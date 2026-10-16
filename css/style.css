@@ -1,0 +1,214 @@
+/* ===== DimeLog — shared stylesheet (single-page) ===== */
+:root{
+  --bg:#faf9fc; --surface:#ffffff; --surface2:#f9fafb;
+  --surface-hover:#f3f4f6;
+  --text:#1a1a1a; --text2:#5e5e5e; --muted:#9ca3af;
+  --border:rgba(0,0,0,0.12); --border-light:rgba(0,0,0,0.06);
+  --primary:#9333ea; --primary-light:#a855f7; --primary-bg:#f3e8ff;
+  --success:#22c55e; --success-bg:rgba(34,197,94,0.1);
+  --error:#ef4444; --warning:#f59e0b; --warning-bg:rgba(245,158,11,0.1); --warning-text:#92400e;
+  --info:#3b82f6; --info-bg:rgba(59,130,246,0.1);
+  --font:'Amazon Ember','Helvetica Neue','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:'SF Mono','Monaco','Menlo','Consolas',monospace;
+  --radius:10px; --radius-sm:6px; --radius-pill:100px; --shadow:0 1px 2px rgba(0,0,0,0.05);
+  --sb-w:208px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;}
+body{background:var(--bg);font-family:var(--font);color:var(--text);line-height:1.6;font-size:13px;}
+/* ข้อความทั่วไป (ไม่ได้ตั้งขนาดเอง) ใช้ 13px เท่ากันทุกหน้า — กันหลุดไป 16px (ค่า default เบราว์เซอร์) */
+p,li,ol,ul,td,span,div{font-size:13px;}
+/* บังคับฟอนต์ UI เดียวทั้งแอป (ยกเว้นตัวเลข/โค้ดที่ตั้งใจใช้ mono) —
+   กัน Grid Pro / ตาราง / หัวข้อ หลุดไปใช้ฟอนต์ default ของเบราว์เซอร์ */
+h1,h2,h3,p,li,label,.sub,.foot,.btn,.chip,.note,.warn,.ok,.hint,
+.card,.kpi .label,.kpi .unit,.help-tbl,.help-tbl th,.help-tbl td,
+table.rpt,table.rpt th,.yr,
+.highcharts-datagrid-table,.hcg-table,[class*="hcg-"],[class*="highcharts-datagrid"]{font-family:var(--font);}
+
+/* ---------- Sidebar ---------- */
+.dl-sb{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--surface);
+  border-right:1px solid var(--border-light);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;padding:16px 12px;z-index:200;}
+.dl-sb-brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;color:var(--text);padding:4px 8px 16px;}
+.dl-sb-brand img{width:26px;height:26px;border-radius:6px;}
+.dl-sb a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;cursor:pointer;
+  transition:background .15s,color .15s;margin-bottom:2px;}
+.dl-sb a .ic{font-size:16px;width:20px;text-align:center;}
+.dl-sb a:hover{background:var(--surface-hover);color:var(--text);}
+.dl-sb a.active{background:var(--primary);color:#fff;font-weight:600;}
+.dl-sb-foot{margin-top:auto;font-size:10px;color:var(--muted);padding:10px 12px 2px;}
+
+/* ---------- Main area ---------- */
+.main{margin-left:var(--sb-w);padding:clamp(16px,2.2vw,32px);}
+/* จำกัดความกว้างเนื้อหาบนจอกว้างมาก ไม่ให้ยืดจนอ่านยาก + จัดกลาง */
+.main>.panel{max-width:1600px;margin-inline:auto;}
+.panel{display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:4px;}
+h1{font-size:20px;font-weight:600;margin:0;}
+h2{font-size:14px;font-weight:600;margin:0 0 12px;}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px;}
+.foot{color:var(--muted);font-size:12px;margin-top:14px;}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font);font-size:13px;font-weight:500;
+  padding:9px 16px;border:1px solid var(--primary);border-radius:var(--radius-sm);background:var(--primary);
+  color:#fff;text-decoration:none;cursor:pointer;transition:all .15s ease;white-space:nowrap;}
+.btn:hover{background:var(--primary-light);}
+.btn.secondary{background:var(--surface);color:var(--primary);}
+.btn.secondary:hover{background:var(--primary-bg);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ---------- Cards / KPI ---------- */
+.card{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.kpi .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.kpi .value{font-family:var(--mono);font-size:24px;font-weight:600;}
+.kpi .unit{font-size:13px;color:var(--text2);font-weight:400;}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px;}
+@media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+/* ---------- Filters ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center;}
+/* ทุก control สูงเท่ากัน (36px) + กล่อง box-sizing ตรงกัน กันช่องเบี้ยว */
+.filters input,.filters select,.filters .btn{box-sizing:border-box;height:36px;font-family:var(--font);font-size:13px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);vertical-align:middle;line-height:normal;}
+.filters select{padding-right:28px;}
+.filters .btn{display:inline-flex;align-items:center;}
+/* ป้าย From/To + ช่องวันที่ ให้อยู่ในกรอบเดียว สูงเท่า control อื่น baseline ตรง */
+.filters .date-field{box-sizing:border-box;height:36px;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);}
+.filters .date-field input{height:auto;border:none;padding:0;background:transparent;width:130px;font-size:13px;color:var(--text);font-family:var(--font);}
+.filters .date-field input:focus{outline:none;}
+.filters .spacer{flex:1;}
+.chip{font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border-light);border-radius:100px;padding:4px 10px;}
+
+/* ---------- Grid Pro compact ---------- */
+#tableWrap{height:calc(100vh - 210px);min-height:420px;font-size:13px;}
+/* ตั้งฟอนต์ที่ cell/header เท่าที่จำเป็น (ไม่ใช้ selector * ที่ทำให้ scroll กระตุก) */
+#tableWrap{font-family:var(--font);}
+#tableWrap .highcharts-datagrid-cell,#tableWrap .hcg-cell,
+#tableWrap .highcharts-datagrid-column-header,#tableWrap .hcg-column-header{font-size:13px;font-family:var(--font);}
+/* dropdown ที่อยู่ในตาราง (เช่น หน้า Classify) ให้ขนาด/ฟอนต์ตรงกับข้อความในตาราง */
+table.rpt select{font-family:var(--font);font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);}
+#tableWrap .highcharts-datagrid-row,#tableWrap .hcg-row{min-height:26px;}
+#tableWrap .highcharts-datagrid-cell,#tableWrap .hcg-cell{padding-top:3px;padding-bottom:3px;line-height:1.3;}
+/* กันคอลัมน์บีบจนข้อความโดนตัด — ให้ตารางเลื่อนแนวนอนได้ถ้าคอลัมน์เยอะ */
+#tableWrap .highcharts-datagrid-cell,#tableWrap .hcg-cell,
+#tableWrap .highcharts-datagrid-column-header,#tableWrap .hcg-column-header{min-width:84px;white-space:nowrap;}
+#tableWrap .highcharts-datagrid-cell:first-child,#tableWrap .hcg-cell:first-child{min-width:96px;}
+/* กัน header/body เลื่อนไม่ตรงกันเพราะ scrollbar แนวตั้งกินพื้นที่เฉพาะ body —
+   จองรางscrollbarให้คงที่ทั้งสอง layer (header กับ body จะกว้างเท่ากันเสมอ) */
+#tableWrap, #tableWrap .highcharts-datagrid-table, #tableWrap .hcg-table,
+#tableWrap [class*="rows-content"], #tableWrap [class*="row-container"]{scrollbar-gutter:stable;}
+
+/* ---------- Plain tables (tax) ---------- */
+table.rpt{width:100%;border-collapse:collapse;font-size:13px;}
+table.rpt th{text-align:right;color:var(--muted);font-weight:500;padding:9px 12px;border-bottom:2px solid var(--border);white-space:nowrap;}
+table.rpt th:first-child,table.rpt td:first-child{text-align:left;}
+table.rpt td{padding:9px 12px;border-bottom:1px solid var(--border-light);text-align:right;font-family:var(--mono);}
+table.rpt tr.total-row td{font-weight:700;border-top:2px solid var(--border);border-bottom:none;background:var(--surface2);}
+table.rpt tr:hover td{background:var(--surface2);}
+.yr{font-family:var(--font);font-weight:600;}
+
+/* ---------- Setup / Help ---------- */
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 5px;}
+.hint{font-size:12px;color:var(--muted);margin:2px 0 6px;font-weight:400;}
+input[type=text]{width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);}
+input[type=text]:focus{outline:none;border-color:var(--primary);}
+input[type=file]{display:none;}
+.code-block{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;white-space:pre-wrap;margin:10px 0;word-break:break-all;}
+.note{background:var(--info-bg);border-left:3px solid var(--info);border-radius:var(--radius-sm);padding:10px 14px;margin:12px 0;font-size:13px;}
+.warn{background:var(--warning-bg);border-left:3px solid var(--warning);border-radius:var(--radius-sm);padding:10px 14px;margin:12px 0;font-size:13px;color:var(--warning-text);}
+.ok{background:var(--success-bg);border-left:3px solid var(--success);border-radius:var(--radius-sm);padding:10px 14px;margin:12px 0;font-size:13px;display:none;}
+code{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border-light);border-radius:4px;padding:1px 6px;font-size:12px;}
+ol,ul{margin:8px 0;padding-left:20px;} li{margin:5px 0;}
+.num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;font-weight:600;flex:none;margin-right:8px;}
+.help-tbl{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;}
+.help-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+.help-tbl td{padding:8px 10px;border-bottom:1px solid var(--border-light);vertical-align:top;}
+
+/* ===== Help: table of contents + section headers ===== */
+.help-toc{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:20px;}
+.help-toc h2{margin:0 0 10px;font-size:15px;}
+.help-toc .toc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 24px;}
+.help-toc .toc-sec{font-size:12px;}
+.help-toc .toc-sec > span{display:block;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;font-size:11px;}
+.help-toc ul{list-style:none;margin:0;padding:0;}
+.help-toc li{margin:4px 0;}
+.help-toc a{color:var(--accent,#9333ea);text-decoration:none;font-size:13px;}
+.help-toc a:hover{text-decoration:underline;}
+.help-sec-head{display:flex;align-items:center;gap:10px;margin:26px 0 12px;padding-top:6px;scroll-margin-top:16px;}
+.help-sec-head h2{margin:0;font-size:17px;color:var(--text);}
+.help-sec-head .bar{flex:1;height:1px;background:var(--border);}
+.card[id]{scroll-margin-top:16px;}
+.back-top{display:inline-block;margin-top:4px;font-size:12px;color:var(--muted);text-decoration:none;}
+.back-top:hover{text-decoration:underline;color:var(--accent,#9333ea);}
+
+/* ---------- Setup wizard ---------- */
+.wz-steps{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.wz-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:6px 12px;border-radius:var(--radius-pill);background:var(--surface);border:1px solid var(--border-light);}
+.wz-step .wz-dot{width:20px;height:20px;border-radius:50%;background:var(--surface-active);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+.wz-step.active{color:var(--text);border-color:var(--primary);background:var(--primary-bg);}
+.wz-step.active .wz-dot{background:var(--primary);color:#fff;}
+.wz-step.done .wz-dot{background:var(--success);color:#fff;}
+.wz-page{display:none;}
+.wz-page.active{display:block;animation:fade .2s ease;}
+.wz-nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;}
+.wz-copy{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:8px 12px;cursor:pointer;}
+.wz-copy:hover{background:var(--surface-hover);}
+.wz-copy .cp{margin-left:auto;color:var(--primary);font-family:var(--font);}
+.wz-check{display:flex;align-items:flex-start;gap:8px;margin:8px 0;font-size:13px;}
+.wz-check input{margin-top:3px;}
+
+/* ---------- Responsive: sidebar -> top strip ---------- */
+@media(max-width:720px){
+  .dl-sb{position:static;width:auto;flex-direction:row;flex-wrap:wrap;bottom:auto;border-right:none;
+    border-bottom:1px solid var(--border-light);padding:8px;}
+  .dl-sb-brand{width:100%;padding:4px 8px 8px;}
+  .dl-sb a{flex:0 0 auto;margin-bottom:0;} .dl-sb-foot{display:none;}
+  .main{margin-left:0;padding:16px;}
+  #tableWrap{height:70vh;}
+}
+
+
+/* ---------- Privacy mode: ซ่อนตัวเลขเงิน (แคปอวดเพื่อน) ---------- */
+/* ซ่อน label แกน Y (จำนวนเงิน) ของกราฟทั้งหมด — ยังเห็นรูปทรง/แกน X/ชื่อ/pie % */
+body.privacy-on .highcharts-yaxis-labels { visibility: hidden; }
+/* ป้ายกำกับตัวเลขบนแท่ง (bar/column data labels) ที่เป็นจำนวนเงิน */
+body.privacy-on .highcharts-data-labels .highcharts-data-label text { visibility: hidden; }
+/* หมายเหตุเล็ก ๆ บอกว่าอยู่ในโหมดซ่อน */
+body.privacy-on #privToggle { background: var(--primary-bg, #ede9fe); border-color: var(--primary); color: var(--primary); }
+
+
+/* ================= Responsive scaling (ทุกขนาดจอ) ================= */
+/* จอใหญ่มาก (≥1600px): sidebar กว้างขึ้นเล็กน้อย + เนื้อหาหายใจ */
+@media(min-width:1600px){
+  :root{ --sb-w:230px; }
+}
+/* จอกว้างพิเศษ (≥1920px): อนุญาตเนื้อหากว้างขึ้น */
+@media(min-width:1920px){
+  .main>.panel{ max-width:1800px; }
+}
+/* แท็บเล็ตแนวนอน / โน้ตบุ๊กเล็ก (≤1024px): ลด sidebar + padding */
+@media(max-width:1024px){
+  :root{ --sb-w:184px; }
+}
+/* แท็บเล็ตแนวตั้ง (≤760px): grid เป็นคอลัมน์เดียว (จัดใน rule ด้านบนแล้ว) */
+/* มือถือ (≤560px): บีบ padding/ฟอนต์หัวข้อ + ปุ่มเต็มแถว */
+@media(max-width:560px){
+  .main{ padding:12px; }
+  .top{ flex-direction:column; align-items:flex-start; gap:10px; }
+  .top .btn{ flex:1 1 auto; }
+  h1{ font-size:20px; }
+  .kpis{ grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .filters{ gap:6px; }
+  .filters input,.filters select,.filters .btn,.filters .date-field{ height:34px; font-size:12px; }
+  .filters input[type=text]{ min-width:0; width:100%; }
+}
+/* มือถือเล็กมาก (≤380px): KPI 1 คอลัมน์ */
+@media(max-width:380px){
+  .kpis{ grid-template-columns:1fr; }
+}

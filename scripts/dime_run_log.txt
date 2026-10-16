@@ -1,0 +1,313 @@
+===== รันเมื่อ 2026-10-02 17:28:28 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 52 | รายการซื้อขายทั้งหมด: 115
+  [ 1 รายการ] [Confirmation] 2024-01-18 - Dime_mutual_fund_confirmationNote_0407_18012024094645.pdf
+  [ 1 รายการ] [Confirmation] 2025-01-14 - Dime_mutual_fund_confirmationNote_DIMEMF20250110000817.pdf
+  [ 1 รายการ] [Confirmation] 2025-02-28 - Dime_mutual_fund_confirmationNote_DIMEMF20250226000974.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-05 - Dime_mutual_fund_confirmationNote_DIMEMF20250303002456.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-07 - Dime_offshore_confirmationNote_DIMEOS20250307012030.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-10 - Dime_offshore_confirmationNote_DIMEOS20250310024359.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-27 - Dime_offshore_confirmationNote_DIMEOS20250327001426.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-03 - Dime_offshore_confirmationNote_DIMEOS20250403016315.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-10 - Dime_offshore_confirmationNote_DIMEOS20250410010398.pdf
+  [ 2 รายการ] [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  [ 1 รายการ] [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  [ 3 รายการ] [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  [ 3 รายการ] [Confirmation] 2025-07-03 - Dime_offshore_confirmationNote_DIMEOS20250703000078.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_mutual_fund_confirmationNote_DIMEMF20250702001140.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_offshore_confirmationNote_DIMEOS20250704016198.pdf
+  [ 2 รายการ] [Confirmation] 2025-08-01 - Dime_offshore_confirmationNote_DIMEOS20250801043163.pdf
+  [ 4 รายการ] [Confirmation] 2025-08-05 - Dime_offshore_confirmationNote_DIMEOS20250805058650.pdf
+  [ 1 รายการ] [Confirmation] 2025-08-19 - Dime_offshore_confirmationNote_DIMEOS20250819012169.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-03 - Dime_offshore_confirmationNote_DIMEOS20250903107857.pdf
+  [ 3 รายการ] [Confirmation] 2025-09-11 - Dime_offshore_confirmationNote_DIMEOS20250911003308.pdf
+  [ 1 รายการ] [Confirmation] 2025-09-18 - Dime_offshore_confirmationNote_DIMEOS20250918029965.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-29 - Dime_offshore_confirmationNote_DIMEOS20250929066317.pdf
+  [ 1 รายการ] [Confirmation] 2025-10-09 - Dime_offshore_confirmationNote_DIMEOS20251009046059.pdf
+  [ 4 รายการ] [Confirmation] 2025-10-28 - Dime_offshore_confirmationNote_DIMEOS20251028096769.pdf
+  [ 1 รายการ] [Confirmation] 2025-11-24 - Dime_offshore_confirmationNote_DIMEOS20251124007396.pdf
+  [ 4 รายการ] [Confirmation] 2025-11-27 - Dime_offshore_confirmationNote_DIMEOS20251127002179.pdf
+  [ 2 รายการ] [Confirmation] 2025-12-08 - Dime_offshore_confirmationNote_DIMEOS20251208128692.pdf
+  [ 4 รายการ] [Confirmation] 2025-12-29 - Dime_offshore_confirmationNote_DIMEOS20251229013226.pdf
+  [ 2 รายการ] [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  [ 1 รายการ] [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  [ 4 รายการ] [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+  [ 1 รายการ] [Confirmation] 2026-02-10 - Dime_offshore_confirmationNote_DIMEOS20260210087388.pdf
+  [ 4 รายการ] [Confirmation] 2026-03-02 - Dime_offshore_confirmationNote_DIMEOS20260302014374.pdf
+  [ 1 รายการ] [Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf
+  [ 5 รายการ] [Confirmation] 2026-03-27 - Dime_offshore_confirmationNote_DIMEOS20260327047289.pdf
+  [ 1 รายการ] [Confirmation] 2026-04-21 - Dime_offshore_confirmationNote_DIMEOS20260421037673.pdf
+  [ 3 รายการ] [Confirmation] 2026-04-28 - Dime_offshore_confirmationNote_DIMEOS20260428089612.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-05 - Dime_offshore_confirmationNote_DIMEOS20260505080798.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-08 - Dime_offshore_confirmationNote_DIMEOS20260508023577.pdf
+  [ 2 รายการ] [Confirmation] 2026-05-20 - Dime_offshore_confirmationNote_DIMEOS20260520037185.pdf
+  [ 6 รายการ] [Confirmation] 2026-05-27 - Dime_offshore_confirmationNote_DIMEOS20260527069542.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-18 - Dime_offshore_confirmationNote_DIMEOS20260618094749.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-24 - Dime_offshore_confirmationNote_DIMEOS20260624113743.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-26 - Dime_offshore_confirmationNote_DIMEOS20260626061980.pdf
+  [ 6 รายการ] [Confirmation] 2026-06-29 - Dime_offshore_confirmationNote_DIMEOS20260629026070.pdf
+  [ 1 รายการ] [Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf
+  [ 7 รายการ] [Confirmation] 2026-07-31 - Dime_offshore_confirmationNote_DIMEOS20260731096679.pdf
+  [ 6 รายการ] [Confirmation] 2026-09-21 - Dime_offshore_confirmationNote_DIMEOS20260921060023.pdf
+  [ 1 รายการ] [Confirmation] 2026-09-22 - Dime_offshore_confirmationNote_DIMEOS20260922092960.pdf
+  [ 2 รายการ] [Confirmation] 2026-09-28 - Dime_offshore_confirmationNote_DIMEOS20260928003721.pdf
+
+===== รันเมื่อ 2026-10-02 17:33:08 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 52 | รายการซื้อขายทั้งหมด: 115
+  [ 1 รายการ] [Confirmation] 2024-01-18 - Dime_mutual_fund_confirmationNote_0407_18012024094645.pdf
+  [ 1 รายการ] [Confirmation] 2025-01-14 - Dime_mutual_fund_confirmationNote_DIMEMF20250110000817.pdf
+  [ 1 รายการ] [Confirmation] 2025-02-28 - Dime_mutual_fund_confirmationNote_DIMEMF20250226000974.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-05 - Dime_mutual_fund_confirmationNote_DIMEMF20250303002456.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-07 - Dime_offshore_confirmationNote_DIMEOS20250307012030.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-10 - Dime_offshore_confirmationNote_DIMEOS20250310024359.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-27 - Dime_offshore_confirmationNote_DIMEOS20250327001426.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-03 - Dime_offshore_confirmationNote_DIMEOS20250403016315.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-10 - Dime_offshore_confirmationNote_DIMEOS20250410010398.pdf
+  [ 2 รายการ] [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  [ 1 รายการ] [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  [ 3 รายการ] [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  [ 3 รายการ] [Confirmation] 2025-07-03 - Dime_offshore_confirmationNote_DIMEOS20250703000078.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_mutual_fund_confirmationNote_DIMEMF20250702001140.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_offshore_confirmationNote_DIMEOS20250704016198.pdf
+  [ 2 รายการ] [Confirmation] 2025-08-01 - Dime_offshore_confirmationNote_DIMEOS20250801043163.pdf
+  [ 4 รายการ] [Confirmation] 2025-08-05 - Dime_offshore_confirmationNote_DIMEOS20250805058650.pdf
+  [ 1 รายการ] [Confirmation] 2025-08-19 - Dime_offshore_confirmationNote_DIMEOS20250819012169.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-03 - Dime_offshore_confirmationNote_DIMEOS20250903107857.pdf
+  [ 3 รายการ] [Confirmation] 2025-09-11 - Dime_offshore_confirmationNote_DIMEOS20250911003308.pdf
+  [ 1 รายการ] [Confirmation] 2025-09-18 - Dime_offshore_confirmationNote_DIMEOS20250918029965.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-29 - Dime_offshore_confirmationNote_DIMEOS20250929066317.pdf
+  [ 1 รายการ] [Confirmation] 2025-10-09 - Dime_offshore_confirmationNote_DIMEOS20251009046059.pdf
+  [ 4 รายการ] [Confirmation] 2025-10-28 - Dime_offshore_confirmationNote_DIMEOS20251028096769.pdf
+  [ 1 รายการ] [Confirmation] 2025-11-24 - Dime_offshore_confirmationNote_DIMEOS20251124007396.pdf
+  [ 4 รายการ] [Confirmation] 2025-11-27 - Dime_offshore_confirmationNote_DIMEOS20251127002179.pdf
+  [ 2 รายการ] [Confirmation] 2025-12-08 - Dime_offshore_confirmationNote_DIMEOS20251208128692.pdf
+  [ 4 รายการ] [Confirmation] 2025-12-29 - Dime_offshore_confirmationNote_DIMEOS20251229013226.pdf
+  [ 2 รายการ] [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  [ 1 รายการ] [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  [ 4 รายการ] [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+  [ 1 รายการ] [Confirmation] 2026-02-10 - Dime_offshore_confirmationNote_DIMEOS20260210087388.pdf
+  [ 4 รายการ] [Confirmation] 2026-03-02 - Dime_offshore_confirmationNote_DIMEOS20260302014374.pdf
+  [ 1 รายการ] [Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf
+  [ 5 รายการ] [Confirmation] 2026-03-27 - Dime_offshore_confirmationNote_DIMEOS20260327047289.pdf
+  [ 1 รายการ] [Confirmation] 2026-04-21 - Dime_offshore_confirmationNote_DIMEOS20260421037673.pdf
+  [ 3 รายการ] [Confirmation] 2026-04-28 - Dime_offshore_confirmationNote_DIMEOS20260428089612.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-05 - Dime_offshore_confirmationNote_DIMEOS20260505080798.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-08 - Dime_offshore_confirmationNote_DIMEOS20260508023577.pdf
+  [ 2 รายการ] [Confirmation] 2026-05-20 - Dime_offshore_confirmationNote_DIMEOS20260520037185.pdf
+  [ 6 รายการ] [Confirmation] 2026-05-27 - Dime_offshore_confirmationNote_DIMEOS20260527069542.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-18 - Dime_offshore_confirmationNote_DIMEOS20260618094749.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-24 - Dime_offshore_confirmationNote_DIMEOS20260624113743.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-26 - Dime_offshore_confirmationNote_DIMEOS20260626061980.pdf
+  [ 6 รายการ] [Confirmation] 2026-06-29 - Dime_offshore_confirmationNote_DIMEOS20260629026070.pdf
+  [ 1 รายการ] [Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf
+  [ 7 รายการ] [Confirmation] 2026-07-31 - Dime_offshore_confirmationNote_DIMEOS20260731096679.pdf
+  [ 6 รายการ] [Confirmation] 2026-09-21 - Dime_offshore_confirmationNote_DIMEOS20260921060023.pdf
+  [ 1 รายการ] [Confirmation] 2026-09-22 - Dime_offshore_confirmationNote_DIMEOS20260922092960.pdf
+  [ 2 รายการ] [Confirmation] 2026-09-28 - Dime_offshore_confirmationNote_DIMEOS20260928003721.pdf
+
+===== รันเมื่อ 2026-10-02 22:16:26 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 52 | รายการซื้อขายทั้งหมด: 115
+  [ 1 รายการ] [Confirmation] 2024-01-18 - Dime_mutual_fund_confirmationNote_0407_18012024094645.pdf
+  [ 1 รายการ] [Confirmation] 2025-01-14 - Dime_mutual_fund_confirmationNote_DIMEMF20250110000817.pdf
+  [ 1 รายการ] [Confirmation] 2025-02-28 - Dime_mutual_fund_confirmationNote_DIMEMF20250226000974.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-05 - Dime_mutual_fund_confirmationNote_DIMEMF20250303002456.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-07 - Dime_offshore_confirmationNote_DIMEOS20250307012030.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-10 - Dime_offshore_confirmationNote_DIMEOS20250310024359.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-27 - Dime_offshore_confirmationNote_DIMEOS20250327001426.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-03 - Dime_offshore_confirmationNote_DIMEOS20250403016315.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-10 - Dime_offshore_confirmationNote_DIMEOS20250410010398.pdf
+  [ 3 รายการ] [Confirmation] 2025-07-03 - Dime_offshore_confirmationNote_DIMEOS20250703000078.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_mutual_fund_confirmationNote_DIMEMF20250702001140.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_offshore_confirmationNote_DIMEOS20250704016198.pdf
+  [ 2 รายการ] [Confirmation] 2025-08-01 - Dime_offshore_confirmationNote_DIMEOS20250801043163.pdf
+  [ 4 รายการ] [Confirmation] 2025-08-05 - Dime_offshore_confirmationNote_DIMEOS20250805058650.pdf
+  [ 1 รายการ] [Confirmation] 2025-08-19 - Dime_offshore_confirmationNote_DIMEOS20250819012169.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-03 - Dime_offshore_confirmationNote_DIMEOS20250903107857.pdf
+  [ 3 รายการ] [Confirmation] 2025-09-11 - Dime_offshore_confirmationNote_DIMEOS20250911003308.pdf
+  [ 1 รายการ] [Confirmation] 2025-09-18 - Dime_offshore_confirmationNote_DIMEOS20250918029965.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-29 - Dime_offshore_confirmationNote_DIMEOS20250929066317.pdf
+  [ 1 รายการ] [Confirmation] 2025-10-09 - Dime_offshore_confirmationNote_DIMEOS20251009046059.pdf
+  [ 4 รายการ] [Confirmation] 2025-10-28 - Dime_offshore_confirmationNote_DIMEOS20251028096769.pdf
+  [ 1 รายการ] [Confirmation] 2025-11-24 - Dime_offshore_confirmationNote_DIMEOS20251124007396.pdf
+  [ 4 รายการ] [Confirmation] 2025-11-27 - Dime_offshore_confirmationNote_DIMEOS20251127002179.pdf
+  [ 2 รายการ] [Confirmation] 2025-12-08 - Dime_offshore_confirmationNote_DIMEOS20251208128692.pdf
+  [ 4 รายการ] [Confirmation] 2025-12-29 - Dime_offshore_confirmationNote_DIMEOS20251229013226.pdf
+  [ 1 รายการ] [Confirmation] 2026-02-10 - Dime_offshore_confirmationNote_DIMEOS20260210087388.pdf
+  [ 4 รายการ] [Confirmation] 2026-03-02 - Dime_offshore_confirmationNote_DIMEOS20260302014374.pdf
+  [ 1 รายการ] [Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf
+  [ 5 รายการ] [Confirmation] 2026-03-27 - Dime_offshore_confirmationNote_DIMEOS20260327047289.pdf
+  [ 1 รายการ] [Confirmation] 2026-04-21 - Dime_offshore_confirmationNote_DIMEOS20260421037673.pdf
+  [ 3 รายการ] [Confirmation] 2026-04-28 - Dime_offshore_confirmationNote_DIMEOS20260428089612.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-05 - Dime_offshore_confirmationNote_DIMEOS20260505080798.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-08 - Dime_offshore_confirmationNote_DIMEOS20260508023577.pdf
+  [ 2 รายการ] [Confirmation] 2026-05-20 - Dime_offshore_confirmationNote_DIMEOS20260520037185.pdf
+  [ 6 รายการ] [Confirmation] 2026-05-27 - Dime_offshore_confirmationNote_DIMEOS20260527069542.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-18 - Dime_offshore_confirmationNote_DIMEOS20260618094749.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-24 - Dime_offshore_confirmationNote_DIMEOS20260624113743.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-26 - Dime_offshore_confirmationNote_DIMEOS20260626061980.pdf
+  [ 6 รายการ] [Confirmation] 2026-06-29 - Dime_offshore_confirmationNote_DIMEOS20260629026070.pdf
+  [ 1 รายการ] [Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf
+  [ 7 รายการ] [Confirmation] 2026-07-31 - Dime_offshore_confirmationNote_DIMEOS20260731096679.pdf
+  [ 6 รายการ] [Confirmation] 2026-09-21 - Dime_offshore_confirmationNote_DIMEOS20260921060023.pdf
+  [ 1 รายการ] [Confirmation] 2026-09-22 - Dime_offshore_confirmationNote_DIMEOS20260922092960.pdf
+  [ 2 รายการ] [Confirmation] 2026-09-28 - Dime_offshore_confirmationNote_DIMEOS20260928003721.pdf
+  [ 2 รายการ] [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  [ 1 รายการ] [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  [ 3 รายการ] [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  [ 2 รายการ] [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  [ 1 รายการ] [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  [ 4 รายการ] [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+ย้ายไฟล์เข้าโฟลเดอร์ปี/ชนิด: 8
+  -> 2025/Offshore/  [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+
+===== รันเมื่อ 2026-10-02 22:18:27 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 52 | รายการซื้อขายทั้งหมด: 115
+  [ 1 รายการ] [Confirmation] 2024-01-18 - Dime_mutual_fund_confirmationNote_0407_18012024094645.pdf
+  [ 1 รายการ] [Confirmation] 2025-01-14 - Dime_mutual_fund_confirmationNote_DIMEMF20250110000817.pdf
+  [ 1 รายการ] [Confirmation] 2025-02-28 - Dime_mutual_fund_confirmationNote_DIMEMF20250226000974.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-05 - Dime_mutual_fund_confirmationNote_DIMEMF20250303002456.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-07 - Dime_offshore_confirmationNote_DIMEOS20250307012030.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-10 - Dime_offshore_confirmationNote_DIMEOS20250310024359.pdf
+  [ 1 รายการ] [Confirmation] 2025-03-27 - Dime_offshore_confirmationNote_DIMEOS20250327001426.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-03 - Dime_offshore_confirmationNote_DIMEOS20250403016315.pdf
+  [ 1 รายการ] [Confirmation] 2025-04-10 - Dime_offshore_confirmationNote_DIMEOS20250410010398.pdf
+  [ 2 รายการ] [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  [ 1 รายการ] [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  [ 3 รายการ] [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  [ 1 รายการ] [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  [ 3 รายการ] [Confirmation] 2025-07-03 - Dime_offshore_confirmationNote_DIMEOS20250703000078.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_mutual_fund_confirmationNote_DIMEMF20250702001140.pdf
+  [ 1 รายการ] [Confirmation] 2025-07-04 - Dime_offshore_confirmationNote_DIMEOS20250704016198.pdf
+  [ 2 รายการ] [Confirmation] 2025-08-01 - Dime_offshore_confirmationNote_DIMEOS20250801043163.pdf
+  [ 4 รายการ] [Confirmation] 2025-08-05 - Dime_offshore_confirmationNote_DIMEOS20250805058650.pdf
+  [ 1 รายการ] [Confirmation] 2025-08-19 - Dime_offshore_confirmationNote_DIMEOS20250819012169.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-03 - Dime_offshore_confirmationNote_DIMEOS20250903107857.pdf
+  [ 3 รายการ] [Confirmation] 2025-09-11 - Dime_offshore_confirmationNote_DIMEOS20250911003308.pdf
+  [ 1 รายการ] [Confirmation] 2025-09-18 - Dime_offshore_confirmationNote_DIMEOS20250918029965.pdf
+  [ 4 รายการ] [Confirmation] 2025-09-29 - Dime_offshore_confirmationNote_DIMEOS20250929066317.pdf
+  [ 1 รายการ] [Confirmation] 2025-10-09 - Dime_offshore_confirmationNote_DIMEOS20251009046059.pdf
+  [ 4 รายการ] [Confirmation] 2025-10-28 - Dime_offshore_confirmationNote_DIMEOS20251028096769.pdf
+  [ 1 รายการ] [Confirmation] 2025-11-24 - Dime_offshore_confirmationNote_DIMEOS20251124007396.pdf
+  [ 4 รายการ] [Confirmation] 2025-11-27 - Dime_offshore_confirmationNote_DIMEOS20251127002179.pdf
+  [ 2 รายการ] [Confirmation] 2025-12-08 - Dime_offshore_confirmationNote_DIMEOS20251208128692.pdf
+  [ 4 รายการ] [Confirmation] 2025-12-29 - Dime_offshore_confirmationNote_DIMEOS20251229013226.pdf
+  [ 2 รายการ] [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  [ 1 รายการ] [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  [ 4 รายการ] [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+  [ 1 รายการ] [Confirmation] 2026-02-10 - Dime_offshore_confirmationNote_DIMEOS20260210087388.pdf
+  [ 4 รายการ] [Confirmation] 2026-03-02 - Dime_offshore_confirmationNote_DIMEOS20260302014374.pdf
+  [ 1 รายการ] [Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf
+  [ 5 รายการ] [Confirmation] 2026-03-27 - Dime_offshore_confirmationNote_DIMEOS20260327047289.pdf
+  [ 1 รายการ] [Confirmation] 2026-04-21 - Dime_offshore_confirmationNote_DIMEOS20260421037673.pdf
+  [ 3 รายการ] [Confirmation] 2026-04-28 - Dime_offshore_confirmationNote_DIMEOS20260428089612.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-05 - Dime_offshore_confirmationNote_DIMEOS20260505080798.pdf
+  [ 1 รายการ] [Confirmation] 2026-05-08 - Dime_offshore_confirmationNote_DIMEOS20260508023577.pdf
+  [ 2 รายการ] [Confirmation] 2026-05-20 - Dime_offshore_confirmationNote_DIMEOS20260520037185.pdf
+  [ 6 รายการ] [Confirmation] 2026-05-27 - Dime_offshore_confirmationNote_DIMEOS20260527069542.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-18 - Dime_offshore_confirmationNote_DIMEOS20260618094749.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-24 - Dime_offshore_confirmationNote_DIMEOS20260624113743.pdf
+  [ 1 รายการ] [Confirmation] 2026-06-26 - Dime_offshore_confirmationNote_DIMEOS20260626061980.pdf
+  [ 6 รายการ] [Confirmation] 2026-06-29 - Dime_offshore_confirmationNote_DIMEOS20260629026070.pdf
+  [ 1 รายการ] [Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf
+  [ 7 รายการ] [Confirmation] 2026-07-31 - Dime_offshore_confirmationNote_DIMEOS20260731096679.pdf
+  [ 6 รายการ] [Confirmation] 2026-09-21 - Dime_offshore_confirmationNote_DIMEOS20260921060023.pdf
+  [ 1 รายการ] [Confirmation] 2026-09-22 - Dime_offshore_confirmationNote_DIMEOS20260922092960.pdf
+  [ 2 รายการ] [Confirmation] 2026-09-28 - Dime_offshore_confirmationNote_DIMEOS20260928003721.pdf
+ย้ายไฟล์เข้าโฟลเดอร์ปี/ชนิด: 52
+  -> 2024/Mutual Fund/  [Confirmation] 2024-01-18 - Dime_mutual_fund_confirmationNote_0407_18012024094645.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-01-14 - Dime_mutual_fund_confirmationNote_DIMEMF20250110000817.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-02-28 - Dime_mutual_fund_confirmationNote_DIMEMF20250226000974.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-03-05 - Dime_mutual_fund_confirmationNote_DIMEMF20250303002456.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-03-07 - Dime_offshore_confirmationNote_DIMEOS20250307012030.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-03-10 - Dime_offshore_confirmationNote_DIMEOS20250310024359.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-03-27 - Dime_offshore_confirmationNote_DIMEOS20250327001426.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-04-03 - Dime_offshore_confirmationNote_DIMEOS20250403016315.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-04-10 - Dime_offshore_confirmationNote_DIMEOS20250410010398.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-05-06 - Dime_offshore_confirmationNote_DIMEOS20250506018917.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-05-07 - Dime_mutual_fund_confirmationNote_DIMEMF20250502002275.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-06-04 - Dime_offshore_confirmationNote_DIMEOS20250604040740.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-06-06 - Dime_mutual_fund_confirmationNote_DIMEMF20250604002834.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-06-24 - Dime_offshore_confirmationNote_DIMEOS20250624005107.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-07-03 - Dime_offshore_confirmationNote_DIMEOS20250703000078.pdf
+  -> 2025/Mutual Fund/  [Confirmation] 2025-07-04 - Dime_mutual_fund_confirmationNote_DIMEMF20250702001140.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-07-04 - Dime_offshore_confirmationNote_DIMEOS20250704016198.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-08-01 - Dime_offshore_confirmationNote_DIMEOS20250801043163.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-08-05 - Dime_offshore_confirmationNote_DIMEOS20250805058650.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-08-19 - Dime_offshore_confirmationNote_DIMEOS20250819012169.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-09-03 - Dime_offshore_confirmationNote_DIMEOS20250903107857.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-09-11 - Dime_offshore_confirmationNote_DIMEOS20250911003308.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-09-18 - Dime_offshore_confirmationNote_DIMEOS20250918029965.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-09-29 - Dime_offshore_confirmationNote_DIMEOS20250929066317.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-10-09 - Dime_offshore_confirmationNote_DIMEOS20251009046059.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-10-28 - Dime_offshore_confirmationNote_DIMEOS20251028096769.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-11-24 - Dime_offshore_confirmationNote_DIMEOS20251124007396.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-11-27 - Dime_offshore_confirmationNote_DIMEOS20251127002179.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-12-08 - Dime_offshore_confirmationNote_DIMEOS20251208128692.pdf
+  -> 2025/Offshore/  [Confirmation] 2025-12-29 - Dime_offshore_confirmationNote_DIMEOS20251229013226.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-19 - Dime_offshore_confirmationNote_DIMEOS20260119057467.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-01-27 - Dime_offshore_confirmationNote_DIMEOS20260127074319.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-02-10 - Dime_offshore_confirmationNote_DIMEOS20260210087388.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-03-02 - Dime_offshore_confirmationNote_DIMEOS20260302014374.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-03-27 - Dime_offshore_confirmationNote_DIMEOS20260327047289.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-04-21 - Dime_offshore_confirmationNote_DIMEOS20260421037673.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-04-28 - Dime_offshore_confirmationNote_DIMEOS20260428089612.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-05-05 - Dime_offshore_confirmationNote_DIMEOS20260505080798.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-05-08 - Dime_offshore_confirmationNote_DIMEOS20260508023577.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-05-20 - Dime_offshore_confirmationNote_DIMEOS20260520037185.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-05-27 - Dime_offshore_confirmationNote_DIMEOS20260527069542.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-06-18 - Dime_offshore_confirmationNote_DIMEOS20260618094749.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-06-24 - Dime_offshore_confirmationNote_DIMEOS20260624113743.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-06-26 - Dime_offshore_confirmationNote_DIMEOS20260626061980.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-06-29 - Dime_offshore_confirmationNote_DIMEOS20260629026070.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-07-31 - Dime_offshore_confirmationNote_DIMEOS20260731096679.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-09-21 - Dime_offshore_confirmationNote_DIMEOS20260921060023.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-09-22 - Dime_offshore_confirmationNote_DIMEOS20260922092960.pdf
+  -> 2026/Offshore/  [Confirmation] 2026-09-28 - Dime_offshore_confirmationNote_DIMEOS20260928003721.pdf
+
+===== รันเมื่อ 2026-10-02 22:29:56 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 1 | รายการซื้อขายทั้งหมด: 115
+  [ 2 รายการ] [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+ย้ายไฟล์เข้าโฟลเดอร์ปี/ชนิด: 1
+  -> 2026/Offshore/  [Confirmation] 2026-01-13 - Dime_offshore_confirmationNote_DIMEOS20260113002754.pdf
+
+===== รันเมื่อ 2026-10-04 16:04:28 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 0 | รายการซื้อขายทั้งหมด: 115
+
+===== รันเมื่อ 2026-10-04 16:14:16 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 0 | รายการซื้อขายทั้งหมด: 115
+
+===== รันเมื่อ 2026-10-04 16:15:09 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 0 | รายการซื้อขายทั้งหมด: 115
+
+===== รันเมื่อ 2026-10-04 16:15:52 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 0 | รายการซื้อขายทั้งหมด: 115
+
+===== รันเมื่อ 2026-10-12 11:18:05 =====
+โฟลเดอร์: G:\My Drive\Documents\Investment\Dime\Confirmation Notes
+ไฟล์ PDF ที่พบ: 0 | รายการซื้อขายทั้งหมด: 115
+

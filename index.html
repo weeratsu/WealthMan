@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WealthMan</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro@3.0.0/css/grid-pro.css">
+<script src="https://cdn.jsdelivr.net/npm/highcharts@12.1.2/highcharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@12.1.2/modules/accessibility.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro@3.0.0/grid-pro.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- ข้อมูล: public ก่อน แล้วทับด้วย full ถ้ามีบนเครื่อง -->
+<script src="data/inv_data.js"></script>
+<script src="data/inv_data_full.js" onerror="/* ไม่มีไฟล์ full บนเครื่องนี้ ใช้ public แทน */"></script>
+  <script src="data/dividends.js" onerror="/* ยังไม่มีข้อมูลปันผล */"></script>
+  <script src="data/prices.js" onerror="/* ยังไม่มีราคาตั้งต้น */"></script>
+</head>
+<body>
+  <!-- ===== Sidebar ===== -->
+  <nav class="dl-sb">
+    <div class="dl-sb-brand"><img src="assets/favicon-32.png" alt="">WealthMan</div>
+    <a data-nav="dashboard" class="active"><span class="ic">📊</span><span>Dashboard</span></a>
+    <a data-nav="trades"><span class="ic">📋</span><span>Transactions</span></a>
+    <a data-nav="holdings"><span class="ic">📦</span><span>Holdings</span></a>
+    <a data-nav="dividends"><span class="ic">💰</span><span>Dividends</span></a>
+    <a data-nav="tax"><span class="ic">📄</span><span>Tax Report</span></a>
+    <a data-nav="analysis"><span class="ic">📈</span><span>Analysis</span></a>
+    <a data-nav="classify"><span class="ic">🏷️</span><span>Classify</span></a>
+    <a data-nav="setup"><span class="ic">⚙️</span><span>Settings</span></a>
+    <a data-nav="help"><span class="ic">📖</span><span>Help</span></a>
+    <button id="privToggle" class="btn secondary" style="margin:10px 10px 0;width:calc(100% - 20px);">👁️ ซ่อนตัวเลข</button>
+    <div class="dl-sb-foot">WealthMan</div>
+  </nav>
+
+  <main class="main">
+    <!-- ===== Panel: Dashboard ===== -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="top"><div><h1>Dashboard</h1><div class="sub" id="dashSub">กำลังโหลดข้อมูล…</div></div></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div class="card"><h2>เงินลงทุนรายเดือน (THB)</h2><div id="chartMonthly" style="height:300px;"></div></div>
+        <div class="card"><h2>สัดส่วนการลงทุนตามหลักทรัพย์ (THB)</h2><div id="chartAlloc" style="height:300px;"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>เงินลงทุนสะสม (THB)</h2><div id="chartCumulative" style="height:280px;"></div></div>
+        <div class="card"><h2>สัดส่วนตามชนิดสินทรัพย์</h2><div id="chartClass" style="height:280px;"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>สัดส่วนตามประเภท (จากแท็บ Classify)</h2><div id="chartType" style="height:300px;"></div></div>
+        <div class="card"><h2>เงินลงทุนตามประเภท (THB)</h2><div id="chartTypeBar" style="height:300px;"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>เงินปันผลรับรายเดือน (USD)</h2><div id="chartDiv" style="height:300px;"></div></div>
+        <div class="card"><h2>กำไร/ขาดทุนต่อหลักทรัพย์ (เฉพาะที่ใส่ราคา)</h2><div id="chartPL" style="height:300px;"></div></div>
+      </div>
+      <div class="foot" id="dashFoot"></div>
+    </section>
+
+    <!-- ===== Panel: Trades ===== -->
+    <section class="panel" id="panel-trades">
+      <div class="top">
+        <h1>Transactions</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="btnExport">📊 Export Excel</button>
+          <button class="btn secondary" id="btnBackup">💾 Backup</button>
+          <button class="btn secondary" id="btnImport">📥 Import</button>
+          <input type="file" id="fileImport" accept=".json,application/json">
+        </div>
+      </div>
+      <div class="sub" id="trdSub"></div>
+      <div class="card">
+        <div class="filters">
+          <input type="text" id="fSearch" placeholder="Search (security, order, txn id)…" style="min-width:220px;">
+          <select id="fClass"><option value="">All classes</option><option value="offshore">Offshore</option><option value="mutual_fund">Mutual Fund</option></select>
+          <select id="fSec"><option value="">All securities</option></select>
+          <select id="fTxnType"><option value="">All transaction types</option><option value="BUY">BUY</option><option value="SEL">SELL</option><option value="SUB">SUB</option><option value="RED">RED</option><option value="SWI">SWITCH-IN</option><option value="SWO">SWITCH-OUT</option></select>
+          <select id="fCcy"><option value="">All currencies</option><option value="THB">THB</option><option value="USD">USD</option></select>
+          <select id="fYear"><option value="">All years</option></select>
+          <span class="date-field">From <input type="date" id="fDateFrom"></span>
+          <span class="date-field">To <input type="date" id="fDateTo"></span>
+          <button class="btn secondary" id="fClear">Clear</button>
+          <span class="spacer"></span>
+          <span class="chip" id="rowCount"></span>
+        </div>
+        <div id="tableWrap"></div>
+      </div>
+    </section>
+
+    <!-- ===== Panel: Holdings ===== -->
+    <section class="panel" id="panel-holdings">
+      <div class="top">
+        <h1>Holdings</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="btnHldExport">📊 Export Excel</button>
+          <button class="btn secondary" id="btnHldTemplate">📄 Price Template</button>
+          <button class="btn secondary" id="btnHldImport">📥 Import Prices</button>
+          <input type="file" id="hldImportFile" accept=".xlsx,.xls" style="display:none;">
+        </div>
+      </div>
+      <div class="sub">สรุปต่อหลักทรัพย์ — ใส่ราคาปัจจุบันเพื่อดูกำไร/ขาดทุน (กรอกในช่อง หรือ Import ราคา · คลิกชื่อดูรายการ)</div>
+      <div class="kpis" id="hldKpis"></div>
+      <div class="card">
+        <div class="filters">
+          <input type="text" id="hldSearch" placeholder="Search symbol…" style="min-width:200px;">
+          <select id="hldClass"><option value="">All classes</option><option value="offshore">Offshore</option><option value="mutual_fund">Mutual Fund</option></select>
+          <select id="hldType"><option value="">All types</option></select>
+          <span class="spacer"></span>
+          <span class="chip" id="hldCount"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="rpt" id="hldTable">
+            <thead><tr>
+              <th style="text-align:left">Symbol</th>
+              <th style="text-align:left">Class</th>
+              <th style="text-align:left">Type</th>
+              <th>Net units</th>
+              <th>Ccy</th>
+              <th>Avg cost/unit</th>
+              <th>ราคาปัจจุบัน</th>
+              <th>มูลค่าตลาด</th>
+              <th>กำไร/ขาดทุน</th>
+              <th>Invested (THB)</th>
+              <th>#</th>
+            </tr></thead>
+            <tbody id="hldBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- detail drill-down overlay -->
+      <div id="hldDetail" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:24px;">
+        <div style="background:var(--surface);border-radius:var(--radius);max-width:900px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.25);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 10px;position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border-light);">
+            <div>
+              <h2 id="hldDetailTitle" style="margin:0 0 6px;"></h2>
+              <div id="hldDetailSub" style="font-size:12px;color:var(--muted);"></div>
+            </div>
+            <button class="btn secondary" id="hldDetailClose" style="padding:4px 12px;">✕ ปิด</button>
+          </div>
+          <div style="padding:12px 20px 20px;">
+            <table class="rpt">
+              <thead><tr>
+                <th style="text-align:left">วันที่</th><th style="text-align:left">ประเภท</th>
+                <th>หน่วย</th><th>ราคา</th><th>สกุล</th>
+                <th>มูลค่า (THB)</th><th>Total (USD)</th><th>ค่าธรรมเนียม (THB)</th>
+              </tr></thead>
+              <tbody id="hldDetailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Panel: Dividends ===== -->
+    <section class="panel" id="panel-dividends">
+      <div class="top">
+        <h1>Dividends</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="btnDivExport">📊 Export Excel</button>
+          <button class="btn secondary" id="btnDivTemplate">📄 Template</button>
+          <button class="btn secondary" id="btnDivImport">📥 Import</button>
+          <input type="file" id="divImportFile" accept=".xlsx,.xls" style="display:none;">
+        </div>
+      </div>
+      <div class="sub">บันทึกเงินปันผล (USD) — เพิ่มรายการใหม่ด้วย Template Excel แล้ว Import (ไม่ต้องพึ่ง OCR)</div>
+      <div class="kpis" id="divKpis"></div>
+      <div class="card">
+        <div class="filters">
+          <input type="text" id="divSearch" placeholder="Search symbol…" style="min-width:200px;">
+          <select id="divSec"><option value="">All securities</option></select>
+          <select id="divYear"><option value="">All years</option></select>
+          <span class="spacer"></span>
+          <span class="chip" id="divCount"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="rpt" id="divTable">
+            <thead><tr>
+              <th style="text-align:left">วันที่จ่าย</th>
+              <th style="text-align:left">หลักทรัพย์</th>
+              <th>ต่อหน่วย (USD)</th>
+              <th>ปันผล (USD)</th>
+              <th>ภาษีหัก (USD)</th>
+              <th>สุทธิ (USD)</th>
+              <th style="text-align:left">Record date</th>
+            </tr></thead>
+            <tbody id="divBody"></tbody>
+          </table>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          <b>วิธีเพิ่มปันผลใหม่:</b> กด <b>Template</b> เพื่อโหลดไฟล์ Excel เปล่า → กรอกข้อมูล (จะใช้ OCR ตัวไหนช่วยก็ได้) → กด <b>Import</b> เลือกไฟล์ที่กรอก — ระบบรวมให้อัตโนมัติ (กันซ้ำด้วย หลักทรัพย์+วันจ่าย)
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Panel: Tax ===== -->
+    <section class="panel" id="panel-tax">
+      <div class="top">
+        <h1>Tax Report</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" id="btnTaxExport">📊 Export Excel</button></div>
+      </div>
+      <div class="sub" id="taxSub"></div>
+      <div class="card"><h2>สรุปรายปี (THB)</h2>
+        <table class="rpt"><thead><tr><th>ปี</th><th>รายการ</th><th>ยอดซื้อ</th><th>ยอดขาย</th><th>ค่าธรรมเนียม</th><th>ภาษีหัก ณ ที่จ่าย</th></tr></thead><tbody id="taxYearBody"></tbody></table>
+      </div>
+      <div class="card"><h2>ยอดลงทุน + ค่าธรรมเนียมรายปี</h2><div id="chartTaxYear" style="height:300px;"></div></div>
+      <div class="card"><h2>แยกตามชนิดสินทรัพย์ (รายปี)</h2>
+        <table class="rpt"><thead><tr><th>ปี</th><th>ชนิด</th><th>รายการ</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxClassBody"></tbody></table>
+      </div>
+      <div class="card"><h2>แยกตามประเภท (จากแท็บ Classify)</h2>
+        <table class="rpt"><thead><tr><th>ประเภท</th><th>จำนวนหลักทรัพย์</th><th>รายการ</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxTypeBody"></tbody></table>
+      </div>
+      <div class="card"><h2>สรุปรายหลักทรัพย์ (ยอดซื้อสะสม)</h2>
+        <div id="chartTaxSec" style="height:340px;margin-bottom:14px;"></div>
+        <table class="rpt"><thead><tr><th>หลักทรัพย์</th><th>ชนิด</th><th>รายการ</th><th>จำนวนหน่วยรวม</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxSecBody"></tbody></table>
+      </div>
+      <div class="card"><h2>เงินปันผลรายปี (USD)</h2>
+        <div class="hint" style="margin-bottom:8px;">ปันผลจากหุ้นต่างประเทศ — ภาษีหัก ณ ที่จ่าย (US WHT) หักที่ต้นทางแล้ว · ปันผลที่นำเข้าไทยอาจต้องเสียภาษีเงินได้ (ใช้เครดิตภาษีที่ถูกหักได้)</div>
+        <table class="rpt"><thead><tr><th>ปี</th><th>จำนวนครั้ง</th><th>ปันผล (USD)</th><th>ภาษีหัก ณ ที่จ่าย (USD)</th><th>ปันผลสุทธิ (USD)</th></tr></thead><tbody id="taxDivYearBody"></tbody></table>
+      </div>
+      <div class="card"><h2>เงินปันผลรายหลักทรัพย์ (USD)</h2>
+        <table class="rpt"><thead><tr><th>หลักทรัพย์</th><th>จำนวนครั้ง</th><th>ปันผล (USD)</th><th>ภาษีหัก (USD)</th><th>ปันผลสุทธิ (USD)</th></tr></thead><tbody id="taxDivSecBody"></tbody></table>
+      </div>
+      <div class="warn">⚠️ รายงานนี้สรุปตัวเลขจากใบยืนยันการซื้อขาย ใช้เป็นข้อมูลประกอบ/ตรวจสอบเท่านั้น ไม่ใช่เอกสารยื่นภาษีทางการ — สำหรับการยื่นจริง (โดยเฉพาะเงินได้/กำไรจากหุ้นต่างประเทศ และเครดิตภาษี) ควรปรึกษาผู้เชี่ยวชาญหรือสรรพากร</div>
+    </section>
+
+    <!-- ===== Panel: Analysis ===== -->
+    <section class="panel" id="panel-analysis">
+      <div class="top"><h1>Analysis</h1></div>
+      <div class="sub" id="anSub"></div>
+      <div class="kpis" id="anKpis"></div>
+      <div class="card"><h2>กำไร/ขาดทุน % ต่อหลักทรัพย์ (Top / Worst performer)</h2>
+        <div class="hint" style="margin-bottom:8px;">ต้องใส่ราคาปัจจุบันในหน้า Holdings ก่อน</div>
+        <div id="anPerf" style="height:360px;"></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Dividend Yield on Cost (USD)</h2><div class="hint" style="margin-bottom:8px;">ปันผลรับสะสม ÷ เงินลงทุน — ตัวไหนปันผลคุ้มทุนสุด</div><div id="anYoc" style="height:320px;"></div></div>
+        <div class="card"><h2>แนวโน้มปันผลรายเดือน (USD)</h2><div class="hint" style="margin-bottom:8px;">ดูว่าปันผลโตขึ้นไหมตามเวลา</div><div id="anDivTrend" style="height:320px;"></div></div>
+      </div>
+      <div class="card"><h2>Total Return — ผลตอบแทนรวม (ราคา + ปันผล)</h2>
+        <div class="hint" style="margin-bottom:8px;">รวมกำไร/ขาดทุนจากราคา + ปันผลที่ได้รับ · เรียงจากดีสุด→แย่สุด</div>
+        <div style="overflow-x:auto;">
+          <table class="rpt" id="anTotTable">
+            <thead><tr>
+              <th style="text-align:left">หลักทรัพย์</th>
+              <th style="text-align:left">ประเภท</th>
+              <th>สกุล</th>
+              <th>เงินลงทุน</th>
+              <th>กำไร/ขาดทุน (ราคา) %</th>
+              <th>ปันผลรับ</th>
+              <th>Yield on cost</th>
+              <th>Total return %</th>
+            </tr></thead>
+            <tbody id="anTotBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="warn">⚠️ ตัวเลขอิงราคาปัจจุบันที่กรอกเอง + ปันผลที่บันทึก ใช้ประเมินคร่าว ๆ · กองทุนไทย (THB) ยังไม่มีราคา/ปันผลในระบบจึงไม่แสดงผลตอบแทน · ไม่รวมผลของอัตราแลกเปลี่ยน</div>
+    </section>
+
+
+    <!-- ===== Panel: Setup ===== -->
+    <section class="panel" id="panel-classify">
+      <div class="top">
+        <h1>Classify Securities</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn secondary" id="btnClsExport">💾 Backup types</button>
+          <button class="btn secondary" id="btnClsImport">📥 Import types</button>
+          <input type="file" id="clsImportFile" accept=".json,application/json">
+        </div>
+      </div>
+      <div class="sub">กำหนดประเภทให้หลักทรัพย์แต่ละตัว — เลือกจาก dropdown (เก็บในเบราว์เซอร์ด้วย localStorage)</div>
+      <div class="card">
+        <div class="filters">
+          <input type="text" id="clsSearch" placeholder="ค้นหาหลักทรัพย์…" style="min-width:220px;">
+          <select id="clsFilter"><option value="">ทั้งหมด</option><option value="unset">ยังไม่กำหนด</option></select>
+          <span class="spacer"></span><span class="chip" id="clsCount"></span>
+        </div>
+        <table class="rpt" id="clsTable"><thead><tr><th>หลักทรัพย์</th><th>ชนิด (จากไฟล์)</th><th>จำนวนรายการ</th><th>ประเภท (กำหนดเอง)</th></tr></thead><tbody id="clsBody"></tbody></table>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-setup">
+      <div class="top"><h1>Settings — Setup Wizard</h1></div>
+      <div class="sub">ตั้งค่าโปรแกรมทีละขั้น — เหมาะสำหรับติดตั้งครั้งแรก (หรือส่งให้เพื่อน)</div>
+
+      <!-- step indicator -->
+      <div class="wz-steps" id="wzSteps">
+        <div class="wz-step active" data-step="0"><span class="wz-dot">1</span> Install Python</div>
+        <div class="wz-step" data-step="1"><span class="wz-dot">2</span> Set folder</div>
+        <div class="wz-step" data-step="2"><span class="wz-dot">3</span> Run parser</div>
+        <div class="wz-step" data-step="3"><span class="wz-dot">4</span> Done</div>
+      </div>
+
+      <div class="card">
+        <!-- Step 1: Install -->
+        <div class="wz-page active" id="wz-0">
+          <h2>ขั้นที่ 1 — ติดตั้ง Python + ไลบรารี</h2>
+          <ol>
+            <li>ติดตั้ง Python จาก <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> → ตอนติดตั้ง <b>ติ๊ก "Add Python to PATH"</b></li>
+            <li>เปิด Command Prompt (กดปุ่ม Windows → พิมพ์ <code>cmd</code>) แล้วรันคำสั่งนี้:</li>
+          </ol>
+          <div class="wz-copy" data-copy="pip install pdfplumber"><span>pip install pdfplumber</span><span class="cp">คัดลอก</span></div>
+          <div class="hint">ถ้าไม่รู้จัก <code>pip</code> ลอง <code>python -m pip install pdfplumber</code> หรือ <code>py -m pip install pdfplumber</code></div>
+          <div class="wz-check"><input type="checkbox" id="chk0"><label for="chk0" style="margin:0;font-weight:400">ติดตั้ง Python + pdfplumber เรียบร้อยแล้ว</label></div>
+        </div>
+
+        <!-- Step 2: Folder / config -->
+        <div class="wz-page" id="wz-1">
+          <h2>ขั้นที่ 2 — ตั้งโฟลเดอร์ไฟล์บิล</h2>
+          <label>Path โฟลเดอร์ Confirmation Notes</label>
+          <div class="hint">โฟลเดอร์ที่มีโฟลเดอร์ปี (2024, 2025, …) อยู่ข้างใน — คัดลอก path จาก File Explorer มาวาง</div>
+          <input type="text" id="rootPath" placeholder="เช่น  G:\My Drive\Documents\Investment\Dime\Confirmation Notes" spellcheck="false">
+          <label style="margin-top:14px;display:block;">Path โฟลเดอร์รูปปันผล (Dividend) <span style="color:var(--muted);font-weight:400">— ไม่บังคับ</span></label>
+          <div class="hint">โฟลเดอร์ที่เก็บรูปแคปหน้าปันผลจากมือถือ (ไว้ใช้ตอนทำฟีเจอร์ปันผล)</div>
+          <input type="text" id="divPath" placeholder="เช่น  G:\My Drive\Documents\Investment\Dime\Dividend" spellcheck="false">
+          <label class="wz-check" style="margin-top:14px;"><input type="checkbox" id="archiveChk" checked> <span>หลัง parse เสร็จ ให้ย้ายไฟล์ PDF เข้าโฟลเดอร์ <code>ปี/ชนิด</code> อัตโนมัติ (เช่น <code>2026/Offshore</code>)</span></label>
+          <div class="hint">ไฟล์ใหม่วางที่ root ของ Confirmation Notes → หลัง parse จะถูกย้ายเข้า yyyy/Offshore หรือ yyyy/Mutual Fund · ปิดได้ถ้าอยากจัดเอง</div>
+          <div id="cfgPreview" style="margin-top:14px;display:none;">
+            <div class="hint">ไฟล์ config.json ที่จะได้:</div>
+            <div class="code-block" id="cfgPreviewCode"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn" id="btnGenCfg">💾 สร้าง config.json</button>
+            <button class="btn secondary" id="btnCopyCfg">📋 คัดลอกเนื้อหา</button>
+          </div>
+          <div class="ok" id="cfgOk"></div>
+          <div class="note" style="margin-top:14px;"><b>Chrome/Edge:</b> เด้ง Save As → เลือกโฟลเดอร์ <code>scripts\</code> → Save · <b>Firefox:</b> ดาวน์โหลดแล้วย้ายเข้า <code>scripts\</code> เอง</div>
+          <div class="warn">config.json เก็บแค่ path ไม่เก็บรหัส PDF (รหัสพิมพ์ตอนรันทุกครั้ง ไม่ถูกบันทึก)</div>
+        </div>
+
+        <!-- Step 3: Run -->
+        <div class="wz-page" id="wz-2">
+          <h2>ขั้นที่ 3 — รันตัวอ่านไฟล์</h2>
+          <ol>
+            <li>ดับเบิลคลิก <code>scripts\run_wealthman.bat</code></li>
+            <li>พิมพ์รหัส PDF เมื่อถาม แล้ว Enter <span class="hint">(พิมพ์แล้วไม่เห็นตัวอักษร = ปกติ)</span></li>
+            <li>parser จะอ่านไฟล์ทั้งหมด → สร้างข้อมูล → เปิด dashboard ให้อัตโนมัติ</li>
+          </ol>
+          <div class="hint">หรือรันผ่าน Command Prompt เองก็ได้:</div>
+          <div class="wz-copy" data-copy="python scripts\parse_investments.py"><span>python scripts\parse_investments.py</span><span class="cp">คัดลอก</span></div>
+          <div class="wz-check"><input type="checkbox" id="chk2"><label for="chk2" style="margin:0;font-weight:400">รัน parser แล้ว เห็นข้อความ "เขียนผลแล้ว" / dashboard เปิดขึ้น</label></div>
+        </div>
+
+        <!-- Step 4: Done -->
+        <div class="wz-page" id="wz-3">
+          <h2>ขั้นที่ 4 — เสร็จสิ้น</h2>
+          <div id="wzResult" class="note">กำลังตรวจสอบข้อมูล…</div>
+          <p style="margin-top:12px;">เวลามีไฟล์ใหม่มา: ดับเบิลคลิก <code>scripts\run_wealthman.bat</code> อีกครั้ง → ข้อมูลอัปเดต (ไม่ต้องตั้งค่าใหม่)</p>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn" id="wzGoDash">📊 ไปที่ Dashboard</button>
+          </div>
+        </div>
+
+        <!-- nav -->
+        <div class="wz-nav">
+          <button class="btn secondary" id="wzBack">← ย้อนกลับ</button>
+          <button class="btn" id="wzNext">ถัดไป →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Panel: Help ===== -->
+    <section class="panel" id="panel-help">
+      <div class="top"><h1>Help</h1></div>
+      <div class="sub">ระบบเก็บ log การซื้อขายจากใบยืนยัน (Confirmation Note) ของ Dime! อัตโนมัติ</div>
+
+      <!-- ===== Table of contents ===== -->
+      <nav class="help-toc" id="help-top">
+        <h2>สารบัญ</h2>
+        <div class="toc-grid">
+          <div class="toc-sec">
+            <span>เริ่มต้นใช้งาน</span>
+            <ul>
+              <li><a href="#h-overview">ภาพรวมระบบ — ทำงานยังไง</a></li>
+            </ul>
+          </div>
+          <div class="toc-sec">
+            <span>การใช้งานประจำ</span>
+            <ul>
+              <li><a href="#h-newfiles">เวลามีไฟล์ใหม่มา (flow อัตโนมัติ)</a></li>
+              <li><a href="#h-modes">2 โหมดการรัน (ปกติ / rebuild)</a></li>
+              <li><a href="#h-dividends">วิธี log เงินปันผล</a></li>
+            </ul>
+          </div>
+          <div class="toc-sec">
+            <span>ติดตั้ง &amp; ตั้งค่า</span>
+            <ul>
+              <li><a href="#h-install">ติดตั้งครั้งแรก (สำหรับ user)</a></li>
+              <li><a href="#h-appsscript">(ตัวเลือก) ตั้ง Apps Script</a></li>
+            </ul>
+          </div>
+          <div class="toc-sec">
+            <span>ราคา · วิเคราะห์ · ความเป็นส่วนตัว</span>
+            <ul>
+              <li><a href="#h-holdings">ราคาปัจจุบัน + กำไร/ขาดทุน</a></li>
+              <li><a href="#h-analysis">หน้า Analysis</a></li>
+              <li><a href="#h-privacy">โหมดซ่อนตัวเลข (Privacy)</a></li>
+            </ul>
+          </div>
+          <div class="toc-sec">
+            <span>ภาษี</span>
+            <ul>
+              <li><a href="#h-tax">ภาษีเงินได้หุ้นต่างประเทศ</a></li>
+            </ul>
+          </div>
+          <div class="toc-sec">
+            <span>อ้างอิง</span>
+            <ul>
+              <li><a href="#h-faq">คำถามที่พบบ่อย</a></li>
+              <li><a href="#h-files">ไฟล์ในโปรเจกต์</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ===== Section 1: เริ่มต้นใช้งาน ===== -->
+      <div class="help-sec-head" id="sec-start"><h2>เริ่มต้นใช้งาน</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-overview">
+        <h2>ภาพรวมระบบ — ทำงานยังไง</h2>
+        <table class="help-tbl">
+          <tr><th>ส่วน</th><th>ทำอะไร</th><th>ทำงานเมื่อ</th></tr>
+          <tr><td><b>1. Google Apps Script</b> (cloud)</td><td>ดึง PDF ใบยืนยันจาก Gmail → เซฟลงโฟลเดอร์ <b>root</b> ของ Confirmation Notes (inbox รอประมวลผล)</td><td>อัตโนมัติทุกวัน ~01:00</td></tr>
+          <tr><td><b>2. parse_investments.py</b> (เครื่อง)</td><td>อ่าน PDF ทุกไฟล์ → ดึงรายการซื้อขาย → สร้างไฟล์ข้อมูล → <b>ย้ายไฟล์เข้า <code>ปี/ชนิด</code></b></td><td>กดรัน run_wealthman.bat</td></tr>
+        </table>
+        <div class="note">ไฟล์ PDF ติดรหัส — parse_investments.py ถอดรหัสตอนอ่านเท่านั้น ไม่แตะเนื้อไฟล์ต้นฉบับ และไม่เก็บรหัสลงไฟล์</div>
+        <div class="note" style="margin-top:8px;"><b>โครงสร้างโฟลเดอร์:</b> ไฟล์ใหม่อยู่ที่ root (= ยังไม่ประมวลผล) · หลัง parse สำเร็จจะถูกย้ายเข้า <code>yyyy/Offshore</code> หรือ <code>yyyy/Mutual Fund</code> อัตโนมัติ (เปิด/ปิดได้ที่ Settings)</div>
+      </div>
+
+      <!-- ===== Section 2: การใช้งานประจำ ===== -->
+      <div class="help-sec-head" id="sec-daily"><h2>การใช้งานประจำ</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-newfiles">
+        <h2><span class="num">1</span>เวลามีไฟล์ใหม่มา (flow อัตโนมัติ)</h2>
+        <ol>
+          <li>Apps Script ดึงไฟล์ใหม่จาก Gmail ลงที่ <b>root</b> ของ Confirmation Notes อัตโนมัติทุกวัน (~01:00) — ไฟล์ที่ root = ยังไม่ประมวลผล</li>
+          <li>รัน parser: ดับเบิลคลิก <code>scripts\run_wealthman.bat</code></li>
+          <li>พิมพ์รหัส PDF เมื่อถาม (พิมพ์แล้วไม่เห็นตัวอักษร = ปกติ)</li>
+          <li>parser อ่านข้อมูล → อัปเดต dashboard → <b>ย้ายไฟล์ที่ root เข้า <code>yyyy/Offshore</code> หรือ <code>yyyy/Mutual Fund</code></b> ตามปี+ชนิดในเอกสาร</li>
+          <li>ไฟล์ที่ย้ายแล้ว = ประมวลผลเรียบร้อย · ดูว่าย้ายอะไรไปไหนได้ใน <code>scripts\run_log.txt</code></li>
+        </ol>
+        <div class="note"><b>กันพลาด:</b> ย้ายเฉพาะไฟล์ที่ parse สำเร็จ + รู้ปี/ชนิดชัด · ปี/ชนิดไม่ชัด → ปล่อยไว้ที่ root · ชื่อซ้ำปลายทางเติม _2 ไม่ทับ · รายการกันซ้ำด้วย txn_id อยู่แล้ว (ย้ายไฟล์ไม่กระทบข้อมูล)</div>
+        <div class="hint" style="margin-top:8px;">ปิดการย้ายอัตโนมัติได้ที่ Settings (เอาเครื่องหมายถูก "ย้ายไฟล์เข้าปี/ชนิด" ออก) — ไฟล์จะค้างที่ root ให้จัดเอง</div>
+      </div>
+
+      <div class="card" id="h-modes">
+        <h2><span class="num">⚡</span>2 โหมดการรัน: ปกติ (เร็ว) vs rebuild (อ่านใหม่ทั้งหมด)</h2>
+        <div class="note">parser อ่านไฟล์แบบ 2 โหมด เพื่อไม่ให้เปิดไฟล์เก่าซ้ำทุกครั้ง (ยิ่งไฟล์เยอะยิ่งช้า)</div>
+        <table class="rpt" style="margin-top:12px;">
+          <thead><tr><th>โหมด</th><th>ไฟล์ที่ดับเบิลคลิก</th><th>อ่านอะไร</th><th>ใช้เมื่อ</th></tr></thead>
+          <tbody>
+            <tr><td><b>ปกติ (เร็ว)</b></td><td><code>scripts\run_wealthman.bat</code></td><td>เฉพาะ PDF ที่ <b>root</b> (ไฟล์ใหม่) + โหลดข้อมูลเก่าจาก <code>inv_data_full.js</code></td><td>ทุกวัน เวลาไฟล์ใหม่มา</td></tr>
+            <tr><td><b>rebuild</b></td><td><code>scripts\run_wealthman_rebuild.bat</code></td><td><b>ทุกไฟล์</b> (root + ทุกโฟลเดอร์ปี) อ่านสดใหม่หมด</td><td>แก้ parser (เพิ่ม field) · สงสัยข้อมูลเพี้ยน · <code>inv_data_full.js</code> หาย</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:12px;"><b>โหมดปกติทำงานยังไง:</b></p>
+        <ol>
+          <li>โหลดรายการเก่าจาก <code>data\inv_data_full.js</code> (ที่เคย parse ไว้)</li>
+          <li>อ่าน PDF <b>เฉพาะที่ root</b> เท่านั้น (ไฟล์ใหม่ที่ยังไม่ย้ายเข้าปี) — ไฟล์ใน <code>yyyy/</code> ไม่ถูกเปิดซ้ำ</li>
+          <li>รวมเก่า+ใหม่ กันซ้ำด้วย <code>txn_id + order_no</code> → เขียนไฟล์ข้อมูล → ย้ายไฟล์ root เข้าปี/ชนิด</li>
+        </ol>
+        <div class="note" style="margin-top:10px;"><b>ตาข่ายนิรภัย:</b> ถ้ายังไม่มี <code>inv_data_full.js</code> (เช่นเครื่องใหม่/ลบไป) → โหมดปกติจะ <b>auto-rebuild</b> อ่านทุกไฟล์ให้เองครั้งแรก ไม่ต้องสั่ง rebuild</div>
+        <div class="hint" style="margin-top:8px;">รันผ่าน Command Prompt ก็ได้: <code>run_wealthman.bat</code> (ปกติ) หรือ <code>run_wealthman.bat rebuild</code> (อ่านใหม่ทั้งหมด) — ไฟล์ <code>run_wealthman_rebuild.bat</code> คือตัวเดียวกับการพิมพ์ <code>rebuild</code> ต่อท้าย เผื่อสะดวกดับเบิลคลิก</div>
+      </div>
+
+      <div class="card" id="h-dividends">
+        <h2><span class="num">💰</span>วิธี log เงินปันผล (Dividends)</h2>
+        <div class="note">ปันผลไม่มีเอกสารส่งทางเมล — ต้องแคปหน้าจอจากแอป Dime บนมือถือเอา แล้วเอาเข้าระบบ</div>
+        <p style="margin-top:10px;"><b>ขั้นตอนทั้งหมด:</b></p>
+        <ol>
+          <li><b>แคปหน้าปันผล</b>จากแอป Dime บนมือถือ (หน้า Activity / Dividend) — แคปให้เห็น header เดือน + รายการ Dividend และ Withholding Tax ครบ · <b>แคป 1 รูป = 1 เดือน อย่าให้เดือนปนกันในรูปเดียว</b> (ถ้าเดือนนั้นรายการยาวเกินจอ ค่อยแคปเพิ่มเป็นรูปที่ 2 ของเดือนเดิม)</li>
+          <li><b>เซฟรูปเข้าโฟลเดอร์</b> <code>G:\My Drive\Documents\Investment\Dime\Dividend</code> (path นี้ตั้งไว้ในแท็บ Settings ช่อง "โฟลเดอร์รูปปันผล")</li>
+          <li><b>แปลงรูปเป็นข้อมูล</b> — เลือก 1 ใน 2 วิธี:
+            <ul>
+              <li><b>วิธี A — กรอกผ่าน Template (ไม่พึ่งใคร):</b> ไปแท็บ <b>💰 Dividends</b> → กด <b>Template</b> ได้ไฟล์ Excel เปล่า → กรอกข้อมูลจากรูป (จะพิมพ์เอง หรือใช้ OCR ตัวไหนช่วยก็ได้) → กด <b>Import</b> เลือกไฟล์ที่กรอก → ระบบรวมให้อัตโนมัติ (กันซ้ำด้วย หลักทรัพย์ + วันจ่าย)</li>
+              <li><b>วิธี B — ให้ผู้ช่วย AI อ่านให้:</b> เปิดแชทผู้ช่วย แล้วบอกให้อ่านรูปในโฟลเดอร์ Dividend → ได้ข้อมูลกลับมา (แม่นกว่า OCR ทั่วไป แต่ต้องมีผู้ช่วย)</li>
+            </ul>
+          </li>
+          <li><b>ตั้งชื่อรูป + ย้ายเข้า Logged</b> — รูปที่ log เข้าระบบแล้ว เปลี่ยนชื่อตามเดือนที่อยู่ในรูป (ดูหัวข้อถัดไป) แล้วย้ายเข้าโฟลเดอร์ <code>Dividend\Logged</code></li>
+        </ol>
+        <p style="margin-top:12px;"><b>กฎการตั้งชื่อรูป (สำคัญ — เพื่อรู้ว่า log ถึงเดือนไหนแล้ว):</b></p>
+        <ul>
+          <li>ตั้งชื่อตาม <b>เดือนที่อยู่ในรูปจริง</b> (header เดือนในภาพ) ไม่ใช่ชื่อ IMG จากกล้อง หรือลำดับไฟล์</li>
+          <li>รูปแบบ: <code>Dividend yyyy-mm.jpg</code> เช่น <code>Dividend 2025-04.jpg</code></li>
+          <li>ถ้าเดือนเดียวแคปหลายรูป (เลื่อนจอ) → เติม <b>-A, -B, -C</b> (ใช้ตัวอักษร ไม่ใช่เลข จะได้ไม่สับสนกับวันที่) เช่น <code>Dividend 2025-10-A.jpg</code>, <code>Dividend 2025-10-B.jpg</code></li>
+        </ul>
+        <div class="note">💡 ตั้งแต่นี้แคป <b>1 รูป = 1 เดือน</b> (ไม่ปนเดือน) → ตั้งชื่อ <code>Dividend yyyy-mm.jpg</code> ได้ตรงเลย · ถ้าเดือนไหนรายการยาวต้องแคป 2 รูป ให้เป็นเดือนเดียวกันทั้งคู่แล้วเติม -A/-B · ยึด <b>เดือนที่อยู่ในรูป</b> เป็นหลักเสมอ (ไม่ใช่ลำดับไฟล์)</div>
+        <div class="note" style="margin-top:10px;">กติกาโฟลเดอร์: รูปที่ยังอยู่ใน <code>Dividend\</code> (นอก Logged) = <b>ยังไม่ได้ log</b> · รูปใน <code>Dividend\Logged\</code> = <b>log เข้าระบบแล้ว</b></div>
+        <p style="margin-top:12px;"><b>schema คอลัมน์ใน Template:</b> <code>security</code> (ชื่อหลักทรัพย์), <code>pay_date</code> (วันจ่าย yyyy-mm-dd), <code>gross_usd</code> (ปันผลก่อนหักภาษี), <code>wht_usd</code> (ภาษีหัก ณ ที่จ่าย — ว่างได้), <code>fee_usd</code> (ค่าธรรมเนียมเช่น TAF — ว่างได้), <code>per_share</code> (ต่อหน่วย — ว่างได้), <code>record_date</code> (ว่างได้), <code>note</code></p>
+        <div class="note" style="margin-top:12px;"><b>ปันผลเชื่อมไปหน้าไหนบ้าง:</b> ข้อมูลปันผลจะแสดงใน <b>Dashboard</b> (KPI ปันผลสุทธิ + กราฟปันผลรายเดือน) และ <b>Tax Report</b> (ตารางปันผลรายปี + รายหลักทรัพย์ + ชีตใน Excel export) อัตโนมัติ</div>
+        <div class="note" style="margin-top:8px;"><b>เรื่องภาษีปันผล:</b> <code>wht_usd</code> = ภาษีหัก ณ ที่จ่ายของสหรัฐ (US Withholding Tax ปกติ 15%) หักที่ต้นทางแล้ว · ปันผลต่างประเทศที่นำเข้าไทยอาจต้องเสียภาษีเงินได้ไทย แต่ใช้เครดิตภาษีที่ถูกหักที่สหรัฐได้ — ดูสรุปรายปีในแท็บ Tax Report เพื่อใช้ประกอบการยื่น (ไม่ใช่เอกสารทางการ ควรปรึกษาผู้เชี่ยวชาญ)</div>
+      </div>
+
+      <!-- ===== Section 3: ติดตั้ง & ตั้งค่า ===== -->
+      <div class="help-sec-head" id="sec-setup"><h2>ติดตั้ง &amp; ตั้งค่า</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-install">
+        <h2><span class="num">2</span>ติดตั้งครั้งแรก (สำหรับ user)</h2>
+        <ol>
+          <li><b>ดาวน์โหลดไฟล์</b> — Download ZIP จาก GitHub แล้วแตกไฟล์</li>
+          <li><b>ติดตั้ง Python</b> จาก <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> → <b>ติ๊ก "Add Python to PATH"</b></li>
+          <li><b>ติดตั้งไลบรารีอ่าน PDF</b> — เปิด Command Prompt (กด Windows → พิมพ์ <code>cmd</code>) แล้วพิมพ์:
+            <div class="code-block">pip install pdfplumber</div>
+            <div class="hint">ถ้าไม่รู้จัก <code>pip</code> ลอง <code>python -m pip install pdfplumber</code> หรือ <code>py -m pip install pdfplumber</code></div>
+          </li>
+          <li><b>ตั้งโฟลเดอร์ไฟล์บิล</b> — ไปแท็บ <b>⚙️ ตั้งค่า</b> กรอก path → สร้าง <code>config.json</code> → วางใน <code>scripts\</code> (หรือแก้ <code>ROOT</code> ใน parse_investments.py เอง)</li>
+          <li><b>รัน</b> — ดับเบิลคลิก <code>scripts\run_wealthman.bat</code> → ใส่รหัส → เสร็จ</li>
+        </ol>
+      </div>
+
+      <div class="card" id="h-appsscript">
+        <h2><span class="num">3</span>(ตัวเลือก) ตั้ง Apps Script ดึง PDF จาก Gmail</h2>
+        <ol>
+          <li>เปิด <a href="https://script.google.com" target="_blank">script.google.com</a> → New project</li>
+          <li>วางสคริปต์ดึงไฟล์แนบจาก Gmail (ผู้ส่ง <code>no-reply@dime.co.th</code>, subject "ใบยืนยันการซื้อขาย") ลงที่ <b>root</b> ของ Confirmation Notes (ไม่แยกปี — ให้ parser ย้ายเข้าปี/ชนิดเอง)</li>
+          <li>ตั้ง timezone เป็น <b>Asia/Bangkok</b> → Authorize → ตั้ง Trigger รายวัน (Day timer)</li>
+          <li>ให้ Google Drive sync โฟลเดอร์ลงเครื่อง แล้วตั้ง path ในแท็บ ตั้งค่า มาที่โฟลเดอร์นี้</li>
+        </ol>
+        <div class="note">ขั้นนี้เป็นตัวเลือก — ถ้าเซฟ PDF เองก็ข้ามได้</div>
+      </div>
+
+      <!-- ===== Section 4: ราคา · วิเคราะห์ · ความเป็นส่วนตัว ===== -->
+      <div class="help-sec-head" id="sec-analyze"><h2>ราคา · วิเคราะห์ · ความเป็นส่วนตัว</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-holdings">
+        <h2><span class="num">💹</span>ราคาปัจจุบัน + กำไร/ขาดทุน (Holdings)</h2>
+        <p>หน้า <b>Holdings</b> สรุปแต่ละหลักทรัพย์ที่ถืออยู่: หน่วยคงเหลือ, ต้นทุนเฉลี่ย, ราคาปัจจุบัน, มูลค่าตลาด, กำไร/ขาดทุน (%)</p>
+        <p style="margin-top:10px;"><b>วิธีใส่ราคาปัจจุบัน:</b></p>
+        <ol>
+          <li><b>กรอกในตารางเลย</b> — พิมพ์ราคาในช่อง "ราคาปัจจุบัน" ของแต่ละตัว แล้ว Enter (เก็บในเบราว์เซอร์ localStorage)</li>
+          <li><b>หรือ Import ทีเดียวทั้งชุด</b> — กด <b>Price Template</b> ได้ไฟล์ Excel (มี symbol + ราคาล่าสุด) → แก้ราคา → กด <b>Import Prices</b></li>
+        </ol>
+        <div class="note">ราคาต่อหน่วยใช้สกุลเงินของหลักทรัพย์ (หุ้นต่างประเทศ = USD) · ราคาปัจจุบันเปลี่ยนทุกวัน อัปเดตเมื่อไหร่ก็กรอก/Import ใหม่ทับได้</div>
+        <div class="hint" style="margin-top:8px;">แคปราคาจาก Watchlist ในแอป Dime มาแล้วให้ผู้ช่วย AI อ่านให้ก็ได้ (ครั้งเดียวตั้งต้น) จากนั้นกรอก/Import เองต่อ</div>
+      </div>
+
+      <div class="card" id="h-analysis">
+        <h2><span class="num">📈</span>หน้า Analysis — วิเคราะห์ผลตอบแทน</h2>
+        <p>วิเคราะห์ว่าตัวไหน performance ดี / ปันผลคุ้ม — ต้องใส่ราคาปัจจุบัน (Holdings) และบันทึกปันผล (Dividends) ก่อนจึงจะคำนวณได้</p>
+        <table class="help-tbl" style="margin-top:8px;">
+          <tr><th>ส่วน</th><th>ความหมาย</th></tr>
+          <tr><td><b>กำไร/ขาดทุน %</b></td><td>(ราคาปัจจุบัน − ต้นทุน) ÷ ต้นทุน · เรียง Top → Worst</td></tr>
+          <tr><td><b>Dividend Yield on Cost</b></td><td>ปันผลรับสะสม ÷ เงินลงทุน — ตัวไหนปันผลคุ้มทุนสุด</td></tr>
+          <tr><td><b>แนวโน้มปันผลรายเดือน</b></td><td>ปันผลรับแต่ละเดือน ดูว่าโตขึ้นไหม</td></tr>
+          <tr><td><b>Total Return</b></td><td>ผลตอบแทนรวม = กำไร/ขาดทุนจากราคา + ปันผลที่ได้รับ</td></tr>
+        </table>
+        <div class="note" style="margin-top:8px;">กองทุนไทย (THB) ยังไม่มีราคา/ปันผลในระบบ จึงไม่แสดงผลตอบแทน · ตัวเลขไม่รวมผลอัตราแลกเปลี่ยน (คนละสกุลแยกกัน)</div>
+      </div>
+
+      <div class="card" id="h-privacy">
+        <h2><span class="num">🙈</span>โหมดซ่อนตัวเลข (Privacy)</h2>
+        <p>ปุ่ม <b>👁️ ซ่อนตัวเลข</b> ที่มุมล่างซ้าย (ใต้เมนู) — กดเพื่อซ่อน<b>จำนวนเงินทุกหน้า</b> ไว้แคปหน้าจออวดเพื่อนโดยไม่เผยพอร์ตจริง</p>
+        <ul>
+          <li><b>ซ่อน:</b> จำนวนเงิน (เงินลงทุน, มูลค่าตลาด, กำไร/ขาดทุนเป็นเงิน, ปันผล, ค่าธรรมเนียม, ยอดในตาราง, แกน Y ของกราฟ) → เป็น <code>•••••</code></li>
+          <li><b>ยังโชว์:</b> % กำไร/ขาดทุน, ราคาต่อหน่วย, จำนวนหน่วย, ชื่อหุ้น, สัดส่วน % — อวด performance ได้โดยไม่บอกเงินจริง</li>
+        </ul>
+        <div class="note">สถานะจำไว้ในเบราว์เซอร์ (เปิดค้างได้) · กดปุ่มเดิมอีกครั้งเพื่อโชว์ตัวเลขกลับ</div>
+      </div>
+
+      <!-- ===== Section 5: ภาษี ===== -->
+      <div class="help-sec-head" id="sec-tax"><h2>ภาษี</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-tax">
+        <h2><span class="num">🧾</span>ภาษีเงินได้จากหุ้นต่างประเทศ (สำหรับผู้อยู่ไทย)</h2>
+        <div class="warn">ข้อมูลสรุปเพื่อความเข้าใจเบื้องต้น — ไม่ใช่คำแนะนำทางภาษี กฎหมายเปลี่ยนได้ ควรปรึกษานักบัญชี/ผู้เชี่ยวชาญก่อนยื่นจริง</div>
+
+        <p style="margin-top:12px;"><b>หลักสำคัญ: ไทยเก็บภาษีเงินได้ต่างประเทศแบบ "ตามการนำเงินเข้า" (remittance)</b> — ไม่ใช่ตอนที่กำไรเกิดในต่างประเทศ แต่ตอนที่<b>โอนเงินกลับเข้าไทย</b></p>
+        <p style="margin-top:8px;">เงินได้ต่างประเทศจะถูกเก็บภาษีก็ต่อเมื่อครบ <b>2 เงื่อนไขพร้อมกัน</b>:</p>
+        <ol>
+          <li><b>คุณเป็นผู้มีถิ่นที่อยู่ในไทยทางภาษี</b> ในปีที่เงินได้นั้นเกิด — คืออยู่ในไทย <b>ตั้งแต่ 180 วันขึ้นไป</b> ในปีปฏิทินนั้น (นับสะสม ไม่ต้องติดกัน)</li>
+          <li><b>คุณนำเงินนั้นเข้าไทย</b> — จะปีเดียวกับที่ได้ หรือปีไหนก็ตามหลังจากนั้น</li>
+        </ol>
+        <div class="note">ถ้าขาดข้อใดข้อหนึ่ง ก็ยังไม่ถูกเก็บ · ภาษีจะคิดใน<b>ปีที่นำเงินเข้า</b> ไม่ใช่ปีที่ได้กำไร</div>
+
+        <p style="margin-top:14px;"><b>เส้นแบ่งสำคัญ: ก่อน vs หลัง 1 ม.ค. 2024</b></p>
+        <ul>
+          <li><b>เงินได้ที่เกิดตั้งแต่ 1 ม.ค. 2024 เป็นต้นไป</b> (ตามแนวปฏิบัติ ป.161/2566) → นำเข้าไทยเมื่อไหร่ก็ต้องนำมารวมคำนวณภาษี ไม่ว่าจะข้ามปีหรือไม่</li>
+          <li><b>เงินได้ที่เกิดก่อน 1 ม.ค. 2024</b> (ตามแนวปฏิบัติ ป.162/2566) → <b>ยกเว้น</b> นำเข้าไทยตอนไหนก็ไม่ถูกเก็บ</li>
+        </ul>
+        <div class="note" style="margin-top:8px;">💡 เก็บหลักฐานแยก <b>เงินก่อนปี 2024</b> ออกจาก <b>เงินได้หลังปี 2024</b> (เช่น statement ณ 31 ธ.ค. 2023) — ถ้าเงินปนกันในบัญชีเดียว จะพิสูจน์ส่วนที่ยกเว้นได้ยาก</div>
+
+        <p style="margin-top:14px;"><b>หุ้นนอกของคุณเข้าข่ายยังไง</b> (Dime offshore):</p>
+        <ul>
+          <li><b>กำไรจากการขาย (capital gain)</b> + <b>เงินปันผล (dividend)</b> = เงินได้ต่างประเทศ → จะเสียภาษีไทยเมื่อ<b>โอนเงินกลับเข้าไทย</b> (ตามเงื่อนไขด้านบน) · ตราบใดที่เงินยังอยู่ในพอร์ต/บัญชีต่างประเทศ ยังไม่โอนเข้าไทย = ยังไม่ถึงจุดเก็บ</li>
+          <li><b>ปันผลที่ถูกหักภาษีสหรัฐไว้แล้ว</b> (<code>wht_usd</code> ปกติ 15% ตามสนธิสัญญาภาษีซ้อนไทย–สหรัฐ) → ภาษีที่ถูกหักที่สหรัฐ <b>ใช้เป็นเครดิตหักออก</b>จากภาษีไทยได้ กันเก็บซ้ำซ้อน</li>
+        </ul>
+        <div class="note" style="margin-top:8px;"><b>ถ้าต้องยื่น:</b> เงินได้ต่างประเทศที่นำเข้าไทยยื่นในแบบ <b>ภ.ง.ด.90</b> (ยื่นช่วง ม.ค.–มี.ค. ของปีถัดไป) · เตรียมหลักฐานการหักภาษี ณ ที่จ่ายของสหรัฐไว้ใช้ขอเครดิตภาษี</div>
+
+        <p style="margin-top:14px;"><b>แอปนี้ช่วยอะไร:</b></p>
+        <ul>
+          <li>แท็บ <b>Tax Report</b> สรุป<b>กำไร/ขาดทุนจากการขายรายปี</b> + <b>ปันผลรับรายปี</b> (gross/หักภาษี/สุทธิ) + ภาษีสหรัฐที่ถูกหัก (<code>wht_usd</code>) → ใช้เป็นตัวเลขตั้งต้นประกอบการยื่น</li>
+          <li>Export Excel ได้หลายชีต (รายปี/รายหลักทรัพย์/ปันผล) ส่งให้นักบัญชีได้เลย</li>
+        </ul>
+        <div class="warn" style="margin-top:10px;">⚠️ ตัวเลขในแอปคิดตาม<b>วันทำรายการ (ซื้อ/ขาย/จ่ายปันผล)</b> ซึ่งใช้ดูผลตอบแทน — แต่<b>ฐานภาษีไทยยึดตามวันที่นำเงินเข้าไทย</b> ซึ่งแอปไม่ทราบ (ขึ้นกับว่าคุณโอนกลับเมื่อไหร่) จึงต้องปรับให้ตรงกับการโอนจริงเองตอนยื่น</div>
+        <div class="note" style="margin-top:10px;">หมายเหตุสถานะกฎหมาย: มีการพูดถึง<b>ร่างผ่อนปรน</b> (ยกเว้นถ้านำเข้าปีเดียวกับที่ได้ หรือปีถัดไป) แต่ ณ ปี 2026 <b>ยังเป็นแค่ร่าง ยังไม่ประกาศใช้</b> — ให้ยึดกฎ ป.161/162 ที่ใช้อยู่จนกว่าจะมีประกาศจริง</div>
+        <a class="back-top" href="#help-top">↑ กลับไปสารบัญ</a>
+      </div>
+
+      <!-- ===== Section 6: อ้างอิง ===== -->
+      <div class="help-sec-head" id="sec-ref"><h2>อ้างอิง</h2><div class="bar"></div></div>
+
+      <div class="card" id="h-faq">
+        <h2><span class="num">4</span>คำถามที่พบบ่อย</h2>
+        <p><b>ไฟล์ที่อ่านแล้วจะซ้ำไหม?</b><br>ไม่ซ้ำ — กันซ้ำด้วยเลขรายการ (txn_id + order_no) รันกี่รอบก็ได้ผลเท่าเดิม ไม่ต้องย้าย/เปลี่ยนชื่อไฟล์</p>
+        <p><b>record มาจากไฟล์ไหน?</b><br>ดูคอลัมน์ "ไฟล์ต้นฉบับ" (source_file) ในไฟล์ Excel ที่ export</p>
+        <p><b>อัปเดตล่าสุดเมื่อไร?</b><br>ดูท้ายหน้าสรุป หรือเปิด <code>scripts\run_log.txt</code></p>
+      </div>
+
+      <div class="card" id="h-files">
+        <h2>ไฟล์ในโปรเจกต์</h2>
+        <ul>
+          <li><b>index.html</b> — แอปหน้าเดียว (ทุกแท็บอยู่ในนี้)</li>
+          <li><b>css/style.css</b> — สไตล์กลาง</li>
+          <li><b>js/</b> — โค้ดแยกตามแท็บ (app, dashboard, trades, holdings, dividends, tax, analysis, classify, setup)</li>
+          <li><b>data/</b> — inv_data.js (public), inv_data_full.js (local), inv_log.json, dividends.js (ปันผล), prices.js (ราคาตั้งต้น)</li>
+          <li><b>scripts/</b> — parse_investments.py, run_wealthman.bat, run_wealthman_rebuild.bat, investment_save_to_drive.gs, config.json</li>
+          <li><b>assets/</b> — ไอคอน</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Scripts: shared data + router, then per-panel modules ===== -->
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/trades.js"></script>
+  <script src="js/holdings.js"></script>
+  <script src="js/dividends.js"></script>
+  <script src="js/tax.js"></script>
+  <script src="js/analysis.js"></script>
+  <script src="js/classify.js"></script>
+  <script src="js/setup.js"></script>
+  <script>
+    // init เมื่อ DL พร้อม (กัน error ถ้าสคริปต์ภายนอกยังโหลดไม่เสร็จในบางสภาพแวดล้อม)
+    (function start(n){
+      if (window.DL && DL.init) { try { DL.init(); } catch(e){ console.error(e); } }
+      else if (n < 50) { setTimeout(function(){ start(n+1); }, 50); }
+    })(0);
+  </script>
+</body>
+</html>

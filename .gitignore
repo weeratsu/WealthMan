@@ -1,0 +1,21 @@
+# ===== ข้อมูลส่วนตัว / ห้ามขึ้น git (แม้แต่ private repo) =====
+# ข้อมูลครบ (มีเลขบัญชี account_no) — เก็บไว้แค่เครื่อง
+data/inv_data_full.js
+# path โฟลเดอร์ส่วนตัวของเครื่อง
+scripts/config.json
+# log การรัน (มี path เครื่อง)
+scripts/run_log.txt
+# ไฟล์ export Excel (พอร์ตเต็ม)
+*.xlsx
+# ไฟล์ backup
+Dime_Backup_*.json
+Dime_SecTypes_*.json
+
+# ===== ระบบ =====
+.DS_Store
+Thumbs.db
+desktop.ini
+__pycache__/
+*.pyc
+.vscode/
+.idea/
