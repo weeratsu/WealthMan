@@ -43,21 +43,25 @@ DL.register('setup', function () {
   const previewCode = document.getElementById('cfgPreviewCode');
   const okMsg = document.getElementById('cfgOk');
   const divPath = document.getElementById('divPath');
+  const goldPath = document.getElementById('goldPath');
   const archiveChk = document.getElementById('archiveChk');
   const buildConfig = () => {
     const cfg = { root: rootPath.value.trim() };
     const d = (divPath && divPath.value.trim()) || '';
     if (d) cfg.dividend_root = d;   // ใส่เฉพาะเมื่อกรอก (ไม่บังคับ)
+    const g = (goldPath && goldPath.value.trim()) || '';
+    if (g) cfg.gold_root = g;       // โฟลเดอร์ทอง (ไม่บังคับ)
     if (archiveChk) cfg.archive_after_parse = !!archiveChk.checked;  // ย้ายไฟล์เข้าปี/ชนิดหลัง parse
     return cfg;
   };
   function refresh() {
     const cfg = buildConfig();
-    if (cfg.root || cfg.dividend_root) { preview.style.display = 'block'; previewCode.textContent = JSON.stringify(cfg, null, 2); }
+    if (cfg.root || cfg.dividend_root || cfg.gold_root) { preview.style.display = 'block'; previewCode.textContent = JSON.stringify(cfg, null, 2); }
     else preview.style.display = 'none';
   }
   rootPath.addEventListener('input', refresh);
   if (divPath) divPath.addEventListener('input', refresh);
+  if (goldPath) goldPath.addEventListener('input', refresh);
   if (archiveChk) archiveChk.addEventListener('change', refresh);
 
   document.getElementById('btnGenCfg').addEventListener('click', async () => {

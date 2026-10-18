@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-16T14:36:32",
+  "generated_at": "2026-10-16T16:11:41",
   "source_folder": "",
-  "file_count": 59,
-  "trade_count": 122,
+  "file_count": 60,
+  "trade_count": 124,
   "trades": [
     {
       "asset_class": "gold",
@@ -1730,6 +1730,29 @@
       "source_file": "[Confirmation] 2026-03-11 - Dime_offshore_confirmationNote_DIMEOS20260311048590.pdf"
     },
     {
+      "asset_class": "gold",
+      "txn_id": "DMB2603170012706",
+      "doc_no": "DMB2603170012706",
+      "issue_date": "17/03/2026",
+      "iso_date": "2026-03-17",
+      "fx_thb_usd": null,
+      "order_no": "GLDMTSBML2026031722454707214",
+      "settlement": "2026-03-17",
+      "type": "BUY",
+      "security": "GLDOZUSD",
+      "exchange": "MTS Gold",
+      "units": 0.0006,
+      "price": 4987.89,
+      "ccy": "USD",
+      "gross_usd": 3,
+      "fee_usd": 0.0,
+      "total_usd": 3,
+      "gross_thb": null,
+      "fee_thb": null,
+      "total_thb": null,
+      "source_file": "mts_gold.json"
+    },
+    {
       "asset_class": "offshore",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
@@ -2395,6 +2418,29 @@
       "fee_thb": 0.0,
       "total_thb": 270.54,
       "source_file": "[Confirmation] 2026-07-22 - Dime_offshore_confirmationNote_DIMEOS20260722008397.pdf"
+    },
+    {
+      "asset_class": "gold",
+      "txn_id": "DMB2607270002746",
+      "doc_no": "DMB2607270002746",
+      "issue_date": "27/07/2026",
+      "iso_date": "2026-07-27",
+      "fx_thb_usd": null,
+      "order_no": "GLDMTSBML2026072714215773265",
+      "settlement": "2026-07-27",
+      "type": "BUY",
+      "security": "GLDOZUSD",
+      "exchange": "MTS Gold",
+      "units": 0.0072,
+      "price": 4104.78,
+      "ccy": "USD",
+      "gross_usd": 29.56,
+      "fee_usd": 0.0,
+      "total_usd": 29.56,
+      "gross_thb": null,
+      "fee_thb": null,
+      "total_thb": null,
+      "source_file": "mts_gold.json"
     },
     {
       "asset_class": "offshore",

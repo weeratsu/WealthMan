@@ -53,6 +53,10 @@ DL.register('dashboard', function (payload) {
   const divs = loadDivs();
   const divGrossUsd = divs.reduce((s, d) => s + (+d.gross_usd || 0), 0);
   const divNetUsd = divs.reduce((s, d) => s + ((+d.gross_usd || 0) - (+d.wht_usd || 0) - (+d.fee_usd || 0)), 0);
+  // ปันผลสุทธิเป็น THB (แปลงแต่ละรายการด้วยเรทวันจ่าย — เรทวันใกล้สุด)
+  const _fxMap = DL.loadFx();
+  const divNetThb = divs.reduce((s, d) => { const net = (+d.gross_usd || 0) - (+d.wht_usd || 0) - (+d.fee_usd || 0); const v = DL.usdToThb(net, d.pay_date, _fxMap); return s + (v || 0); }, 0);
+  const _divThbSfx = DL.isPrivate() ? ' (≈฿•••)' : (divNetThb ? ` (≈฿${fmt(divNetThb, 0)})` : '');
   const divByMonth = {};
   divs.forEach(d => { const m = (d.pay_date || '').slice(0, 7); if (m) divByMonth[m] = (divByMonth[m] || 0) + (+d.gross_usd || 0); });
   const plStr = (plUsd || mktUsd ? (plUsd >= 0 ? '+' : '') + money(plUsd, 2) + ' USD' : '') +
@@ -63,7 +67,7 @@ DL.register('dashboard', function (payload) {
     { label: 'เงินลงทุนรวม', value: money(totalInvested, 0), unit: 'THB' },
     { label: 'หลักทรัพย์', value: nSec, unit: 'ตัว' },
     { label: 'ค่าธรรมเนียมรวม', value: money(totalFee, 2), unit: 'THB' },
-    { label: 'ปันผลรับสุทธิ', value: money(divNetUsd, 2), unit: 'USD', color: 'var(--success)' },
+    { label: 'ปันผลรับสุทธิ', value: money(divNetUsd, 2) + '<span style="color:var(--muted);font-size:12px">' + _divThbSfx + '</span>', unit: 'USD', color: 'var(--success)' },
     { label: 'กำไร/ขาดทุน (ที่ใส่ราคา)', value: plStr, unit: '', color: plColor },
   ];
   document.getElementById('kpis').innerHTML = kpis.map(k =>

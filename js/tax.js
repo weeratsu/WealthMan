@@ -60,17 +60,21 @@ DL.register('tax', function (payload) {
   }
   const divs = loadDivs();
   const g2 = v => +(+v || 0);
+  const fxMap = DL.loadFx();
+  const netUsdOf = d => g2(d.gross_usd) - g2(d.wht_usd) - g2(d.fee_usd);
+  const netThbOf = d => { const v = DL.usdToThb(netUsdOf(d), d.pay_date, fxMap); return v == null ? 0 : v; };
+  const thbTot = n => DL.isPrivate() ? ' (≈฿•••)' : (n ? ` (≈฿${fmt(n, 0)})` : '');
   // by year
   const DY = {};
   divs.forEach(d => { const y = (d.pay_date || '').slice(0, 4); if (!y) return;
-    (DY[y] = DY[y] || { n: 0, gross: 0, wht: 0, net: 0 }); const r = DY[y];
-    r.n++; r.gross += g2(d.gross_usd); r.wht += g2(d.wht_usd); r.net += g2(d.gross_usd) - g2(d.wht_usd) - g2(d.fee_usd); });
+    (DY[y] = DY[y] || { n: 0, gross: 0, wht: 0, net: 0, net_thb: 0 }); const r = DY[y];
+    r.n++; r.gross += g2(d.gross_usd); r.wht += g2(d.wht_usd); r.net += netUsdOf(d); r.net_thb += netThbOf(d); });
   const divYears = Object.keys(DY).sort();
-  const dtot = { n: 0, gross: 0, wht: 0, net: 0 };
+  const dtot = { n: 0, gross: 0, wht: 0, net: 0, net_thb: 0 };
   let dyrows = '';
-  divYears.forEach(y => { const r = DY[y]; dtot.n += r.n; dtot.gross += r.gross; dtot.wht += r.wht; dtot.net += r.net;
-    dyrows += `<tr><td class="yr">${y}</td><td>${r.n}</td><td style="color:var(--success)">${money(r.gross, 2)}</td><td>${money(r.wht, 2)}</td><td><b>${money(r.net, 2)}</b></td></tr>`; });
-  if (divYears.length) dyrows += `<tr class="total-row"><td>รวม</td><td>${dtot.n}</td><td>${money(dtot.gross, 2)}</td><td>${money(dtot.wht, 2)}</td><td>${money(dtot.net, 2)}</td></tr>`;
+  divYears.forEach(y => { const r = DY[y]; dtot.n += r.n; dtot.gross += r.gross; dtot.wht += r.wht; dtot.net += r.net; dtot.net_thb += r.net_thb;
+    dyrows += `<tr><td class="yr">${y}</td><td>${r.n}</td><td style="color:var(--success)">${money(r.gross, 2)}</td><td>${money(r.wht, 2)}</td><td><b>${money(r.net, 2)}</b><span style="color:var(--muted);font-size:11px">${thbTot(r.net_thb)}</span></td></tr>`; });
+  if (divYears.length) dyrows += `<tr class="total-row"><td>รวม</td><td>${dtot.n}</td><td>${money(dtot.gross, 2)}</td><td>${money(dtot.wht, 2)}</td><td>${money(dtot.net, 2)}<span style="color:var(--muted);font-size:11px">${thbTot(dtot.net_thb)}</span></td></tr>`;
   else dyrows = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีข้อมูลปันผล</td></tr>';
   const divYearBody = document.getElementById('taxDivYearBody'); if (divYearBody) divYearBody.innerHTML = dyrows;
   // by security

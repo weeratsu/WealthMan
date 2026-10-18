@@ -8,16 +8,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro@3.0.0/css/grid-pro.css">
+<!-- Grid Pro removed — Transactions now uses a plain HTML table (no header/body misalignment) -->
 <script src="https://cdn.jsdelivr.net/npm/highcharts@12.1.2/highcharts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/highcharts@12.1.2/modules/accessibility.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro@3.0.0/grid-pro.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <!-- ข้อมูล: public ก่อน แล้วทับด้วย full ถ้ามีบนเครื่อง -->
 <script src="data/inv_data.js"></script>
 <script src="data/inv_data_full.js" onerror="/* ไม่มีไฟล์ full บนเครื่องนี้ ใช้ public แทน */"></script>
   <script src="data/dividends.js" onerror="/* ยังไม่มีข้อมูลปันผล */"></script>
   <script src="data/prices.js" onerror="/* ยังไม่มีราคาตั้งต้น */"></script>
+  <script src="data/fx.js" onerror="/* ยังไม่มีเรท FX ตั้งต้น */"></script>
 </head>
 <body>
   <!-- ===== Sidebar ===== -->
@@ -30,6 +30,7 @@
     <a data-nav="tax"><span class="ic">📄</span><span>Tax Report</span></a>
     <a data-nav="analysis"><span class="ic">📈</span><span>Analysis</span></a>
     <a data-nav="classify"><span class="ic">🏷️</span><span>Classify</span></a>
+    <a data-nav="fx"><span class="ic">💱</span><span>FX Rates</span></a>
     <a data-nav="setup"><span class="ic">⚙️</span><span>Settings</span></a>
     <a data-nav="help"><span class="ic">📖</span><span>Help</span></a>
     <button id="privToggle" class="btn secondary" style="margin:10px 10px 0;width:calc(100% - 20px);">👁️ ซ่อนตัวเลข</button>
@@ -283,6 +284,28 @@
       </div>
     </section>
 
+    <!-- ===== Panel: FX Rates ===== -->
+    <section class="panel" id="panel-fx">
+      <div class="top">
+        <h1>FX Rates (USD→THB)</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn secondary" id="btnFxTemplate">📄 Template</button>
+          <button class="btn secondary" id="btnFxImport">📥 Import Excel</button>
+          <input type="file" id="fxImportFile" accept=".xlsx,.xls,.csv">
+        </div>
+      </div>
+      <div class="sub">เรทแลกเปลี่ยน ฿ ต่อ 1 USD รายวัน — ใช้แปลงรายการสกุล USD ที่ไม่มีเรทในตัว (MTS Gold, เงินปันผล) · ระบบเลือกเรท “วันใกล้สุด” ให้อัตโนมัติ · เก็บในเบราว์เซอร์ (localStorage ทับ seed)</div>
+      <div class="card">
+        <div class="filters">
+          <input type="date" id="fxDate" title="วันที่">
+          <input type="number" id="fxVal" step="0.0001" placeholder="เรท ฿/USD เช่น 32.5000" style="min-width:160px;">
+          <button class="btn" id="btnFxAdd">+ เพิ่ม/แก้เรท</button>
+          <span class="spacer"></span><span class="chip" id="fxCount"></span>
+        </div>
+        <table class="rpt" id="fxTable"><thead><tr><th>วันที่</th><th>เรท (฿/USD)</th><th>ที่มา</th><th></th></tr></thead><tbody id="fxBody"></tbody></table>
+      </div>
+    </section>
+
     <section class="panel" id="panel-setup">
       <div class="top"><h1>Settings — Setup Wizard</h1></div>
       <div class="sub">ตั้งค่าโปรแกรมทีละขั้น — เหมาะสำหรับติดตั้งครั้งแรก (หรือส่งให้เพื่อน)</div>
@@ -317,6 +340,9 @@
           <label style="margin-top:14px;display:block;">Path โฟลเดอร์รูปปันผล (Dividend) <span style="color:var(--muted);font-weight:400">— ไม่บังคับ</span></label>
           <div class="hint">โฟลเดอร์ที่เก็บรูปแคปหน้าปันผลจากมือถือ (ไว้ใช้ตอนทำฟีเจอร์ปันผล)</div>
           <input type="text" id="divPath" placeholder="เช่น  G:\My Drive\Documents\Investment\Dime\Dividend" spellcheck="false">
+          <label style="margin-top:14px;display:block;">Path โฟลเดอร์ทอง (Hua Seng Heng) <span style="color:var(--muted);font-weight:400">— ไม่บังคับ</span></label>
+          <div class="hint">โฟลเดอร์ไฟล์ยืนยันการซื้อขายทอง — parser จะอ่านทองจากที่นี่เพิ่มจาก Confirmation Notes</div>
+          <input type="text" id="goldPath" placeholder="เช่น  G:\My Drive\Documents\Investment\Hua Seng Heng Gold Now" spellcheck="false">
           <label class="wz-check" style="margin-top:14px;"><input type="checkbox" id="archiveChk" checked> <span>หลัง parse เสร็จ ให้ย้ายไฟล์ PDF เข้าโฟลเดอร์ <code>ปี/ชนิด</code> อัตโนมัติ (เช่น <code>2026/Offshore</code>)</span></label>
           <div class="hint">ไฟล์ใหม่วางที่ root ของ Confirmation Notes → หลัง parse จะถูกย้ายเข้า yyyy/Offshore หรือ yyyy/Mutual Fund · ปิดได้ถ้าอยากจัดเอง</div>
           <div id="cfgPreview" style="margin-top:14px;display:none;">

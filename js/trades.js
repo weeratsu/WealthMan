@@ -1,8 +1,10 @@
-/* DimeLog — Trades panel (table + filters + export/backup/import) */
+/* WealthMan — Trades panel (plain HTML table + filters + export/backup/import)
+   เปลี่ยนจาก Grid Pro เป็น <table> ธรรมดา + sticky thead:
+   DOM เดียว header กับ body ใช้ความกว้างคอลัมน์ร่วมกัน → ไม่มีทางเหลื่อมกันตอน resize */
 DL.register('trades', function (payload) {
   const dmy = DL.dmy, clsLabel = DL.clsLabel;
   let CURRENT = [];
-  let grid = null;
+  let sortKey = 'date', sortDir = 1;   // 1=asc, -1=desc
   const TRADES = () => (DL.payload.trades || []);
 
   const sub = document.getElementById('trdSub');
@@ -23,124 +25,84 @@ DL.register('trades', function (payload) {
   [...new Set(TRADES().map(t => (t.iso_date || '').slice(0, 4)).filter(Boolean))].sort()
     .forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; fYear.appendChild(o); });
 
-  // class filter — สร้างจากข้อมูลจริง (เดิม fix ไว้แค่ offshore/mutual_fund → ไม่มี gold)
+  // class filter — สร้างจากข้อมูลจริง (ไม่ fix ค่า → asset_class ใหม่โผล่เอง)
   DL.buildClassOptions(document.getElementById('fClass'), 'All classes');
 
-  Grid.setOptions({ gridKey: 'AV58-GK4N-VJLA-A22K-06Z2-NDM9', credits: { enabled: false } });
+  // ---- นิยามคอลัมน์ (id, หัว, ชนิด, ฟังก์ชันดึงค่า, คำอธิบาย tooltip) ----
+  const fxOf = t => { const v = t.fx_thb_usd; if (v != null && v !== '') return +v; const a = t.total_usd, b = t.total_thb; return (a && b) ? b / a : null; };
+  const COLS = [
+    { id:'date',  h:'วันที่',            get:t=>t.iso_date||'',          kind:'date', tip:'วันที่ทำรายการ (ตามใบยืนยัน)' },
+    { id:'cls',   h:'ชนิด',              get:t=>clsLabel(t.asset_class), kind:'text', tip:'ชนิดสินทรัพย์ — Offshore=หุ้นต่างประเทศ, Mutual Fund=กองทุนรวมไทย, Gold=ทองคำ' },
+    { id:'type',  h:'ประเภท',            get:t=>t.type||'',              kind:'text', tip:'ประเภทรายการ — SUB=ซื้อกองทุน, RED=ขายกองทุน, SWI/SWO=สับเปลี่ยนเข้า/ออก, BUY=ซื้อ, SEL=ขาย' },
+    { id:'sec',   h:'หลักทรัพย์',        get:t=>t.security||'',          kind:'text', tip:'ชื่อหลักทรัพย์/กองทุน' },
+    { id:'exch',  h:'ตลาด',              get:t=>t.exchange||'-',         kind:'text', tip:'ตลาดหลักทรัพย์ — กองทุนไทย/ทองเป็นผู้ให้บริการ' },
+    { id:'units', h:'จำนวนหน่วย',        get:t=>t.units,                 kind:'num', dp:7, tip:'จำนวนหน่วย/หุ้น/กรัมที่ได้รับ' },
+    { id:'price', h:'ราคา/หน่วย',        get:t=>t.price,                 kind:'num', dp:4, tip:'ราคาต่อหน่วย' },
+    { id:'ccy',   h:'สกุล',              get:t=>t.ccy||'',               kind:'text', tip:'สกุลเงินของรายการ (THB/USD)' },
+    { id:'fx',    h:'FX (THB/USD)',      get:fxOf,                       kind:'num', dp:4, dash:true, tip:'อัตราแลกเปลี่ยน THB ต่อ 1 USD (กองทุนไทย/ทองไม่มี = —)' },
+    { id:'gusd',  h:'Gross (USD)',       get:t=>t.gross_usd,             kind:'money', dp:2, tip:'มูลค่ารวมก่อนหักค่าธรรมเนียม สกุล USD' },
+    { id:'thb',   h:'มูลค่า (THB)',       get:t=>t.total_thb,            kind:'money', dp:2, tip:'มูลค่ารวมเป็นเงินบาท' },
+    { id:'tusd',  h:'Total (USD)',       get:t=>t.total_usd,             kind:'money', dp:2, thb:true, tip:'มูลค่ารวมสุทธิ สกุล USD · วงเล็บ ≈฿ = แปลงเป็นบาทด้วยเรทวันใกล้สุด (FX Rates)' },
+    { id:'fee',   h:'ค่าธรรมเนียม (THB)', get:t=>t.fee_thb,              kind:'money', dp:2, tip:'ค่าธรรมเนียมเป็นเงินบาท' },
+    { id:'fusd',  h:'Fee (USD)',         get:t=>t.fee_usd,               kind:'money', dp:2, tip:'ค่าธรรมเนียม สกุล USD' },
+    { id:'txn',   h:'Txn ID',            get:t=>t.txn_id||'',            kind:'text', tip:'เลขอ้างอิงรายการ (Transaction ID)' },
+  ];
 
-  function renderGrid(list) {
+  const nf = (v, dp) => v == null || v === '' ? '' : Number(v).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  function cellText(c, t) {
+    const v = c.get(t);
+    if (c.kind === 'date') return v ? dmy(v) : '';
+    if (c.kind === 'text') return v == null ? '' : String(v);
+    if (c.kind === 'num')  return v == null ? (c.dash ? '—' : '') : Number(v).toLocaleString('en-US', { minimumFractionDigits: c.dp === 7 ? 0 : c.dp, maximumFractionDigits: c.dp });
+    if (c.kind === 'money') {
+      if (v == null) return '';
+      if (DL.isPrivate()) return '•••••';
+      let out = nf(v, c.dp);
+      // คอลัมน์ที่ตั้ง thb:true + เป็น USD → เติม (≈฿...) ด้วยเรทวันทำรายการ (เรทวันใกล้สุด)
+      if (c.thb && t.ccy === 'USD') { const b = DL.usdToThb(v, t.iso_date); if (b != null) out += ` (≈฿${nf(b, 0)})`; }
+      return out;
+    }
+    return v == null ? '' : String(v);
+  }
+
+  const esc = s => String(s).replace(/[&<>"]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]));
+
+  function render(list) {
     CURRENT = list;
     document.getElementById('rowCount').textContent = `${list.length} รายการ`;
-    const num = d => ({ cells: { formatter() { return this.value == null ? '' : Number(this.value).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); } } });
-    const PRIV = DL.isPrivate();
-    const mnum = d => ({ cells: { formatter() { return this.value == null ? '' : (PRIV ? '•••••' : Number(this.value).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })); } } });
-    const data = {
-      date: list.map(t => t.iso_date || ''), cls: list.map(t => clsLabel(t.asset_class)),
-      type: list.map(t => t.type), sec: list.map(t => t.security), exch: list.map(t => t.exchange || '-'),
-      units: list.map(t => t.units), price: list.map(t => t.price), ccy: list.map(t => t.ccy),
-      fx: list.map(t => { const v = t.fx_thb_usd; if (v != null && v !== '') return v; const a = t.total_usd, b = t.total_thb; return (a && b) ? b / a : null; }),
-      gusd: list.map(t => t.gross_usd), thb: list.map(t => t.total_thb), tusd: list.map(t => t.total_usd),
-      fee: list.map(t => t.fee_thb), fusd: list.map(t => t.fee_usd), txn: list.map(t => t.txn_id),
-    };
-    const columns = [
-      { id: 'date', header: 'วันที่', cells: { formatter() { return this.value ? dmy(this.value) : ''; } } }, { id: 'cls', header: 'ชนิด' }, { id: 'type', header: 'ประเภท' },
-      { id: 'sec', header: 'หลักทรัพย์' }, { id: 'exch', header: 'ตลาด' },
-      { id: 'units', header: 'จำนวนหน่วย', cells: { formatter() { return this.value == null ? '' : Number(this.value).toLocaleString('en-US', { maximumFractionDigits: 7 }); } } },
-      { id: 'price', header: 'ราคา/หน่วย', ...num(4) }, { id: 'ccy', header: 'สกุล' },
-      { id: 'fx', header: 'FX (THB/USD)', cells: { formatter() { return this.value == null ? '—' : Number(this.value).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); } } },
-      { id: 'gusd', header: 'Gross (USD)', ...mnum(2) }, { id: 'thb', header: 'มูลค่า (THB)', ...mnum(2) },
-      { id: 'tusd', header: 'Total (USD)', ...mnum(2) }, { id: 'fee', header: 'ค่าธรรมเนียม (THB)', ...mnum(2) },
-      { id: 'fusd', header: 'Fee (USD)', ...mnum(2) }, { id: 'txn', header: 'Txn ID' },
-    ];
-    if (grid) { grid.update({ dataTable: { columns: data } }); syncGrid(); }
-    // ปิด virtualization: ข้อมูลไม่กี่ร้อยแถว การ render ครั้งเดียวลื่นกว่า (virtualization เหมาะกับ 1000+ แถว และทำให้ scroll กระตุกตอนแถวน้อย)
-    else {
-      grid = Grid.grid('tableWrap', { dataTable: { columns: data }, rendering: { rows: { virtualization: false } }, columnDefaults: { sorting: { sortable: true } }, columns });
-      // re-apply tooltips after a header click (sort ทำให้ header re-render)
-      const wrap = document.getElementById('tableWrap');
-      if (wrap && !wrap.dataset.tipHook) { wrap.dataset.tipHook = '1'; wrap.addEventListener('click', applyHeaderTips); }
-      syncGrid();
-    }
-    applyHeaderTips();
-  }
-
-  // บังคับ Grid Pro คำนวณความกว้างคอลัมน์ใหม่หลัง paint แรก (scrollbar แนวตั้งเพิ่ง render → header/body จะได้ตรงกัน)
-  function syncGrid() {
-    requestAnimationFrame(() => {
-      try {
-        if (!grid) return;
-        if (typeof grid.reflow === 'function') grid.reflow();
-        else if (grid.viewport && typeof grid.viewport.reflow === 'function') grid.viewport.reflow();
-      } catch (e) { /* เงียบ */ }
+    // sort
+    const col = COLS.find(c => c.id === sortKey) || COLS[0];
+    const sorted = list.slice().sort((a, b) => {
+      let va = col.get(a), vb = col.get(b);
+      if (col.kind === 'num' || col.kind === 'money') { va = va == null ? -Infinity : +va; vb = vb == null ? -Infinity : +vb; return (va - vb) * sortDir; }
+      va = (va == null ? '' : String(va)); vb = (vb == null ? '' : String(vb));
+      return va.localeCompare(vb) * sortDir;
     });
-  }
-
-  // แก้ปัญหา header/cell ไม่ตรงกันตอน resize หน้าต่าง — บังคับ Grid Pro คำนวณความกว้างคอลัมน์ใหม่
-  if (!window.__trdResizeHook) {
-    window.__trdResizeHook = true;
-    let rz;
-    window.addEventListener('resize', () => {
-      clearTimeout(rz);
-      rz = setTimeout(() => {
-        try {
-          if (!grid) return;
-          if (typeof grid.reflow === 'function') grid.reflow();
-          else if (grid.viewport && typeof grid.viewport.reflow === 'function') grid.viewport.reflow();
-          else grid.update({});   // fallback: บังคับ re-render
-          applyHeaderTips();
-        } catch (e) { /* เงียบไว้ ไม่ให้ล้มทั้งหน้า */ }
-      }, 150);
-    });
-  }
-
-  // คำอธิบายแต่ละหัวคอลัมน์ (แสดงเป็น tooltip ตอนเอาเมาส์ชี้)
-  const HEADER_TIPS = {
-    date: 'วันที่ทำรายการ (ตามใบยืนยัน)',
-    cls: 'ชนิดสินทรัพย์ — Offshore = หุ้นต่างประเทศ, Mutual Fund = กองทุนรวมไทย',
-    type: 'ประเภทรายการ — SUB=ซื้อกองทุน, RED=ขายกองทุน, SWI/SWO=สับเปลี่ยนเข้า/ออก, BUY=ซื้อหุ้น, SEL=ขายหุ้น',
-    sec: 'ชื่อหลักทรัพย์/กองทุน',
-    exch: 'ตลาดหลักทรัพย์ (NASDAQ/NYSE) — กองทุนไทยเป็น "-"',
-    units: 'จำนวนหน่วย/หุ้นที่ได้รับ',
-    price: 'ราคาต่อหน่วย',
-    ccy: 'สกุลเงินของรายการ (THB/USD)',
-    fx: 'อัตราแลกเปลี่ยน THB ต่อ 1 USD ของรายการนั้น (กองทุนไทยไม่มี = —)',
-    gusd: 'มูลค่ารวมก่อนหักค่าธรรมเนียม สกุล USD (Gross)',
-    thb: 'มูลค่ารวมเป็นเงินบาท (THB)',
-    tusd: 'มูลค่ารวมสุทธิ สกุล USD (Total)',
-    fee: 'ค่าธรรมเนียมเป็นเงินบาท (THB)',
-    fusd: 'ค่าธรรมเนียม สกุล USD',
-    txn: 'เลขอ้างอิงรายการ (Transaction ID)',
-  };
-  function applyHeaderTips() {
-    // Grid Pro v3 ใช้ <thead><th> จริง — เติม title ที่ th และ element ข้อความข้างใน (.hcg-header-cell-content)
-    const ids = ['date','cls','type','sec','exch','units','price','ccy','fx','gusd','thb','tusd','fee','fusd','txn'];
-    const run = () => {
-      const wrap = document.getElementById('tableWrap');
-      if (!wrap) return false;
-      const ths = wrap.querySelectorAll('thead th');
-      if (!ths.length) return false;
-      ths.forEach((th, i) => {
-        const tip = HEADER_TIPS[ids[i]];
-        if (!tip) return;
-        th.setAttribute('title', tip);
-        th.style.cursor = 'help';
-        const content = th.querySelector('.hcg-header-cell-content');
-        if (content) content.setAttribute('title', tip);
+    const alignCls = c => (c.kind === 'num' || c.kind === 'money') ? ' class="r"' : '';
+    const head = '<thead><tr>' + COLS.map(c => {
+      const arrow = c.id === sortKey ? (sortDir === 1 ? ' ▲' : ' ▼') : '';
+      return `<th data-k="${c.id}" title="${esc(c.tip)}"${alignCls(c)}>${esc(c.h)}${arrow}</th>`;
+    }).join('') + '</tr></thead>';
+    const body = '<tbody>' + sorted.map(t =>
+      '<tr>' + COLS.map(c => `<td${alignCls(c)}>${esc(cellText(c, t))}</td>`).join('') + '</tr>'
+    ).join('') + '</tbody>';
+    document.getElementById('tableWrap').innerHTML = `<table class="trd-tbl">${head}${body}</table>`;
+    // header click → sort
+    document.querySelectorAll('#tableWrap thead th').forEach(th => {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => {
+        const k = th.dataset.k;
+        if (k === sortKey) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+        render(CURRENT);
       });
-      return true;
-    };
-    // ลองหลายครั้งเผื่อ header ยัง render ไม่เสร็จ
-    let tries = 0;
-    const timer = setInterval(() => { if (run() || ++tries > 10) clearInterval(timer); }, 80);
+    });
   }
 
-  // แปลง dd/mm/yyyy -> yyyy-mm-dd (คืน '' ถ้าว่าง/ไม่ครบ) เพื่อเทียบช่วงวันที่
   function dmyToIso(s) {
     s = (s || '').trim(); if (!s) return '';
     const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (!m) return '';
-    const d = m[1].padStart(2, '0'), mo = m[2].padStart(2, '0');
-    return `${m[3]}-${mo}-${d}`;
+    return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
   }
 
   function applyFilter() {
@@ -150,7 +112,6 @@ DL.register('trades', function (payload) {
     const ty = document.getElementById('fTxnType').value;
     const ccy = document.getElementById('fCcy').value;
     const yr = fYear.value;
-    // native date picker ให้ค่าเป็น yyyy-mm-dd อยู่แล้ว เทียบกับ iso_date ได้ตรง
     const from = document.getElementById('fDateFrom').value;
     const to = document.getElementById('fDateTo').value;
     const list = TRADES().filter(t => {
@@ -165,7 +126,7 @@ DL.register('trades', function (payload) {
       if (q) { const hay = `${t.security} ${t.order_no} ${t.txn_id} ${t.exchange}`.toLowerCase(); if (!hay.includes(q)) return false; }
       return true;
     });
-    renderGrid(list);
+    render(list);
   }
 
   function exportExcel() {
@@ -177,14 +138,14 @@ DL.register('trades', function (payload) {
       'FX THB/USD': t.fx_thb_usd, 'Order No': t.order_no, 'Txn ID': t.txn_id, 'ไฟล์ต้นฉบับ': t.source_file,
     }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Dime Trades');
-    XLSX.writeFile(wb, `Dime_Trades_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Trades');
+    XLSX.writeFile(wb, `WealthMan_Trades_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   function backupJSON() {
     const blob = new Blob([JSON.stringify(DL.payload, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = `Dime_Backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
+    a.href = URL.createObjectURL(blob); a.download = `WealthMan_Backup_${new Date().toISOString().slice(0, 10)}.json`; a.click();
     URL.revokeObjectURL(a.href);
   }
 
@@ -198,7 +159,7 @@ DL.register('trades', function (payload) {
         if (!data.trades || !Array.isArray(data.trades)) throw new Error('ไม่พบ trades');
         DL.setPayload(data);
         alert('นำเข้าข้อมูลสำเร็จ: ' + data.trades.length + ' รายการ');
-        DL.refreshAll();   // re-render ทุก panel (dashboard/tax/trades) ด้วยข้อมูลใหม่
+        DL.refreshAll();
       } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };

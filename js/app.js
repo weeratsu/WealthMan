@@ -60,6 +60,7 @@ window.DL = (function () {
     'ORCL':'US Stock','RKLB':'US Stock','TSM':'US Stock',
     'ASP-S&P500':'Open-End Fund','ASP-S&P500-A':'Open-End Fund','SCBS&P500':'Open-End Fund',
     'Gold 96.5%':'Gold',
+    'GLDOZUSD':'Gold','Gold (MTS)':'Gold',
   };
   const TYPE_KEY = 'dimelog_sec_types';
   function loadTypes() {
@@ -77,6 +78,42 @@ window.DL = (function () {
 
   function register(key, fn) { panels[key] = fn; }
 
+  // ---------- FX rates (USD→THB) : seed data/fx.js (window.INV_FX) + localStorage override ----------
+  // เก็บเป็น { 'yyyy-mm-dd': rate(฿ ต่อ 1 USD) } · ผู้ใช้กรอก/Import เพิ่มทับ seed ได้
+  const FX_KEY = 'dimelog_fx';
+  function fxSeed() { try { return (window.INV_FX && window.INV_FX.rates) || {}; } catch (e) { return {}; } }
+  function loadFx() {
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem(FX_KEY) || '{}') || {}; } catch (e) {}
+    return Object.assign({}, fxSeed(), user);   // user ทับ seed
+  }
+  function saveFx(map) { try { localStorage.setItem(FX_KEY, JSON.stringify(map || {})); } catch (e) {} }
+  // เรท ณ วันที่ iso: ตรงวันถ้ามี ไม่งั้น "วันใกล้สุด" (ผลต่างวันน้อยสุด) · todayRate = fallback สุดท้าย
+  function fxRate(iso, map) {
+    map = map || loadFx();
+    const keys = Object.keys(map);
+    if (!keys.length) return null;
+    if (iso && map[iso] != null) return +map[iso];
+    if (!iso) { // ไม่มีวัน → เรทล่าสุด
+      keys.sort(); return +map[keys[keys.length - 1]];
+    }
+    const t = Date.parse(iso);
+    let best = null, bestDiff = Infinity;
+    keys.forEach(k => { const d = Math.abs(Date.parse(k) - t); if (d < bestDiff) { bestDiff = d; best = k; } });
+    return best == null ? null : +map[best];
+  }
+  // แปลง usd→thb ด้วยเรทวันนั้น · คืน null ถ้าไม่มีเรท
+  function usdToThb(usd, iso, map) {
+    if (usd == null || usd === '') return null;
+    const r = fxRate(iso, map); return r == null ? null : usd * r;
+  }
+  // สตริงแสดง THB ต่อท้าย USD: "$3.00 (≈฿109)" · ซ่อนตัวเลขเมื่อ privacy
+  function thbSuffix(usd, iso, map) {
+    const v = usdToThb(usd, iso, map);
+    if (v == null) return '';
+    return priv ? ' (≈฿•••)' : ` (≈฿${fmt(v, 0)})`;
+  }
+
   function show(key) {
     // leaving Classify: types may have changed → let dashboard/tax re-render with latest types
     const prev = document.querySelector('.dl-sb a.active');
@@ -86,6 +123,10 @@ window.DL = (function () {
     // leaving Holdings: ราคาปัจจุบันอาจเปลี่ยน → ให้ Dashboard re-render กำไร/ขาดทุนใหม่
     if (prev && prev.getAttribute('data-nav') === 'holdings' && key !== 'holdings') {
       rendered['dashboard'] = false; rendered['analysis'] = false;
+    }
+    // leaving FX Rates: เรทอาจเปลี่ยน → หน้าที่แปลง USD→THB ต้อง re-render
+    if (prev && prev.getAttribute('data-nav') === 'fx' && key !== 'fx') {
+      rendered['dashboard'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
     }
     // leaving Dividends: อาจ import ปันผลเพิ่ม → ให้ Dashboard/Tax re-render
     if (prev && prev.getAttribute('data-nav') === 'dividends' && key !== 'dividends') {
@@ -146,5 +187,6 @@ window.DL = (function () {
   return { C, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, register, show, refreshAll, setPayload, init,
            SEC_TYPES, DEFAULT_TYPES, loadTypes, saveTypes, typeOf, userTypeOf, setType,
            isPrivate, setPrivate, togglePrivacy,
+           loadFx, saveFx, fxRate, usdToThb, thbSuffix,
            get payload() { return payload; } };
 })();

@@ -340,6 +340,38 @@ def main():
         except Exception as e:
             errors.append((fname, repr(e)[:150]))
 
+    # ---- อ่านทอง MTS Gold จาก mts_gold.json (เมล Dime ไม่มี PDF — Apps Script เขียนไว้ที่ root) ----
+    # map เป็น asset_class='gold' (ccy=USD, units=oz) · กันซ้ำด้วย txn_id+order_no เดียวกับ PDF
+    _mts = os.path.join(ROOT, "mts_gold.json")
+    if os.path.exists(_mts):
+        try:
+            _doc = json.load(open(_mts, encoding="utf-8"))
+            _recs = _doc.get("records", _doc if isinstance(_doc, list) else []) or []
+            _n = 0
+            for rec in _recs:
+                iso = rec.get("iso_date", "") or ""
+                order = rec.get("ref", "") or rec.get("order_no", "")
+                txn = rec.get("txn_id", "") or rec.get("doc_no", "") or order
+                key = (txn, order)
+                if key in seen:
+                    continue
+                seen.add(key)
+                all_trades.append({
+                    'asset_class':'gold','txn_id':txn,'doc_no':rec.get("doc_no",""),'account_no':'',
+                    'issue_date': (f"{iso[8:10]}/{iso[5:7]}/{iso[0:4]}" if len(iso) >= 10 else iso),
+                    'iso_date':iso,'fx_thb_usd':None,
+                    'order_no':order,'settlement':iso,'type':rec.get("type","BUY"),
+                    'security':rec.get("security","Gold (MTS)"),'exchange':'MTS Gold',
+                    'units':rec.get("units"),'price':rec.get("price"),'ccy':rec.get("ccy","USD"),
+                    'gross_usd':rec.get("total_usd"),'fee_usd':0.0,'total_usd':rec.get("total_usd"),
+                    'gross_thb':None,'fee_thb':None,'total_thb':None,
+                    'source_file':'mts_gold.json',
+                })
+                _n += 1
+            print(f"MTS Gold: อ่าน {_n} รายการจาก mts_gold.json")
+        except Exception as e:
+            errors.append(("mts_gold.json", repr(e)[:150]))
+
     all_trades.sort(key=lambda r: (r['iso_date'], r['order_no']))
 
     payload = {

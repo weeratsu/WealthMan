@@ -128,7 +128,10 @@ DL.register('holdings', function (payload) {
     const col = r.pl_native > 0 ? 'var(--success)' : r.pl_native < 0 ? 'var(--error,#d33)' : 'var(--text)';
     const sign = r.pl_native >= 0 ? '+' : '';
     const pct = r.pl_pct != null ? ` (${sign}${fmt(r.pl_pct, 1)}%)` : '';
-    return `<td>${money(r.mkt_native, 2)}</td>` +
+    // มูลค่าตลาด USD → เติม (≈฿) ด้วยเรทล่าสุด (today/nearest)
+    let mktThb = '';
+    if (r.ccy === 'USD' && !DL.isPrivate()) { const b = DL.usdToThb(r.mkt_native, null); if (b != null) mktThb = `<span style="color:var(--muted);font-size:11px"> (≈฿${fmt(b, 0)})</span>`; }
+    return `<td>${money(r.mkt_native, 2)}${mktThb}</td>` +
            `<td style="color:${col}">${sign}${money(r.pl_native, 2)}${pct}</td>`;
   }
 
