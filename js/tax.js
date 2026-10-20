@@ -3,6 +3,26 @@ DL.register('tax', function (payload) {
   const C = DL.C, fmt = DL.fmt, money = DL.money, dmy = DL.dmy, isBuy = DL.isBuy, isSell = DL.isSell;
   const trades = (payload.trades || []).slice();
 
+  // ----- โหลดปันผล + เรท FX ไว้ล่วงหน้า (ใช้ในตารางสรุปรายปีด้วย) -----
+  const _divsAll = (function () {
+    const base = ((window.INV_DIVIDENDS && window.INV_DIVIDENDS.dividends) || []).slice();
+    let imp = []; try { imp = JSON.parse(localStorage.getItem('dimelog_dividends_import') || '[]') || []; } catch (e) {}
+    const map = {};
+    base.concat(imp).forEach(d => { if (d.security && d.security !== '(TAF Fee)') map[d.security + '|' + d.pay_date] = d; });
+    return Object.values(map);
+  })();
+  const _fxMapTax = DL.loadFx();
+  const _g2 = v => +(+v || 0);
+  // ปันผลต่อปี (บาท): สุทธิ + ภาษี US ที่ถูกหัก — แปลงแต่ละรายการด้วยเรทวันจ่าย
+  const divYrNetThb = {}, divYrWhtThb = {};
+  _divsAll.forEach(d => {
+    const y = (d.pay_date || '').slice(0, 4); if (!y) return;
+    const net = _g2(d.gross_usd) - _g2(d.wht_usd) - _g2(d.fee_usd);
+    const netB = DL.usdToThb(net, d.pay_date, _fxMapTax); const whtB = DL.usdToThb(_g2(d.wht_usd), d.pay_date, _fxMapTax);
+    divYrNetThb[y] = (divYrNetThb[y] || 0) + (netB || 0);
+    divYrWhtThb[y] = (divYrWhtThb[y] || 0) + (whtB || 0);
+  });
+
   // ----- yearly -----
   const Y = {};
   trades.forEach(t => {
@@ -11,12 +31,15 @@ DL.register('tax', function (payload) {
     const r = Y[y]; r.n++; r.fee += (t.fee_thb || 0); r.wht += (t.wht_thb || 0);
     if (isBuy(t)) r.buy += (t.total_thb || 0); else if (isSell(t)) r.sell += (t.total_thb || 0);
   });
+  // รวมปีที่มีเฉพาะปันผล (ไม่มี trade) เข้ามาด้วย
+  Object.keys(divYrNetThb).forEach(y => { if (!Y[y]) Y[y] = { n: 0, buy: 0, sell: 0, fee: 0, wht: 0 }; });
   const years = Object.keys(Y).sort();
-  const tot = { n: 0, buy: 0, sell: 0, fee: 0, wht: 0 };
+  const tot = { n: 0, buy: 0, sell: 0, fee: 0, divNet: 0, divWht: 0 };
   let rows = '';
-  years.forEach(y => { const r = Y[y]; tot.n += r.n; tot.buy += r.buy; tot.sell += r.sell; tot.fee += r.fee; tot.wht += r.wht;
-    rows += `<tr><td class="yr">${y}</td><td>${r.n}</td><td>${money(r.buy)}</td><td>${money(r.sell)}</td><td>${money(r.fee)}</td><td>${money(r.wht)}</td></tr>`; });
-  rows += `<tr class="total-row"><td>รวม</td><td>${tot.n}</td><td>${money(tot.buy)}</td><td>${money(tot.sell)}</td><td>${money(tot.fee)}</td><td>${money(tot.wht)}</td></tr>`;
+  years.forEach(y => { const r = Y[y]; const dn = divYrNetThb[y] || 0, dw = divYrWhtThb[y] || 0;
+    tot.n += r.n; tot.buy += r.buy; tot.sell += r.sell; tot.fee += r.fee; tot.divNet += dn; tot.divWht += dw;
+    rows += `<tr><td class="yr">${y}</td><td>${r.n}</td><td>${money(r.buy)}</td><td>${money(r.sell)}</td><td>${money(r.fee)}</td><td style="color:var(--success)">${dn ? money(dn, 0) : '—'}</td><td>${dw ? money(dw, 0) : '—'}</td></tr>`; });
+  rows += `<tr class="total-row"><td>รวม</td><td>${tot.n}</td><td>${money(tot.buy)}</td><td>${money(tot.sell)}</td><td>${money(tot.fee)}</td><td>${money(tot.divNet, 0)}</td><td>${money(tot.divWht, 0)}</td></tr>`;
   document.getElementById('taxYearBody').innerHTML = rows;
 
   // ----- class x year -----
