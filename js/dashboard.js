@@ -36,7 +36,7 @@ DL.register('dashboard', function (payload) {
     if (a.units <= 0.0000001) return;
     const p = prices[a.sym];
     if (p == null || p === '' || isNaN(+p)) return;
-    const mkt = (+p) * a.units, pl = mkt - a.inv_native;
+    const mkt = (+p) * (a.units / DL.priceDivisor(a.sym)), pl = mkt - a.inv_native;
     if (a.ccy === 'USD') { plUsd += pl; mktUsd += mkt; } else { plThb += pl; mktThb += mkt; }
     plBySym.push({ sym: a.sym, pl: Math.round(pl * 100) / 100, ccy: a.ccy });
   });
@@ -59,19 +59,32 @@ DL.register('dashboard', function (payload) {
   const _divThbSfx = DL.isPrivate() ? ' (≈฿•••)' : (divNetThb ? ` (≈฿${fmt(divNetThb, 0)})` : '');
   const divByMonth = {};
   divs.forEach(d => { const m = (d.pay_date || '').slice(0, 7); if (m) divByMonth[m] = (divByMonth[m] || 0) + (+d.gross_usd || 0); });
-  const plStr = (plUsd || mktUsd ? (plUsd >= 0 ? '+' : '') + money(plUsd, 2) + ' USD' : '') +
+  // เติม ฿ ต่อท้ายส่วน USD (แปลงด้วยเรทล่าสุด)
+  const _priv = DL.isPrivate();
+  const _fxUsed = DL.fxRate(null);                     // เรท USD→THB ล่าสุด
+  const _plUsdInThb = DL.usdToThb(plUsd, null);        // กำไรฝั่ง USD เป็นบาท
+  let _plUsdThb = '';
+  if ((plUsd || mktUsd) && !_priv) { if (_plUsdInThb != null) _plUsdThb = ` (≈${_plUsdInThb < 0 ? '-' : ''}฿${fmt(Math.abs(_plUsdInThb), 0)})`; }
+  else if ((plUsd || mktUsd) && _priv) _plUsdThb = ' (≈฿•••)';
+  const plStr = (plUsd || mktUsd ? (plUsd >= 0 ? '+' : '') + money(plUsd, 2) + ' USD' + _plUsdThb : '') +
                 (plUsd && plThb ? ' · ' : '') +
                 (plThb ? (plThb >= 0 ? '+' : '') + money(plThb, 0) + ' THB' : '') || '—';
   const plColor = (plUsd || 0) + (plThb || 0) > 0 ? 'var(--success)' : ((plUsd || 0) + (plThb || 0) < 0 ? 'var(--error,#d33)' : '');
+  // รวมเป็นบาททั้งหมด = กำไร THB + กำไร USD แปลงบาท
+  const _plAllThb = (plThb || 0) + (_plUsdInThb != null ? _plUsdInThb : 0);
+  const _hasAny = (plUsd || plThb || mktUsd);
+  const _allThbVal = _priv ? '•••••' : (_hasAny ? (_plAllThb >= 0 ? '+' : '') + fmt(_plAllThb, 0) : '—');
+  const _fxNote = _fxUsed != null ? 'ใช้เรท ≈ ' + fmt(_fxUsed, 2) + ' ฿/USD' : '';
   const kpis = [
-    { label: 'เงินลงทุนรวม', value: money(totalInvested, 0), unit: 'THB' },
-    { label: 'หลักทรัพย์', value: nSec, unit: 'ตัว' },
+    { label: 'เงินลงทุนรวม', value: money(totalInvested, 0), unit: 'THB', note: 'รวมทุกตัวที่เคยซื้อ (รวมที่ขายหมดแล้ว)' },
+    { label: 'หลักทรัพย์', value: nSec, unit: 'ตัว', note: 'นับทุกตัวที่เคยซื้อ · Holdings นับเฉพาะที่ยังถือ' },
     { label: 'ค่าธรรมเนียมรวม', value: money(totalFee, 2), unit: 'THB' },
     { label: 'ปันผลรับสุทธิ', value: money(divNetUsd, 2) + '<span style="color:var(--muted);font-size:12px">' + _divThbSfx + '</span>', unit: 'USD', color: 'var(--success)' },
-    { label: 'กำไร/ขาดทุน (ที่ใส่ราคา)', value: plStr, unit: '', color: plColor },
+    { label: 'กำไร/ขาดทุน (ที่ใส่ราคา)', value: plStr, unit: '', color: plColor, note: _fxNote },
+    { label: 'กำไร/ขาดทุน รวมเป็นบาท', value: _allThbVal, unit: 'THB', color: plColor, note: _fxNote },
   ];
   document.getElementById('kpis').innerHTML = kpis.map(k =>
-    `<div class="kpi"><div class="label">${k.label}</div><div class="value"${k.color ? ` style="color:${k.color}"` : ''}>${k.value}${k.unit ? ` <span class="unit">${k.unit}</span>` : ''}</div></div>`).join('');
+    `<div class="kpi"><div class="label">${k.label}</div><div class="value"${k.color ? ` style="color:${k.color}"` : ''}>${k.value}${k.unit ? ` <span class="unit">${k.unit}</span>` : ''}</div>${k.note ? `<div class="kpi-note" style="font-size:11px;color:var(--muted);margin-top:2px;">${k.note}</div>` : ''}</div>`).join('');
   document.getElementById('dashSub').textContent =
     `${payload.trade_count || trades.length} รายการ จาก ${payload.file_count || '?'} ไฟล์ · ช่วง ${dmy(dates[0])} – ${dmy(dates[dates.length - 1])}`;
   document.getElementById('dashFoot').textContent =

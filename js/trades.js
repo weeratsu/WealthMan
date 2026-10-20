@@ -13,11 +13,18 @@ DL.register('trades', function (payload) {
 
   // security filter options (เรียง A→Z)
   const fSec = document.getElementById('fSec');
-  if (fSec) {
-    fSec.innerHTML = '<option value="">All securities</option>';
-    [...new Set(TRADES().map(t => t.security).filter(Boolean))].sort()
-      .forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; fSec.appendChild(o); });
+  // securities dropdown — cascades from the selected class (เลือก class แล้ว securities โชว์เฉพาะ class นั้น)
+  function populateSec() {
+    if (!fSec) return;
+    const cls = document.getElementById('fClass') ? document.getElementById('fClass').value : '';
+    const prev = fSec.value;
+    const list = [...new Set(TRADES().filter(t => !cls || t.asset_class === cls).map(t => t.security).filter(Boolean))].sort();
+    fSec.innerHTML = '<option value="">All securities</option>' +
+      list.map(s => `<option value="${String(s).replace(/"/g,'&quot;')}">${s}</option>`).join('');
+    // คงค่าเดิมถ้ายังอยู่ในชุดใหม่ ไม่งั้นรีเซ็ตเป็น All
+    fSec.value = list.indexOf(prev) >= 0 ? prev : '';
   }
+  populateSec();
 
   // year filter options
   const fYear = document.getElementById('fYear');
@@ -167,7 +174,7 @@ DL.register('trades', function (payload) {
   }
 
   document.getElementById('fSearch').addEventListener('input', applyFilter);
-  document.getElementById('fClass').addEventListener('change', applyFilter);
+  document.getElementById('fClass').addEventListener('change', () => { populateSec(); applyFilter(); });
   document.getElementById('fSec').addEventListener('change', applyFilter);
   document.getElementById('fTxnType').addEventListener('change', applyFilter);
   document.getElementById('fCcy').addEventListener('change', applyFilter);
@@ -178,6 +185,7 @@ DL.register('trades', function (payload) {
     ['fSearch','fClass','fSec','fTxnType','fCcy','fYear','fDateFrom','fDateTo'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
+    populateSec();
     applyFilter();
   });
   document.getElementById('btnExport').addEventListener('click', exportExcel);

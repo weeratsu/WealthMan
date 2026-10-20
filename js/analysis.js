@@ -49,7 +49,7 @@ DL.register('analysis', function (payload) {
     if (a.units <= 0.0000001) return;
     const p = prices[a.sym];
     const price = (p == null || p === '' || isNaN(+p)) ? null : +p;
-    const mkt = price != null ? price * a.units : null;
+    const mkt = price != null ? price * (a.units / DL.priceDivisor(a.sym)) : null;
     const pl = mkt != null ? mkt - a.inv : null;
     const plpct = (pl != null && a.inv) ? pl / a.inv * 100 : null;
     const dv = dsum[a.sym] || { gross: 0, net: 0, n: 0 };

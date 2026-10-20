@@ -36,8 +36,11 @@ DL.register('holdings', function (payload) {
       a.cls = t.asset_class;
       if (t.ccy) a.ccy = t.ccy;
       const u = t.units || 0;
-      if (BUY[t.type]) { a.units += u; a.buys++; a.inv_thb += (t.total_thb || 0); a.inv_usd += (t.total_usd || 0); }
-      else if (SELL[t.type]) { a.units -= u; a.sells++; a.inv_thb -= (t.total_thb || 0); a.inv_usd -= (t.total_usd || 0); }
+      // Invested (THB): ถ้ารายการไม่มี total_thb (เช่น USD อย่าง GLDOZUSD) ให้แปลงจาก total_usd ด้วยเรทวันทำรายการ
+      const thbVal = (t.total_thb != null && t.total_thb !== '') ? t.total_thb
+                     : (t.total_usd != null ? (DL.usdToThb(t.total_usd, t.iso_date) || 0) : 0);
+      if (BUY[t.type]) { a.units += u; a.buys++; a.inv_thb += (thbVal || 0); a.inv_usd += (t.total_usd || 0); }
+      else if (SELL[t.type]) { a.units -= u; a.sells++; a.inv_thb -= (thbVal || 0); a.inv_usd -= (t.total_usd || 0); }
       a.fees_thb += (t.fee_thb || 0);
       a.n++;
       const d = t.iso_date || '';
@@ -52,7 +55,7 @@ DL.register('holdings', function (payload) {
       const p = prices[a.sym];
       a.price = (p == null || p === '') ? null : +p;
       if (a.held && a.price != null) {
-        a.mkt_native = a.price * a.units;                 // มูลค่าตลาด (native)
+        a.mkt_native = a.price * (a.units / DL.priceDivisor(a.sym));  // มูลค่าตลาด (native) — ÷divisor กันหน่วยราคา≠หน่วย units (เช่นทอง HSH)
         a.pl_native = a.mkt_native - a.inv_native;        // กำไร/ขาดทุน (native)
         a.pl_pct = a.inv_native ? (a.pl_native / a.inv_native) * 100 : null;
       } else { a.mkt_native = null; a.pl_native = null; a.pl_pct = null; }
@@ -91,14 +94,26 @@ DL.register('holdings', function (payload) {
     const priced = held.filter(r => r.price != null).length;
     const card = (label, val, unit, cls) => `<div class="kpi"><div class="label">${label}</div><div class="value"${cls ? ` style="color:${cls}"` : ''}>${val}${unit ? ` <span class="unit">${unit}</span>` : ''}</div></div>`;
     const plColor = v => v > 0 ? 'var(--success)' : v < 0 ? 'var(--error,#d33)' : '';
-    const plStr = (haveUsd ? (plUsd >= 0 ? '+' : '') + money(plUsd, 2) + ' USD' : '') +
+    // เรท USD→THB ล่าสุดที่ใช้แปลง + กำไร USD คิดเป็นบาท
+    const fxUsed = DL.fxRate(null);                       // เรทล่าสุด
+    const plUsdInThb = DL.usdToThb(plUsd, null);          // กำไรฝั่ง USD เป็นบาท
+    const priv = DL.isPrivate();
+    const usdThbSfx = haveUsd ? (priv ? ' (≈฿•••)' : (plUsdInThb != null ? ` (≈${plUsdInThb < 0 ? '-' : ''}฿${fmt(Math.abs(plUsdInThb), 0)})` : '')) : '';
+    const plStr = (haveUsd ? (plUsd >= 0 ? '+' : '') + money(plUsd, 2) + ' USD' + usdThbSfx : '') +
                   (haveUsd && haveThb ? ' · ' : '') +
                   (haveThb ? (plThb >= 0 ? '+' : '') + money(plThb, 0) + ' THB' : '') || '—';
+    // รวมเป็นบาททั้งหมด = กำไร THB + กำไร USD แปลงบาท
+    const plAllThb = (haveThb ? plThb : 0) + (plUsdInThb != null ? plUsdInThb : 0);
+    const canAllThb = haveThb || plUsdInThb != null;
+    const allThbVal = priv ? '•••••' : (canAllThb ? (plAllThb >= 0 ? '+' : '') + fmt(plAllThb, 0) : '—');
+    const fxNote = fxUsed != null ? `<div class="kpi-note" style="font-size:11px;color:var(--muted);margin-top:2px;">ใช้เรท ≈ ${fmt(fxUsed, 2)} ฿/USD</div>` : '';
+    const cardN = (label, val, unit, cls, note) => `<div class="kpi"><div class="label">${label}</div><div class="value"${cls ? ` style="color:${cls}"` : ''}>${val}${unit ? ` <span class="unit">${unit}</span>` : ''}</div>${note || ''}</div>`;
     kpiEl.innerHTML =
-      card('เงินลงทุนสุทธิ', money(totTHB, 0), 'THB') +
-      card('ถืออยู่', held.length, 'ตัว') +
+      cardN('เงินลงทุนสุทธิ', money(totTHB, 0), 'THB', '', '<div class="kpi-note" style="font-size:11px;color:var(--muted);margin-top:2px;">เฉพาะที่ยังถืออยู่ (ไม่รวมที่ขายหมด)</div>') +
+      cardN('ถืออยู่', held.length, 'ตัว', '', '<div class="kpi-note" style="font-size:11px;color:var(--muted);margin-top:2px;">เฉพาะที่ยังถือ · Dashboard นับรวมที่ขายหมด</div>') +
       card('ใส่ราคาแล้ว', priced + '/' + held.length, 'ตัว') +
-      card('กำไร/ขาดทุน (ที่มีราคา)', plStr, '', plColor(haveUsd ? plUsd : plThb));
+      cardN('กำไร/ขาดทุน (ที่มีราคา)', plStr, '', plColor(haveUsd ? plUsd : plThb), fxNote) +
+      cardN('กำไร/ขาดทุน รวมเป็นบาท', allThbVal, 'THB', plColor(plAllThb), fxNote);
   }
 
   function current() {
@@ -228,18 +243,16 @@ DL.register('holdings', function (payload) {
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Holdings');
-    XLSX.writeFile(wb, `Dime_Holdings_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(wb, `WealthMan_Holdings_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
   document.getElementById('btnHldTemplate').onclick = function () {
-    // template: ทุก symbol ที่ถืออยู่ + ราคาปัจจุบัน (เติมค่าปัจจุบันให้แก้ง่าย)
+    // template: ทุก symbol ที่ถืออยู่ + ราคาปัจจุบัน · หัวคอลัมน์เป็น security/price/ccy (ตรงกับที่ import อ่าน)
     const rows = ROWS.filter(r => r.held).sort((a, b) => a.sym.localeCompare(b.sym))
       .map(r => ({ security: r.sym, price: r.price != null ? r.price : '', ccy: r.ccy }));
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows, { header: ['security', 'price', 'ccy'] });
-    XLSX.utils.sheet_add_aoa(ws, [['ชื่อหลักทรัพย์', 'ราคาปัจจุบัน (ต่อหน่วย)', 'สกุล (อ้างอิง)']], { origin: 'A1' });
-    XLSX.utils.sheet_add_json(ws, rows, { header: ['security', 'price', 'ccy'], skipHeader: true, origin: 'A2' });
     XLSX.utils.book_append_sheet(wb, ws, 'Prices');
-    XLSX.writeFile(wb, 'Dime_Prices_Template.xlsx');
+    XLSX.writeFile(wb, 'WealthMan_Prices_Template.xlsx');
   };
   document.getElementById('btnHldImport').onclick = () => document.getElementById('hldImportFile').click();
   document.getElementById('hldImportFile').onchange = function (ev) {
@@ -251,8 +264,9 @@ DL.register('holdings', function (payload) {
         const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
         const m = userPrices(); let n = 0;
         rows.forEach(r => {
-          const sym = (r.security || '').toString().trim();
-          const price = r.price;
+          // รับหัวคอลัมน์ได้ทั้งอังกฤษ (security/price) และไทย (จาก Template: ชื่อหลักทรัพย์/ราคาปัจจุบัน...)
+          const sym = (r.security != null ? r.security : (r['ชื่อหลักทรัพย์'] != null ? r['ชื่อหลักทรัพย์'] : '')).toString().trim();
+          let price = (r.price != null && r.price !== '') ? r.price : r['ราคาปัจจุบัน (ต่อหน่วย)'];
           if (!sym) return;
           if (price === '' || price == null || isNaN(+price)) return;
           m[sym] = +price; n++;

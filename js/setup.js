@@ -103,5 +103,57 @@ DL.register('setup', function () {
     }
   }
 
+  // ---------- price-unit divisor ต่อ security ----------
+  (function punitUI() {
+    const secEl = document.getElementById('punitSec');
+    const valEl = document.getElementById('punitVal');
+    const bodyEl = document.getElementById('punitBody');
+    const countEl = document.getElementById('punitCount');
+    if (!secEl || !bodyEl) return;
+    const SEED = { 'Gold 96.5%': 15.244 };
+    const KEY = 'dimelog_price_unit';
+    const loadU = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } };
+    const saveU = (m) => { try { localStorage.setItem(KEY, JSON.stringify(m || {})); } catch (e) {} };
+    const secs = () => [...new Set(((DL.payload && DL.payload.trades) || []).map(t => t.security).filter(Boolean))].sort();
+
+    function fill() {
+      secEl.innerHTML = secs().map(function (s) {
+        return '<option value="' + String(s).replace(/"/g, '&quot;') + '">' + s + '</option>';
+      }).join('');
+    }
+    function render() {
+      const all = Object.assign({}, SEED, loadU());
+      const u = loadU();
+      const keys = Object.keys(all).sort();
+      countEl.textContent = keys.length + ' ตั้งค่า';
+      if (!keys.length) {
+        bodyEl.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">ยังไม่มีการตั้งค่า (ค่าปกติ = 1)</td></tr>';
+        return;
+      }
+      var html = '';
+      keys.forEach(function (s) {
+        var d = all[s];
+        var fromUser = u[s] != null;
+        var mean = (d === 15.244) ? '1 บาททอง = 15.244 กรัม' : ('ราคา 1 หน่วย = ' + d + ' units');
+        var src = fromUser ? '' : ' <span class="chip" style="opacity:.6">seed</span>';
+        var esc = String(s).replace(/"/g, '&quot;');
+        var delBtn = fromUser ? ('<button class="btn secondary" data-del="' + esc + '" style="padding:2px 8px;">รีเซ็ต</button>') : '';
+        html += '<tr><td>' + s + '</td><td class="r" style="font-family:var(--mono)">' + d + src +
+                '</td><td style="font-size:12px;color:var(--muted)">' + mean + '</td><td>' + delBtn + '</td></tr>';
+      });
+      bodyEl.innerHTML = html;
+      bodyEl.querySelectorAll('button[data-del]').forEach(function (b) {
+        b.addEventListener('click', function () { var u2 = loadU(); delete u2[b.dataset.del]; saveU(u2); render(); });
+      });
+    }
+    document.getElementById('btnPunitSet').addEventListener('click', () => {
+      const s = secEl.value; const v = parseFloat(valEl.value);
+      if (!s) { alert('เลือกหลักทรัพย์ก่อน'); return; }
+      if (!(v > 0)) { alert('ใส่ตัวหารให้ถูกต้อง (> 0)'); return; }
+      const u = loadU(); u[s] = v; saveU(u); valEl.value = ''; render();
+    });
+    fill(); render();
+  })();
+
   paint();
 });

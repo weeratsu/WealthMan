@@ -82,10 +82,22 @@ window.DL = (function () {
   // เก็บเป็น { 'yyyy-mm-dd': rate(฿ ต่อ 1 USD) } · ผู้ใช้กรอก/Import เพิ่มทับ seed ได้
   const FX_KEY = 'dimelog_fx';
   function fxSeed() { try { return (window.INV_FX && window.INV_FX.rates) || {}; } catch (e) { return {}; } }
+  // เรทจริงจาก trx ที่มี fx_thb_usd (ใบยืนยัน offshore) — ถ้าวันเดียวมีหลายรายการ ใช้ค่าหลังสุด
+  function fxFromTrx() {
+    const out = {};
+    try {
+      (payload.trades || []).forEach(t => {
+        const r = t.fx_thb_usd;
+        if (r != null && r !== '' && t.iso_date) out[t.iso_date] = +r;
+      });
+    } catch (e) {}
+    return out;
+  }
   function loadFx() {
     let user = {};
     try { user = JSON.parse(localStorage.getItem(FX_KEY) || '{}') || {}; } catch (e) {}
-    return Object.assign({}, fxSeed(), user);   // user ทับ seed
+    // ลำดับทับ: trx (เรทจริงจากใบยืนยัน) < seed < user(กรอกเอง) → ผู้ใช้/seed แก้ทับ trx ได้
+    return Object.assign({}, fxFromTrx(), fxSeed(), user);
   }
   function saveFx(map) { try { localStorage.setItem(FX_KEY, JSON.stringify(map || {})); } catch (e) {} }
   // เรท ณ วันที่ iso: ตรงวันถ้ามี ไม่งั้น "วันใกล้สุด" (ผลต่างวันน้อยสุด) · todayRate = fallback สุดท้าย
@@ -114,6 +126,24 @@ window.DL = (function () {
     return priv ? ' (≈฿•••)' : ` (≈฿${fmt(v, 0)})`;
   }
 
+  // ---------- price-unit divisor ต่อ security ----------
+  // units ที่เก็บ อาจคนละหน่วยกับ "ราคาที่กรอก" (เช่น ทอง HSH: units=กรัม แต่ราคา=บาท/บาททอง)
+  // divisor = ราคา 1 หน่วยที่กรอก เท่ากับกี่ units ที่เก็บ → มูลค่าตลาด = price × (units ÷ divisor)
+  // default 1 (ไม่กระทบหุ้น/กองทุนที่หน่วยตรงกันอยู่แล้ว)
+  const PUNIT_KEY = 'dimelog_price_unit';
+  const PUNIT_SEED = { 'Gold 96.5%': 15.244 };   // 1 บาททอง = 15.244 กรัม
+  function loadDivisors() {
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem(PUNIT_KEY) || '{}') || {}; } catch (e) {}
+    return Object.assign({}, PUNIT_SEED, user);
+  }
+  function saveDivisors(map) { try { localStorage.setItem(PUNIT_KEY, JSON.stringify(map || {})); } catch (e) {} }
+  function priceDivisor(sym, map) {
+    map = map || loadDivisors();
+    const d = +map[sym];
+    return (d && d > 0) ? d : 1;
+  }
+
   function show(key) {
     // leaving Classify: types may have changed → let dashboard/tax re-render with latest types
     const prev = document.querySelector('.dl-sb a.active');
@@ -127,6 +157,10 @@ window.DL = (function () {
     // leaving FX Rates: เรทอาจเปลี่ยน → หน้าที่แปลง USD→THB ต้อง re-render
     if (prev && prev.getAttribute('data-nav') === 'fx' && key !== 'fx') {
       rendered['dashboard'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
+    }
+    // leaving Settings: ตัวหารหน่วยราคา (price-unit) อาจเปลี่ยน → re-render หน้าที่คำนวณมูลค่า
+    if (prev && prev.getAttribute('data-nav') === 'setup' && key !== 'setup') {
+      rendered['dashboard'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
     }
     // leaving Dividends: อาจ import ปันผลเพิ่ม → ให้ Dashboard/Tax re-render
     if (prev && prev.getAttribute('data-nav') === 'dividends' && key !== 'dividends') {
@@ -188,5 +222,6 @@ window.DL = (function () {
            SEC_TYPES, DEFAULT_TYPES, loadTypes, saveTypes, typeOf, userTypeOf, setType,
            isPrivate, setPrivate, togglePrivacy,
            loadFx, saveFx, fxRate, usdToThb, thbSuffix,
+           loadDivisors, saveDivisors, priceDivisor,
            get payload() { return payload; } };
 })();

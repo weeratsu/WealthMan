@@ -294,15 +294,16 @@
           <input type="file" id="fxImportFile" accept=".xlsx,.xls,.csv">
         </div>
       </div>
-      <div class="sub">เรทแลกเปลี่ยน ฿ ต่อ 1 USD รายวัน — ใช้แปลงรายการสกุล USD ที่ไม่มีเรทในตัว (MTS Gold, เงินปันผล) · ระบบเลือกเรท “วันใกล้สุด” ให้อัตโนมัติ · เก็บในเบราว์เซอร์ (localStorage ทับ seed)</div>
+      <div class="sub">Daily ฿ per 1 USD — used to convert USD items that have no built-in rate (MTS Gold, dividends) · the system auto-picks the nearest-date rate · stored in the browser (localStorage overrides seed)</div>
+      <div class="card"><h2>USD/THB Trend</h2><div id="fxChart" style="height:320px;"></div></div>
       <div class="card">
         <div class="filters">
-          <input type="date" id="fxDate" title="วันที่">
-          <input type="number" id="fxVal" step="0.0001" placeholder="เรท ฿/USD เช่น 32.5000" style="min-width:160px;">
-          <button class="btn" id="btnFxAdd">+ เพิ่ม/แก้เรท</button>
+          <input type="date" id="fxDate" title="Date">
+          <input type="number" id="fxVal" step="0.0001" placeholder="Rate ฿/USD, e.g. 32.5000" style="min-width:160px;">
+          <button class="btn" id="btnFxAdd">+ Add / Update rate</button>
           <span class="spacer"></span><span class="chip" id="fxCount"></span>
         </div>
-        <table class="rpt" id="fxTable"><thead><tr><th>วันที่</th><th>เรท (฿/USD)</th><th>ที่มา</th><th></th></tr></thead><tbody id="fxBody"></tbody></table>
+        <table class="rpt" id="fxTable"><thead><tr><th>Date</th><th>Rate (฿/USD)</th><th>Source</th><th></th></tr></thead><tbody id="fxBody"></tbody></table>
       </div>
     </section>
 
@@ -386,6 +387,21 @@
           <button class="btn secondary" id="wzBack">← ย้อนกลับ</button>
           <button class="btn" id="wzNext">ถัดไป →</button>
         </div>
+      </div>
+
+      <div class="card" id="punitCard">
+        <h2><span class="num">💱</span>หน่วยราคา (Price Unit) ต่อหลักทรัพย์</h2>
+        <div class="sub">บางสินทรัพย์ ราคาที่กรอกคนละหน่วยกับจำนวนที่เก็บ — เช่น ทอง HSH เก็บเป็น<b>กรัม</b> แต่ราคาเป็นต่อ<b>บาททอง</b> (1 บาททอง = 15.244 กรัม) · ตั้ง "ตัวหาร" ให้คำนวณมูลค่าถูก: <code>มูลค่า = ราคา × (จำนวน ÷ ตัวหาร)</code></div>
+        <div class="card" style="box-shadow:none;border:1px dashed var(--border);">
+          <div class="filters">
+            <select id="punitSec" style="min-width:200px;"></select>
+            <input type="number" id="punitVal" step="0.0001" placeholder="ตัวหาร เช่น 15.244" style="min-width:160px;">
+            <button class="btn" id="btnPunitSet">ตั้งค่า</button>
+            <span class="spacer"></span><span class="chip" id="punitCount"></span>
+          </div>
+          <table class="rpt" id="punitTable"><thead><tr><th>หลักทรัพย์</th><th>ตัวหาร (units ต่อ 1 หน่วยราคา)</th><th>ความหมาย</th><th></th></tr></thead><tbody id="punitBody"></tbody></table>
+        </div>
+        <div class="note" style="margin-top:8px;">ค่าปกติ = 1 (ราคาต่อหน่วยตรงกับจำนวน — หุ้น/กองทุนส่วนใหญ่) · ตั้งเฉพาะตัวที่หน่วยไม่ตรง · ทอง HSH (Gold 96.5%) ตั้งไว้ให้แล้ว 15.244</div>
       </div>
     </section>
 
@@ -659,6 +675,7 @@
   <script src="js/tax.js"></script>
   <script src="js/analysis.js"></script>
   <script src="js/classify.js"></script>
+  <script src="js/fx.js"></script>
   <script src="js/setup.js"></script>
   <script>
     // init เมื่อ DL พร้อม (กัน error ถ้าสคริปต์ภายนอกยังโหลดไม่เสร็จในบางสภาพแวดล้อม)
