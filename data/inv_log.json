@@ -1,11 +1,12 @@
 {
-  "generated_at": "2026-10-20T16:57:42",
+  "generated_at": "2026-10-22T09:55:40",
   "source_folder": "",
   "file_count": 61,
   "trade_count": 128,
   "trades": [
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962312001830",
       "doc_no": "GB962312001830",
       "issue_date": "01/12/2023",
@@ -29,6 +30,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20240116000571",
       "doc_no": "",
       "issue_date": "16/01/2024",
@@ -52,6 +54,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962405105340",
       "doc_no": "GB962405105340",
       "issue_date": "10/05/2024",
@@ -75,6 +78,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962405117477",
       "doc_no": "GB962405117477",
       "issue_date": "11/05/2024",
@@ -98,6 +102,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250110000817",
       "doc_no": "",
       "issue_date": "10/01/2025",
@@ -121,6 +126,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250226000974",
       "doc_no": "",
       "issue_date": "26/02/2025",
@@ -144,6 +150,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250303002456",
       "doc_no": "",
       "issue_date": "03/03/2025",
@@ -167,6 +174,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250307012030",
       "doc_no": "2025030700012030",
       "issue_date": "07/03/2025",
@@ -190,6 +198,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250310024359",
       "doc_no": "2025031000024359",
       "issue_date": "10/03/2025",
@@ -213,6 +222,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250327001426",
       "doc_no": "2025032700001426",
       "issue_date": "27/03/2025",
@@ -236,6 +246,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250403016315",
       "doc_no": "2025040300016315",
       "issue_date": "03/04/2025",
@@ -259,6 +270,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250410010398",
       "doc_no": "2025041000010398",
       "issue_date": "10/04/2025",
@@ -282,6 +294,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250502002275",
       "doc_no": "",
       "issue_date": "02/05/2025",
@@ -305,6 +318,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250506018917",
       "doc_no": "2025050600018917",
       "issue_date": "05/05/2025",
@@ -328,6 +342,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250506018917",
       "doc_no": "2025050600018917",
       "issue_date": "05/05/2025",
@@ -351,6 +366,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250604040740",
       "doc_no": "2025060400040740",
       "issue_date": "03/06/2025",
@@ -374,6 +390,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250604040740",
       "doc_no": "2025060400040740",
       "issue_date": "03/06/2025",
@@ -397,6 +414,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250604040740",
       "doc_no": "2025060400040740",
       "issue_date": "03/06/2025",
@@ -420,6 +438,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250604002834",
       "doc_no": "",
       "issue_date": "04/06/2025",
@@ -443,6 +462,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250624005107",
       "doc_no": "2025062400005107",
       "issue_date": "24/06/2025",
@@ -466,6 +486,7 @@
     },
     {
       "asset_class": "mutual_fund",
+      "asset_manager": "Dime",
       "txn_id": "DIMEMF20250702001140",
       "doc_no": "",
       "issue_date": "02/07/2025",
@@ -489,6 +510,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250703000078",
       "doc_no": "2025070300000078",
       "issue_date": "03/07/2025",
@@ -512,6 +534,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250703000078",
       "doc_no": "2025070300000078",
       "issue_date": "03/07/2025",
@@ -535,6 +558,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250703000078",
       "doc_no": "2025070300000078",
       "issue_date": "03/07/2025",
@@ -558,6 +582,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250704016198",
       "doc_no": "2025070400016198",
       "issue_date": "07/07/2025",
@@ -581,6 +606,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250801043163",
       "doc_no": "2025080100043163",
       "issue_date": "01/08/2025",
@@ -604,6 +630,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250801043163",
       "doc_no": "2025080100043163",
       "issue_date": "01/08/2025",
@@ -627,6 +654,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250805058650",
       "doc_no": "2025080500058650",
       "issue_date": "05/08/2025",
@@ -650,6 +678,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250805058650",
       "doc_no": "2025080500058650",
       "issue_date": "05/08/2025",
@@ -673,6 +702,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250805058650",
       "doc_no": "2025080500058650",
       "issue_date": "05/08/2025",
@@ -696,6 +726,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250805058650",
       "doc_no": "2025080500058650",
       "issue_date": "05/08/2025",
@@ -719,6 +750,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250819012169",
       "doc_no": "2025081900012169",
       "issue_date": "19/08/2025",
@@ -742,6 +774,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250903107857",
       "doc_no": "2025090300107857",
       "issue_date": "03/09/2025",
@@ -765,6 +798,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250903107857",
       "doc_no": "2025090300107857",
       "issue_date": "03/09/2025",
@@ -788,6 +822,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250903107857",
       "doc_no": "2025090300107857",
       "issue_date": "03/09/2025",
@@ -811,6 +846,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250903107857",
       "doc_no": "2025090300107857",
       "issue_date": "03/09/2025",
@@ -834,6 +870,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250911003308",
       "doc_no": "2025091100003308",
       "issue_date": "11/09/2025",
@@ -857,6 +894,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250911003308",
       "doc_no": "2025091100003308",
       "issue_date": "11/09/2025",
@@ -880,6 +918,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250911003308",
       "doc_no": "2025091100003308",
       "issue_date": "11/09/2025",
@@ -903,6 +942,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250918029965",
       "doc_no": "2025091800029965",
       "issue_date": "18/09/2025",
@@ -926,6 +966,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250929066317",
       "doc_no": "2025092900066317",
       "issue_date": "29/09/2025",
@@ -949,6 +990,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250929066317",
       "doc_no": "2025092900066317",
       "issue_date": "29/09/2025",
@@ -972,6 +1014,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250929066317",
       "doc_no": "2025092900066317",
       "issue_date": "29/09/2025",
@@ -995,6 +1038,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20250929066317",
       "doc_no": "2025092900066317",
       "issue_date": "29/09/2025",
@@ -1018,6 +1062,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251009046059",
       "doc_no": "2025100900046059",
       "issue_date": "09/10/2025",
@@ -1041,6 +1086,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251028096769",
       "doc_no": "2025102800096769",
       "issue_date": "28/10/2025",
@@ -1064,6 +1110,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251028096769",
       "doc_no": "2025102800096769",
       "issue_date": "28/10/2025",
@@ -1087,6 +1134,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251028096769",
       "doc_no": "2025102800096769",
       "issue_date": "28/10/2025",
@@ -1110,6 +1158,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251028096769",
       "doc_no": "2025102800096769",
       "issue_date": "28/10/2025",
@@ -1133,6 +1182,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962511168907",
       "doc_no": "GB962511168907",
       "issue_date": "10/11/2025",
@@ -1156,6 +1206,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251124007396",
       "doc_no": "2025112400007396",
       "issue_date": "24/11/2025",
@@ -1179,6 +1230,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251127002179",
       "doc_no": "2025112700002179",
       "issue_date": "28/11/2025",
@@ -1202,6 +1254,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251127002179",
       "doc_no": "2025112700002179",
       "issue_date": "28/11/2025",
@@ -1225,6 +1278,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251127002179",
       "doc_no": "2025112700002179",
       "issue_date": "28/11/2025",
@@ -1248,6 +1302,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251127002179",
       "doc_no": "2025112700002179",
       "issue_date": "28/11/2025",
@@ -1271,6 +1326,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251208128692",
       "doc_no": "2025120800128692",
       "issue_date": "08/12/2025",
@@ -1294,6 +1350,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251208128692",
       "doc_no": "2025120800128692",
       "issue_date": "08/12/2025",
@@ -1317,6 +1374,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251229013226",
       "doc_no": "2025122900013226",
       "issue_date": "29/12/2025",
@@ -1340,6 +1398,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251229013226",
       "doc_no": "2025122900013226",
       "issue_date": "29/12/2025",
@@ -1363,6 +1422,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251229013226",
       "doc_no": "2025122900013226",
       "issue_date": "29/12/2025",
@@ -1386,6 +1446,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20251229013226",
       "doc_no": "2025122900013226",
       "issue_date": "29/12/2025",
@@ -1409,6 +1470,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962601244475",
       "doc_no": "GB962601244475",
       "issue_date": "12/01/2026",
@@ -1432,6 +1494,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260113002754",
       "doc_no": "2026011300002754",
       "issue_date": "13/01/2026",
@@ -1455,6 +1518,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260113002754",
       "doc_no": "2026011300002754",
       "issue_date": "13/01/2026",
@@ -1478,6 +1542,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260119057467",
       "doc_no": "2026011900057467",
       "issue_date": "20/01/2026",
@@ -1501,6 +1566,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260127074319",
       "doc_no": "2026012700074319",
       "issue_date": "27/01/2026",
@@ -1524,6 +1590,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260127074319",
       "doc_no": "2026012700074319",
       "issue_date": "27/01/2026",
@@ -1547,6 +1614,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260127074319",
       "doc_no": "2026012700074319",
       "issue_date": "27/01/2026",
@@ -1570,6 +1638,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260127074319",
       "doc_no": "2026012700074319",
       "issue_date": "27/01/2026",
@@ -1593,6 +1662,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260210087388",
       "doc_no": "2026021000087388",
       "issue_date": "10/02/2026",
@@ -1616,6 +1686,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260302014374",
       "doc_no": "2026030200014374",
       "issue_date": "02/03/2026",
@@ -1639,6 +1710,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260302014374",
       "doc_no": "2026030200014374",
       "issue_date": "02/03/2026",
@@ -1662,6 +1734,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260302014374",
       "doc_no": "2026030200014374",
       "issue_date": "02/03/2026",
@@ -1685,6 +1758,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260302014374",
       "doc_no": "2026030200014374",
       "issue_date": "02/03/2026",
@@ -1708,6 +1782,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260311048590",
       "doc_no": "2026031100048590",
       "issue_date": "11/03/2026",
@@ -1731,6 +1806,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Dime",
       "txn_id": "DMB2603170012706",
       "doc_no": "DMB2603170012706",
       "issue_date": "17/03/2026",
@@ -1754,6 +1830,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
       "issue_date": "27/03/2026",
@@ -1777,6 +1854,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
       "issue_date": "27/03/2026",
@@ -1800,6 +1878,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
       "issue_date": "27/03/2026",
@@ -1823,6 +1902,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
       "issue_date": "27/03/2026",
@@ -1846,6 +1926,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260327047289",
       "doc_no": "2026032700047289",
       "issue_date": "27/03/2026",
@@ -1869,6 +1950,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260421037673",
       "doc_no": "2026042100037673",
       "issue_date": "21/04/2026",
@@ -1892,6 +1974,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260428089612",
       "doc_no": "2026042800089612",
       "issue_date": "28/04/2026",
@@ -1915,6 +1998,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260428089612",
       "doc_no": "2026042800089612",
       "issue_date": "28/04/2026",
@@ -1938,6 +2022,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260428089612",
       "doc_no": "2026042800089612",
       "issue_date": "28/04/2026",
@@ -1961,6 +2046,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260505080798",
       "doc_no": "2026050500080798",
       "issue_date": "05/05/2026",
@@ -1984,6 +2070,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260508023577",
       "doc_no": "2026050800023577",
       "issue_date": "08/05/2026",
@@ -2007,6 +2094,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260520037185",
       "doc_no": "2026052000037185",
       "issue_date": "20/05/2026",
@@ -2030,6 +2118,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260520037185",
       "doc_no": "2026052000037185",
       "issue_date": "20/05/2026",
@@ -2053,6 +2142,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2076,6 +2166,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2099,6 +2190,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2122,6 +2214,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2145,6 +2238,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2168,6 +2262,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260527069542",
       "doc_no": "2026052700069542",
       "issue_date": "27/05/2026",
@@ -2191,6 +2286,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260618094749",
       "doc_no": "2026061800094749",
       "issue_date": "18/06/2026",
@@ -2214,6 +2310,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260624113743",
       "doc_no": "2026062400113743",
       "issue_date": "24/06/2026",
@@ -2237,6 +2334,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260626061980",
       "doc_no": "2026062600061980",
       "issue_date": "26/06/2026",
@@ -2260,6 +2358,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2283,6 +2382,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2306,6 +2406,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2329,6 +2430,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2352,6 +2454,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2375,6 +2478,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260629026070",
       "doc_no": "2026062900026070",
       "issue_date": "29/06/2026",
@@ -2398,6 +2502,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260722008397",
       "doc_no": "2026072200008397",
       "issue_date": "22/07/2026",
@@ -2421,6 +2526,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Dime",
       "txn_id": "DMB2607270002746",
       "doc_no": "DMB2607270002746",
       "issue_date": "27/07/2026",
@@ -2444,6 +2550,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2467,6 +2574,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2490,6 +2598,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2513,6 +2622,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2536,6 +2646,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2559,6 +2670,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2582,6 +2694,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260731096679",
       "doc_no": "2026073100096679",
       "issue_date": "31/07/2026",
@@ -2605,6 +2718,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2628,6 +2742,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2651,6 +2766,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2674,6 +2790,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2697,6 +2814,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2720,6 +2838,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260921060023",
       "doc_no": "2026092100060023",
       "issue_date": "21/09/2026",
@@ -2743,6 +2862,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260922092960",
       "doc_no": "2026092200092960",
       "issue_date": "22/09/2026",
@@ -2766,6 +2886,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260928003721",
       "doc_no": "2026092800003721",
       "issue_date": "28/09/2026",
@@ -2789,6 +2910,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20260928003721",
       "doc_no": "2026092800003721",
       "issue_date": "28/09/2026",
@@ -2812,6 +2934,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962609599253",
       "doc_no": "GB962609599253",
       "issue_date": "29/09/2026",
@@ -2835,6 +2958,7 @@
     },
     {
       "asset_class": "gold",
+      "asset_manager": "Hua Seng Heng",
       "txn_id": "GB962610219385",
       "doc_no": "GB962610219385",
       "issue_date": "16/10/2026",
@@ -2858,6 +2982,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20261019014908",
       "doc_no": "2026101900014908",
       "issue_date": "19/10/2026",
@@ -2881,6 +3006,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20261019014908",
       "doc_no": "2026101900014908",
       "issue_date": "19/10/2026",
@@ -2904,6 +3030,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20261019014908",
       "doc_no": "2026101900014908",
       "issue_date": "19/10/2026",
@@ -2927,6 +3054,7 @@
     },
     {
       "asset_class": "offshore",
+      "asset_manager": "Dime",
       "txn_id": "DIMEOS20261019014908",
       "doc_no": "2026101900014908",
       "issue_date": "19/10/2026",

@@ -65,18 +65,56 @@
     <section class="panel" id="panel-trades">
       <div class="top">
         <h1>Transactions</h1>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="btn" id="btnAddTrx">+ Add transaction</button>
           <button class="btn" id="btnExport">📊 Export Excel</button>
-          <button class="btn secondary" id="btnBackup">💾 Backup</button>
-          <button class="btn secondary" id="btnImport">📥 Import</button>
+          <details class="moremenu" id="trxMore">
+            <summary class="btn secondary">⋯ เพิ่มเติม</summary>
+            <div class="moremenu-panel">
+              <button class="btn secondary" id="btnImportXlsx">📥 Import Excel</button>
+              <button class="btn secondary" id="btnTrxTemplate">📄 Template</button>
+              <button class="btn secondary" id="btnBackup">💾 Backup</button>
+              <button class="btn secondary" id="btnImport">♻️ Restore</button>
+            </div>
+          </details>
+          <input type="file" id="fileImportXlsx" accept=".xlsx,.xls,.csv">
           <input type="file" id="fileImport" accept=".json,application/json">
         </div>
       </div>
       <div class="sub" id="trdSub"></div>
+      <!-- ===== Add / Edit manual transaction form (hidden by default) ===== -->
+      <div class="card" id="addTrxCard" style="display:none;">
+        <h2 id="addTrxTitle">เพิ่มรายการ (Manual)</h2>
+        <div class="hint" style="margin-bottom:10px;">รายการที่กรอกเองเก็บในเบราว์เซอร์ (ไม่โดน parser ทับ) · รวมกับรายการอัตโนมัติในทุกหน้า</div>
+        <div class="trx-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+          <label>Asset Manager<select id="mfAM"></select></label>
+          <label>ชนิดสินทรัพย์<select id="mfClass"><option value="offshore">Offshore</option><option value="mutual_fund">Mutual Fund</option><option value="gold">Gold</option><option value="other">Other</option></select></label>
+          <label>ประเภทรายการ<select id="mfType"><option value="BUY">BUY (ซื้อ)</option><option value="SEL">SEL (ขาย)</option><option value="SUB">SUB (ซื้อกองทุน)</option><option value="RED">RED (ขายกองทุน)</option><option value="SWI">SWI (สับเปลี่ยนเข้า)</option><option value="SWO">SWO (สับเปลี่ยนออก)</option></select></label>
+          <label>หลักทรัพย์/กองทุน<input type="text" id="mfSec" placeholder="เช่น ASP-RMF"></label>
+          <label>ตลาด/หมายเหตุที่มา<input type="text" id="mfExch" placeholder="เช่น SET / NASDAQ"></label>
+          <!-- fund_type field removed: type is per-security via Classify -->
+          <label>จำนวนหน่วย<input type="number" id="mfUnits" step="0.0001"></label>
+          <label>ราคา/หน่วย<input type="number" id="mfPrice" step="0.0001"></label>
+          <label>สกุลเงิน<select id="mfCcy"><option value="THB">THB</option><option value="USD">USD</option></select></label>
+          <label>มูลค่ารวม (THB)<input type="number" id="mfTotalThb" step="0.01"></label>
+          <label>มูลค่ารวม (USD)<input type="number" id="mfTotalUsd" step="0.01"></label>
+          <label>ค่าธรรมเนียม (THB)<input type="number" id="mfFeeThb" step="0.01"></label>
+          <label>วันที่ทำรายการ<input type="date" id="mfTxnDate"></label>
+          <label>วันมีผล (effective)<input type="date" id="mfEffDate"></label>
+          <label>วันที่ขายได้ (sellable)<input type="date" id="mfSellable"><span class="hint" id="mfSellableHint"></span></label>
+          <label>เลขอ้างอิง (order/txn)<input type="text" id="mfOrder" placeholder="ว่างได้ ระบบ gen ให้"></label>
+          <label style="grid-column:1/-1;">หมายเหตุ<input type="text" id="mfNote"></label>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" id="mfSave">บันทึก</button>
+          <button class="btn secondary" id="mfCancel">ยกเลิก</button>
+        </div>
+      </div>
       <div class="card">
         <div class="filters">
           <input type="text" id="fSearch" placeholder="Search (security, order, txn id)…" style="min-width:220px;">
           <select id="fClass"><option value="">All classes</option><option value="offshore">Offshore</option><option value="mutual_fund">Mutual Fund</option></select>
+          <select id="fFundType"><option value="">All types</option></select>
           <select id="fSec"><option value="">All securities</option></select>
           <select id="fTxnType"><option value="">All transaction types</option><option value="BUY">BUY</option><option value="SEL">SELL</option><option value="SUB">SUB</option><option value="RED">RED</option><option value="SWI">SWITCH-IN</option><option value="SWO">SWITCH-OUT</option></select>
           <select id="fCcy"><option value="">All currencies</option><option value="THB">THB</option><option value="USD">USD</option></select>
@@ -109,6 +147,7 @@
           <input type="text" id="hldSearch" placeholder="Search symbol…" style="min-width:200px;">
           <select id="hldClass"><option value="">All classes</option><option value="offshore">Offshore</option><option value="mutual_fund">Mutual Fund</option></select>
           <select id="hldType"><option value="">All types</option></select>
+          <select id="hldSec"><option value="">All securities</option></select>
           <span class="spacer"></span>
           <span class="chip" id="hldCount"></span>
         </div>
@@ -121,10 +160,11 @@
               <th>Net units</th>
               <th>Ccy</th>
               <th>Avg cost/unit</th>
-              <th>ราคาปัจจุบัน</th>
-              <th>มูลค่าตลาด</th>
-              <th>กำไร/ขาดทุน</th>
+              <th>Current Price</th>
+              <th>Market Value</th>
+              <th>P/L</th>
               <th>Invested (THB)</th>
+              <th>Realized P/L (฿)</th>
               <th>#</th>
             </tr></thead>
             <tbody id="hldBody"></tbody>
@@ -172,7 +212,10 @@
       <div class="card">
         <div class="filters">
           <input type="text" id="divSearch" placeholder="Search symbol…" style="min-width:200px;">
+          <select id="divClass"><option value="">All classes</option></select>
+          <select id="divType"><option value="">All types</option></select>
           <select id="divSec"><option value="">All securities</option></select>
+          <select id="divCcy"><option value="">All currencies</option></select>
           <select id="divYear"><option value="">All years</option></select>
           <span class="spacer"></span>
           <span class="chip" id="divCount"></span>
@@ -180,13 +223,16 @@
         <div style="overflow-x:auto;">
           <table class="rpt" id="divTable">
             <thead><tr>
-              <th style="text-align:left">วันที่จ่าย</th>
-              <th style="text-align:left">หลักทรัพย์</th>
-              <th>ต่อหน่วย (USD)</th>
-              <th>ปันผล (USD)</th>
-              <th>ภาษีหัก (USD)</th>
-              <th>สุทธิ (USD)</th>
+              <th style="text-align:left">Pay Date</th>
+              <th style="text-align:left">Security</th>
+              <th>Ccy</th>
+              <th>Per Unit</th>
+              <th>Gross</th>
+              <th>WHT</th>
+              <th>Net</th>
               <th style="text-align:left">Record date</th>
+              <th style="text-align:left">Effective</th>
+              <th>Actions</th>
             </tr></thead>
             <tbody id="divBody"></tbody>
           </table>
@@ -206,25 +252,25 @@
       <div class="sub" id="taxSub"></div>
       <div class="card"><h2>สรุปรายปี (THB)</h2>
         <div class="hint" style="margin-bottom:8px;">รวมทั้งการซื้อ/ขาย และเงินปันผล · ปันผลแปลงเป็นบาทด้วยเรทวันจ่าย (FX Rates)</div>
-        <table class="rpt"><thead><tr><th>ปี</th><th>รายการ</th><th>ยอดซื้อ</th><th>ยอดขาย</th><th>ค่าธรรมเนียม</th><th>ปันผลสุทธิ (฿)</th><th>ภาษีปันผล US (฿)</th></tr></thead><tbody id="taxYearBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Year</th><th>Transactions</th><th>Buy</th><th>Sell</th><th>Fees</th><th>Net Dividend (฿)</th><th>US Div. Tax (฿)</th></tr></thead><tbody id="taxYearBody"></tbody></table>
       </div>
       <div class="card"><h2>ยอดลงทุน + ค่าธรรมเนียมรายปี</h2><div id="chartTaxYear" style="height:300px;"></div></div>
       <div class="card"><h2>แยกตามชนิดสินทรัพย์ (รายปี)</h2>
-        <table class="rpt"><thead><tr><th>ปี</th><th>ชนิด</th><th>รายการ</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxClassBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Year</th><th>Class</th><th>Transactions</th><th>Buy (THB)</th><th>Fees (THB)</th></tr></thead><tbody id="taxClassBody"></tbody></table>
       </div>
       <div class="card"><h2>แยกตามประเภท (จากแท็บ Classify)</h2>
-        <table class="rpt"><thead><tr><th>ประเภท</th><th>จำนวนหลักทรัพย์</th><th>รายการ</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxTypeBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Type</th><th>Securities</th><th>Transactions</th><th>Buy (THB)</th><th>Fees (THB)</th></tr></thead><tbody id="taxTypeBody"></tbody></table>
       </div>
       <div class="card"><h2>สรุปรายหลักทรัพย์ (ยอดซื้อสะสม)</h2>
         <div id="chartTaxSec" style="height:340px;margin-bottom:14px;"></div>
-        <table class="rpt"><thead><tr><th>หลักทรัพย์</th><th>ชนิด</th><th>รายการ</th><th>จำนวนหน่วยรวม</th><th>ยอดซื้อ (THB)</th><th>ค่าธรรมเนียม (THB)</th></tr></thead><tbody id="taxSecBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Security</th><th>Class</th><th>Transactions</th><th>Total Units</th><th>Buy (THB)</th><th>Fees (THB)</th></tr></thead><tbody id="taxSecBody"></tbody></table>
       </div>
       <div class="card"><h2>เงินปันผลรายปี (USD)</h2>
         <div class="hint" style="margin-bottom:8px;">ปันผลจากหุ้นต่างประเทศ — ภาษีหัก ณ ที่จ่าย (US WHT) หักที่ต้นทางแล้ว · ปันผลที่นำเข้าไทยอาจต้องเสียภาษีเงินได้ (ใช้เครดิตภาษีที่ถูกหักได้)</div>
-        <table class="rpt"><thead><tr><th>ปี</th><th>จำนวนครั้ง</th><th>ปันผล (USD)</th><th>ภาษีหัก ณ ที่จ่าย (USD)</th><th>ปันผลสุทธิ (USD)</th></tr></thead><tbody id="taxDivYearBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Year</th><th>Count</th><th>Gross (USD)</th><th>WHT (USD)</th><th>Net (USD)</th></tr></thead><tbody id="taxDivYearBody"></tbody></table>
       </div>
       <div class="card"><h2>เงินปันผลรายหลักทรัพย์ (USD)</h2>
-        <table class="rpt"><thead><tr><th>หลักทรัพย์</th><th>จำนวนครั้ง</th><th>ปันผล (USD)</th><th>ภาษีหัก (USD)</th><th>ปันผลสุทธิ (USD)</th></tr></thead><tbody id="taxDivSecBody"></tbody></table>
+        <table class="rpt"><thead><tr><th>Security</th><th>Count</th><th>Gross (USD)</th><th>WHT (USD)</th><th>Net (USD)</th></tr></thead><tbody id="taxDivSecBody"></tbody></table>
       </div>
       <div class="warn">⚠️ รายงานนี้สรุปตัวเลขจากใบยืนยันการซื้อขาย ใช้เป็นข้อมูลประกอบ/ตรวจสอบเท่านั้น ไม่ใช่เอกสารยื่นภาษีทางการ — สำหรับการยื่นจริง (โดยเฉพาะเงินได้/กำไรจากหุ้นต่างประเทศ และเครดิตภาษี) ควรปรึกษาผู้เชี่ยวชาญหรือสรรพากร</div>
     </section>
@@ -278,10 +324,12 @@
       <div class="card">
         <div class="filters">
           <input type="text" id="clsSearch" placeholder="ค้นหาหลักทรัพย์…" style="min-width:220px;">
-          <select id="clsFilter"><option value="">ทั้งหมด</option><option value="unset">ยังไม่กำหนด</option></select>
+          <select id="clsClass"><option value="">All classes</option></select>
+          <select id="clsType"><option value="">All types</option></select>
+          <select id="clsFilter"><option value="">All statuses</option><option value="unset">No type</option><option value="set">Has type</option><option value="auto">Auto (default)</option></select>
           <span class="spacer"></span><span class="chip" id="clsCount"></span>
         </div>
-        <table class="rpt" id="clsTable"><thead><tr><th>หลักทรัพย์</th><th>ชนิด (จากไฟล์)</th><th>จำนวนรายการ</th><th>ประเภท (กำหนดเอง)</th></tr></thead><tbody id="clsBody"></tbody></table>
+        <table class="rpt" id="clsTable"><thead><tr><th>Security</th><th>Class</th><th>Transactions</th><th>Type</th></tr></thead><tbody id="clsBody"></tbody></table>
       </div>
     </section>
 
@@ -390,6 +438,64 @@
         </div>
       </div>
 
+      <div class="card" id="profileCard">
+        <h2><span class="num">👤</span>โปรไฟล์</h2>
+        <div class="sub">ใช้คำนวณวันที่ขายได้ของกองทุน RMF (ต้องอายุครบ 55 ปี)</div>
+        <div style="margin-top:10px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">วันเกิด</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <input type="date" id="pfBirthdate" style="height:36px;box-sizing:border-box;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+            <button class="btn" id="btnPfSave" style="height:36px;box-sizing:border-box;">บันทึก</button>
+            <span class="chip" id="pfSaved" style="display:none;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="assetClassCard">
+        <h2><span class="num">🗂️</span>ชนิดสินทรัพย์ (Asset Class)</h2>
+        <div class="sub">ชนิดหลักของสินทรัพย์ · dropdown "ชนิด" ทุกที่ (ฟอร์ม/ฟิลเตอร์) ดึงจากที่นี่ · ตัวติดมากับระบบแก้ชื่อได้ ลบไม่ได้</div>
+        <table class="rpt" id="classTable" style="margin-top:10px;">
+          <thead><tr><th style="text-align:left">Key (internal)</th><th style="text-align:left">Label</th><th>Source</th><th></th></tr></thead>
+          <tbody id="classBody"></tbody>
+        </table>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <input type="text" id="clNewKey" placeholder="key เช่น crypto" style="min-width:150px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:13px;">
+          <input type="text" id="clNewLabel" placeholder="ชื่อที่แสดง เช่น Crypto" style="min-width:170px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <button class="btn" id="btnClAdd" style="height:34px;">+ เพิ่ม</button>
+          <button class="btn secondary" id="btnClReset" style="height:34px;">คืนค่าเริ่มต้น</button>
+          <span class="chip" id="clSaved" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="card" id="fundRulesCard">
+        <h2><span class="num">📅</span>เงื่อนไขกองทุนลดหย่อนภาษี (Sellable Rules)</h2>
+        <div class="sub">ใช้คำนวณ "วันที่ขายได้" ของ RMF/SSF/Thai ESG/LTF · แก้ได้เผื่อกฎเปลี่ยนในอนาคต · ว่าง = ไม่ใช้เงื่อนไขนั้น</div>
+        <table class="rpt" id="fundRulesTable" style="margin-top:10px;">
+          <thead><tr><th style="text-align:left">Fund Type</th><th>Min Hold (yrs)</th><th>Basis</th><th>Min Age (yrs)</th><th></th></tr></thead>
+          <tbody id="fundRulesBody"></tbody>
+        </table>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <input type="text" id="frNewKey" placeholder="เพิ่มประเภทใหม่ (เช่น ESG-Extra)" style="min-width:180px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <input type="number" id="frNewHold" placeholder="ปีถือ" min="0" step="1" style="width:90px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <input type="number" id="frNewAge" placeholder="อายุ" min="0" step="1" style="width:90px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <select id="frNewBasis" style="height:34px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;"><option value="anniversary">วันชนวัน</option><option value="calendar">ปีปฏิทิน</option></select>
+          <button class="btn" id="btnFrAdd" style="height:34px;">+ เพิ่ม</button>
+          <button class="btn secondary" id="btnFrReset" style="height:34px;">คืนค่าเริ่มต้น</button>
+          <span class="chip" id="frSaved" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="card" id="amCard">
+        <h2><span class="num">🏦</span>Asset Manager (AM)</h2>
+        <div class="sub">ผู้จัดการสินทรัพย์/ที่มาของรายการ · auto = parser เติมให้ (Dime, Hua Seng Heng) · เพิ่ม remark ได้</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 12px;">
+          <input type="text" id="amNew" placeholder="เพิ่ม AM ใหม่…" style="min-width:160px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <input type="text" id="amNewRemark" placeholder="remark (ไม่บังคับ)" style="min-width:200px;height:34px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;">
+          <button class="btn" id="btnAmAdd" style="height:34px;">+ เพิ่ม</button>
+        </div>
+        <table class="rpt" id="amTable"><thead><tr><th class="amsort" data-sort="name" style="cursor:pointer">Asset Manager</th><th class="amsort" data-sort="source" style="cursor:pointer">Source</th><th class="amsort" data-sort="secs" style="cursor:pointer">Mapped Securities</th><th>remark</th><th></th></tr></thead><tbody id="amBody"></tbody></table>
+      </div>
+
       <div class="card" id="punitCard">
         <h2><span class="num">💱</span>หน่วยราคา (Price Unit) ต่อหลักทรัพย์</h2>
         <div class="sub">บางสินทรัพย์ ราคาที่กรอกคนละหน่วยกับจำนวนที่เก็บ — เช่น ทอง HSH เก็บเป็น<b>กรัม</b> แต่ราคาเป็นต่อ<b>บาททอง</b> (1 บาททอง = 15.244 กรัม) · ตั้ง "ตัวหาร" ให้คำนวณมูลค่าถูก: <code>มูลค่า = ราคา × (จำนวน ÷ ตัวหาร)</code></div>
@@ -400,7 +506,7 @@
             <button class="btn" id="btnPunitSet">ตั้งค่า</button>
             <span class="spacer"></span><span class="chip" id="punitCount"></span>
           </div>
-          <table class="rpt" id="punitTable"><thead><tr><th>หลักทรัพย์</th><th>ตัวหาร (units ต่อ 1 หน่วยราคา)</th><th>ความหมาย</th><th></th></tr></thead><tbody id="punitBody"></tbody></table>
+          <table class="rpt" id="punitTable"><thead><tr><th>Security</th><th>Divisor (units per 1 price unit)</th><th>Meaning</th><th></th></tr></thead><tbody id="punitBody"></tbody></table>
         </div>
         <div class="note" style="margin-top:8px;">ค่าปกติ = 1 (ราคาต่อหน่วยตรงกับจำนวน — หุ้น/กองทุนส่วนใหญ่) · ตั้งเฉพาะตัวที่หน่วยไม่ตรง · ทอง HSH (Gold 96.5%) ตั้งไว้ให้แล้ว 15.244</div>
       </div>

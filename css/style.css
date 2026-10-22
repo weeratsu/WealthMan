@@ -155,6 +155,10 @@ ol,ul{margin:8px 0;padding-left:20px;} li{margin:5px 0;}
 .card[id]{scroll-margin-top:16px;}
 .back-top{display:inline-block;margin-top:4px;font-size:12px;color:var(--muted);text-decoration:none;}
 .back-top:hover{text-decoration:underline;color:var(--accent,#9333ea);}
+/* ===== Add-transaction form ===== */
+.trx-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);}
+.trx-form input,.trx-form select{height:34px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;}
+.trx-form .hint{font-size:11px;}
 
 /* ---------- Setup wizard ---------- */
 .wz-steps{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
@@ -221,3 +225,12 @@ body.privacy-on #privToggle { background: var(--primary-bg, #ede9fe); border-col
 @media(max-width:380px){
   .kpis{ grid-template-columns:1fr; }
 }
+
+/* ===== More menu (Transactions toolbar) ===== */
+.moremenu{ position:relative; display:inline-block; }
+.moremenu > summary{ list-style:none; cursor:pointer; user-select:none; }
+.moremenu > summary::-webkit-details-marker{ display:none; }
+.moremenu > summary::marker{ content:''; }
+.moremenu[open] > summary{ background:var(--primary); color:#fff; border-color:var(--primary); }
+.moremenu-panel{ position:absolute; top:calc(100% + 6px); right:0; left:auto; z-index:40; display:flex; flex-direction:column; gap:6px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:0 8px 24px rgba(0,0,0,.14); min-width:max-content; width:max-content; }
+.moremenu-panel .btn{ width:100%; justify-content:flex-start; white-space:nowrap; }

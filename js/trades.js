@@ -5,7 +5,7 @@ DL.register('trades', function (payload) {
   const dmy = DL.dmy, clsLabel = DL.clsLabel;
   let CURRENT = [];
   let sortKey = 'date', sortDir = 1;   // 1=asc, -1=desc
-  const TRADES = () => (DL.payload.trades || []);
+  const TRADES = () => DL.allTrades();   // auto (parser) + manual (localStorage)
 
   const sub = document.getElementById('trdSub');
   const dates = TRADES().map(t => t.iso_date).filter(Boolean).sort();
@@ -14,17 +14,32 @@ DL.register('trades', function (payload) {
   // security filter options (เรียง A→Z)
   const fSec = document.getElementById('fSec');
   // securities dropdown — cascades from the selected class (เลือก class แล้ว securities โชว์เฉพาะ class นั้น)
+  function populateFundType() {
+    const el = document.getElementById('fFundType'); if (!el) return;
+    const cls = document.getElementById('fClass') ? document.getElementById('fClass').value : '';
+    const prev = el.value;
+    const list = [...new Set(TRADES().filter(t => !cls || t.asset_class === cls).map(t => DL.typeOf(t.security)).filter(Boolean))].sort();
+    el.innerHTML = '<option value="">All fund types</option>' +
+      list.map(f => `<option value="${String(f).replace(/"/g,'&quot;')}">${f}</option>`).join('');
+    if (prev && list.includes(prev)) el.value = prev;
+  }
   function populateSec() {
     if (!fSec) return;
     const cls = document.getElementById('fClass') ? document.getElementById('fClass').value : '';
+    const tyEl = document.getElementById('fTxnType'), ftEl2 = document.getElementById('fFundType');
+    const ty = tyEl ? tyEl.value : '', fty = ftEl2 ? ftEl2.value : '';
     const prev = fSec.value;
-    const list = [...new Set(TRADES().filter(t => !cls || t.asset_class === cls).map(t => t.security).filter(Boolean))].sort();
+    const list = [...new Set(TRADES().filter(t =>
+      (!cls || t.asset_class === cls) &&
+      (!ty || txnMatch(ty, t.type)) &&
+      (!fty || (DL.typeOf(t.security) || '') === fty)
+    ).map(t => t.security).filter(Boolean))].sort();
     fSec.innerHTML = '<option value="">All securities</option>' +
       list.map(s => `<option value="${String(s).replace(/"/g,'&quot;')}">${s}</option>`).join('');
     // คงค่าเดิมถ้ายังอยู่ในชุดใหม่ ไม่งั้นรีเซ็ตเป็น All
     fSec.value = list.indexOf(prev) >= 0 ? prev : '';
   }
-  populateSec();
+  populateSec(); populateFundType();
 
   // year filter options
   const fYear = document.getElementById('fYear');
@@ -39,9 +54,13 @@ DL.register('trades', function (payload) {
   const fxOf = t => { const v = t.fx_thb_usd; if (v != null && v !== '') return +v; const a = t.total_usd, b = t.total_thb; return (a && b) ? b / a : null; };
   const COLS = [
     { id:'date',  h:'วันที่',            get:t=>t.iso_date||'',          kind:'date', tip:'วันที่ทำรายการ (ตามใบยืนยัน)' },
+    { id:'eff',   h:'วันมีผล',           get:t=>t.effective_date||'',    kind:'date', tip:'วันมีผล (effective/settlement) — เว้นว่างถ้าไม่มี' },
     { id:'cls',   h:'ชนิด',              get:t=>clsLabel(t.asset_class), kind:'text', tip:'ชนิดสินทรัพย์ — Offshore=หุ้นต่างประเทศ, Mutual Fund=กองทุนรวมไทย, Gold=ทองคำ' },
+    { id:'ftype', h:'Type',                get:t=>DL.typeOf(t.security)||'', kind:'text', tip:'ประเภทหลักทรัพย์ (ETF/US Stock/RMF/SSF/LTF…) — กำหนดที่ Classify · ตัวที่มีเงื่อนไขจะคิดวันขายได้ให้' },
+    { id:'am',    h:'Asset Manager',     get:t=>DL.trxAmName(t),         kind:'text', tip:'ผู้จัดการสินทรัพย์/ที่มา — Dime, Hua Seng Heng ฯลฯ (อ้างด้วย id ภายใน แก้ชื่อได้ที่ Settings)' },
     { id:'type',  h:'ประเภท',            get:t=>t.type||'',              kind:'text', tip:'ประเภทรายการ — SUB=ซื้อกองทุน, RED=ขายกองทุน, SWI/SWO=สับเปลี่ยนเข้า/ออก, BUY=ซื้อ, SEL=ขาย' },
     { id:'sec',   h:'หลักทรัพย์',        get:t=>t.security||'',          kind:'text', tip:'ชื่อหลักทรัพย์/กองทุน' },
+    { id:'sellable', h:'ขายได้',          get:t=>isBuyish(t.type)?(t.sellable_date||''):'', kind:'date', tip:'วันที่ขายได้โดยไม่เสียสิทธิภาษี (RMF/SSF/Thai ESG/LTF) — แสดงเฉพาะรายการซื้อ (BUY/SUB)' },
     { id:'exch',  h:'ตลาด',              get:t=>t.exchange||'-',         kind:'text', tip:'ตลาดหลักทรัพย์ — กองทุนไทย/ทองเป็นผู้ให้บริการ' },
     { id:'units', h:'จำนวนหน่วย',        get:t=>t.units,                 kind:'num', dp:7, tip:'จำนวนหน่วย/หุ้น/กรัมที่ได้รับ' },
     { id:'price', h:'ราคา/หน่วย',        get:t=>t.price,                 kind:'num', dp:4, tip:'ราคาต่อหน่วย' },
@@ -112,11 +131,23 @@ DL.register('trades', function (payload) {
     return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
   }
 
+  // normalize txn type: manual ใช้ BUY/SELL · auto ใช้ BUY/SEL/SUB/RED/SWI/SWO
+  // filter เลือก BUY → match BUY/SUB/SWI (ซื้อ/เข้า) · เลือก SEL → match SEL/SELL/RED/SWO (ขาย/ออก)
+  const BUYISH = { BUY: 1, SUB: 1, SWI: 1 }, SELLISH = { SEL: 1, SELL: 1, RED: 1, SWO: 1 };
+  function txnMatch(filterVal, tType) {
+    if (!filterVal) return true;
+    const tt = (tType || '').toUpperCase();
+    if (filterVal === 'BUY') return !!BUYISH[tt];
+    if (filterVal === 'SEL') return !!SELLISH[tt];
+    return tt === filterVal;   // SUB/RED/SWI/SWO เลือกตรงตัว
+  }
+  function isBuyish(tType) { return !!BUYISH[(tType || '').toUpperCase()]; }
   function applyFilter() {
     const q = document.getElementById('fSearch').value.trim().toLowerCase();
     const cls = document.getElementById('fClass').value;
     const sec = document.getElementById('fSec').value;
     const ty = document.getElementById('fTxnType').value;
+    const fty = document.getElementById('fFundType') ? document.getElementById('fFundType').value : '';
     const ccy = document.getElementById('fCcy').value;
     const yr = fYear.value;
     const from = document.getElementById('fDateFrom').value;
@@ -124,7 +155,8 @@ DL.register('trades', function (payload) {
     const list = TRADES().filter(t => {
       if (cls && t.asset_class !== cls) return false;
       if (sec && t.security !== sec) return false;
-      if (ty && t.type !== ty) return false;
+      if (ty && !txnMatch(ty, t.type)) return false;
+      if (fty && (DL.typeOf(t.security) || '') !== fty) return false;
       if (ccy && (t.ccy || '') !== ccy) return false;
       if (yr && (t.iso_date || '').slice(0, 4) !== yr) return false;
       const iso = t.iso_date || '';
@@ -174,9 +206,10 @@ DL.register('trades', function (payload) {
   }
 
   document.getElementById('fSearch').addEventListener('input', applyFilter);
-  document.getElementById('fClass').addEventListener('change', () => { populateSec(); applyFilter(); });
+  document.getElementById('fClass').addEventListener('change', () => { populateSec(); populateFundType(); applyFilter(); });
+  document.getElementById('fFundType') && document.getElementById('fFundType').addEventListener('change', () => { populateSec(); applyFilter(); });
   document.getElementById('fSec').addEventListener('change', applyFilter);
-  document.getElementById('fTxnType').addEventListener('change', applyFilter);
+  document.getElementById('fTxnType').addEventListener('change', () => { populateSec(); applyFilter(); });
   document.getElementById('fCcy').addEventListener('change', applyFilter);
   document.getElementById('fDateFrom').addEventListener('input', applyFilter);
   document.getElementById('fDateTo').addEventListener('input', applyFilter);
@@ -192,6 +225,106 @@ DL.register('trades', function (payload) {
   document.getElementById('btnBackup').addEventListener('click', backupJSON);
   document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
   document.getElementById('fileImport').addEventListener('change', importJSON);
+
+  // ===== Add manual transaction form =====
+  const $ = id => document.getElementById(id);
+  function fillFormDropdowns() {
+    const am = $('mfAM'); if (am) am.innerHTML = '<option value="">—</option>' + DL.allAMs().map(a => `<option value="${a.id}">${a.name.replace(/</g,'&lt;')}</option>`).join('') + '<option value="__new">+ เพิ่มใหม่…</option>';
+    
+    const cl = $('mfClass'); if (cl) { const prev = cl.value; cl.innerHTML = DL.allClasses().map(c => `<option value="${c.key}">${c.label.replace(/</g,'&lt;')}</option>`).join(''); if (prev) cl.value = prev; }
+  }
+  function recomputeSellable() {
+    const sec = ($('mfSec').value || '').trim();
+    const ty = sec ? DL.typeOf(sec) : '';
+    const eff = $('mfEffDate') ? $('mfEffDate').value : '';
+    const txn = $('mfTxnDate').value;
+    const base = eff || txn;   // ใช้วันมีผลก่อน ถ้าไม่มีใช้วันที่ทำรายการ
+    const birth = (DL.loadProfile().birthdate) || '';
+    const sellable = (ty && DL.typeIsSellable(ty)) ? DL.sellableDate(ty, base, birth) : '';
+    const hint = $('mfSellableHint');
+    if (!sec) { if (hint) hint.textContent = ''; return; }
+    if (!ty) { if (hint) hint.textContent = 'ยังไม่ได้กำหนด type — ไปตั้งที่ Classify (แล้วคำนวณให้)'; return; }
+    if (!DL.typeIsSellable(ty)) { $('mfSellable').value = ''; if (hint) hint.textContent = ty + ' — ขายได้เลย (ไม่มีเงื่อนไข)'; return; }
+    if (base) { $('mfSellable').value = sellable || ''; if (hint) hint.textContent = sellable ? ('คำนวณจาก type: ' + ty + ' (แก้ได้)') : (/RMF/i.test(ty) && !birth ? 'ใส่วันเกิดใน Settings เพื่อคำนวณ RMF' : ''); }
+    else if (hint) hint.textContent = '';
+  }
+  $('mfTxnDate') && $('mfTxnDate').addEventListener('change', recomputeSellable);
+  $('mfEffDate') && $('mfEffDate').addEventListener('change', recomputeSellable);
+  $('mfSec') && $('mfSec').addEventListener('input', recomputeSellable);
+  $('mfAM') && $('mfAM').addEventListener('change', function () {
+    if (this.value === '__new') { const n = (prompt('ชื่อ Asset Manager ใหม่:') || '').trim(); let id = ''; if (n) id = DL.amId(n, true, 'manual'); fillFormDropdowns(); this.value = id || ''; }
+  });
+  function openForm() { fillFormDropdowns(); $('addTrxCard').style.display = ''; $('addTrxCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  function closeForm() { $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
+  $('btnAddTrx') && $('btnAddTrx').addEventListener('click', openForm);
+  $('mfCancel') && $('mfCancel').addEventListener('click', closeForm);
+  $('mfSave') && $('mfSave').addEventListener('click', () => {
+    const sec = $('mfSec').value.trim();
+    const txnDate = $('mfTxnDate').value;
+    if (!sec) { alert('ใส่ชื่อหลักทรัพย์ก่อน'); return; }
+    if (!txnDate) { alert('เลือกวันที่ทำรายการก่อน'); return; }
+    const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+    const trx = {
+      _mid: DL.genMid(), asset_class: $('mfClass').value, am_id: $('mfAM').value || '',
+      type: $('mfType').value, security: sec, exchange: $('mfExch').value.trim(),
+      fund_type: '', units: num('mfUnits'), price: num('mfPrice'),
+      ccy: $('mfCcy').value, total_thb: num('mfTotalThb'), total_usd: num('mfTotalUsd'),
+      fee_thb: num('mfFeeThb'), iso_date: txnDate, effective_date: $('mfEffDate').value || '',
+      sellable_date: $('mfSellable').value || '', order_no: $('mfOrder').value.trim() || DL.genMid(),
+      txn_id: $('mfOrder').value.trim() || ('MAN-' + sec), note: $('mfNote').value.trim(),
+    };
+    DL.addManual(trx); closeForm(); applyFilter(); DL.refreshAll && DL.refreshAll();
+    alert('เพิ่มรายการแล้ว');
+  });
+
+  // ===== Import Excel (multi-row) =====
+  function trxTemplate() {
+    const rows = [{ asset_manager: 'Dime', asset_class: 'mutual_fund', type: 'SUB', security: 'ASP-RMF', exchange: '', fund_type: 'RMF', units: 100, price: 10, ccy: 'THB', total_thb: 1000, total_usd: '', fee_thb: 0, txn_date: '2026-01-15', effective_date: '', sellable_date: '', order_no: '', note: '' }];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Transactions');
+    XLSX.writeFile(wb, 'WealthMan_Trades_Template.xlsx');
+  }
+  function importXlsx(ev) {
+    const file = ev.target.files[0]; if (!file) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const wb = XLSX.read(rd.result, { type: 'array' });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+        const cur = DL.loadManual(); let n = 0;
+        const toIso = v => {
+          if (v == null || v === '') return '';
+          if (typeof v === 'number') { const dt = XLSX.SSF.parse_date_code(v); return dt ? `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}` : ''; }
+          return String(v).trim().slice(0, 10);
+        };
+        rows.forEach(r => {
+          const sec = String(r.security || '').trim(); if (!sec) return;
+          const d = toIso(r.txn_date || r.iso_date);
+          const eff = toIso(r.effective_date);
+          const nz = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
+          const amId = r.asset_manager ? DL.amId(String(r.asset_manager).trim(), true, 'manual') : '';
+          const ft = r.fund_type || '';
+          let sellable = toIso(r.sellable_date);
+          if (!sellable && ft) { const birth = (DL.loadProfile() || {}).birthdate || ''; sellable = DL.sellableDate(ft, eff || d, birth) || ''; }
+          cur.push({ _mid: DL.genMid(), asset_class: r.asset_class || 'other', am_id: amId, type: r.type || 'BUY', security: sec, exchange: r.exchange || '', fund_type: ft, units: nz(r.units), price: nz(r.price), ccy: r.ccy || 'THB', total_thb: nz(r.total_thb), total_usd: nz(r.total_usd), fee_thb: nz(r.fee_thb), iso_date: d, effective_date: eff, sellable_date: sellable, order_no: String(r.order_no || '') || DL.genMid(), txn_id: String(r.order_no || '') || ('MAN-' + sec), note: r.note || '' });
+          n++;
+        });
+        DL.saveManual(cur); applyFilter(); DL.refreshAll && DL.refreshAll();
+        alert('นำเข้า ' + n + ' รายการสำเร็จ');
+      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+      ev.target.value = '';
+    };
+    rd.readAsArrayBuffer(file);
+  }
+  $('btnTrxTemplate') && $('btnTrxTemplate').addEventListener('click', trxTemplate);
+  $('btnImportXlsx') && $('btnImportXlsx').addEventListener('click', () => $('fileImportXlsx').click());
+  $('fileImportXlsx') && $('fileImportXlsx').addEventListener('change', importXlsx);
+
+  // more-menu: close after clicking an item, and when clicking outside
+  (function () {
+    const dd = document.getElementById('trxMore'); if (!dd) return;
+    dd.querySelectorAll('.moremenu-panel .btn').forEach(b => b.addEventListener('click', () => dd.removeAttribute('open')));
+    document.addEventListener('click', e => { if (dd.open && !dd.contains(e.target)) dd.removeAttribute('open'); });
+  })();
 
   applyFilter();
 });

@@ -5,8 +5,8 @@
  */
 DL.register('analysis', function (payload) {
   const C = DL.C, fmt = DL.fmt, money = DL.money, dmy = DL.dmy;
-  const trades = (payload.trades || []);
-  const BUY = { BUY: 1, SUB: 1, SWI: 1 }, SELL = { SEL: 1, RED: 1, SWO: 1 };
+  const trades = DL.allTrades();   // auto + manual
+  const BUY = { BUY: 1, SUB: 1, SWI: 1 }, SELL = { SEL: 1, SELL: 1, RED: 1, SWO: 1 };
   const PRIV = DL.isPrivate();
 
   function loadPrices() {

@@ -1,7 +1,7 @@
 /* DimeLog — Dashboard panel */
 DL.register('dashboard', function (payload) {
   const C = DL.C, fmt = DL.fmt, money = DL.money, dmy = DL.dmy, isBuy = DL.isBuy, isSell = DL.isSell;
-  const trades = (payload.trades || []).slice();
+  const trades = DL.allTrades();   // auto + manual
 
   // KPIs
   const totalInvested = trades.filter(isBuy).reduce((a, t) => a + (t.total_thb || 0), 0);
@@ -17,7 +17,7 @@ DL.register('dashboard', function (payload) {
     try { Object.assign(seed, JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}); } catch (e) {}
     return seed;
   }
-  const BUYt = { BUY: 1, SUB: 1, SWI: 1 }, SELLt = { SEL: 1, RED: 1, SWO: 1 };
+  const BUYt = { BUY: 1, SUB: 1, SWI: 1 }, SELLt = { SEL: 1, SELL: 1, RED: 1, SWO: 1 };
   const prices = loadPrices();
   const PRIV = DL.isPrivate();
   // สรุปต่อ symbol: หน่วยคงเหลือ + เงินลงทุน native

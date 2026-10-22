@@ -1,7 +1,7 @@
 /* DimeLog — Tax report panel */
 DL.register('tax', function (payload) {
   const C = DL.C, fmt = DL.fmt, money = DL.money, dmy = DL.dmy, isBuy = DL.isBuy, isSell = DL.isSell;
-  const trades = (payload.trades || []).slice();
+  const trades = DL.allTrades();   // auto + manual
 
   // ----- โหลดปันผล + เรท FX ไว้ล่วงหน้า (ใช้ในตารางสรุปรายปีด้วย) -----
   const _divsAll = (function () {
@@ -162,7 +162,7 @@ DL.register('tax', function (payload) {
       const ds = divSecRows.map(([s, r]) => ({ 'หลักทรัพย์': s, 'จำนวนครั้ง': r.n, 'ปันผล (USD)': +r.gross.toFixed(2), 'ภาษีหัก (USD)': +r.wht.toFixed(2), 'ปันผลสุทธิ (USD)': +r.net.toFixed(2) }));
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ds), 'ปันผลรายหลักทรัพย์');
     }
-    XLSX.writeFile(wb, `Dime_Tax_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(wb, `WealthMan_Tax_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
   document.getElementById('btnTaxExport').onclick = exportTax;
 });

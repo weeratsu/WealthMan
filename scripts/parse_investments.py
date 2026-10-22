@@ -124,7 +124,7 @@ def parse_offshore(pdf):
                 tick.append((w['x0'], w['text']))
         j = lambda d, c: ' '.join(t for _, t in sorted(d.get(c, [])))
         trades.append({
-            'asset_class':'offshore','txn_id':hdr['txn_id'],'doc_no':hdr['doc_no'],
+            'asset_class':'offshore','asset_manager':'Dime','txn_id':hdr['txn_id'],'doc_no':hdr['doc_no'],
             'account_no':hdr['account_no'],'issue_date':hdr['issue_date'],
             'iso_date':iso_date(hdr['issue_date']),'fx_thb_usd':hdr['fx'],
             'order_no':j(usd,'order'),'settlement':j(usd,'settle'),'type':j(usd,'type'),
@@ -146,7 +146,7 @@ def parse_mutual(pdf):
     pat = r'(\d{13,})\s+(SUB|RED|SWI|SWO)\s+(\S+)\s+([\d,]+\.\d+)\s+([\d,]+\.\d+)\s+([\d,]+\.\d+)\s+([\d,]+\.\d+)'
     for m in re.finditer(pat, full):
         trades.append({
-            'asset_class':'mutual_fund','txn_id':hdr['txn_id'],'doc_no':'',
+            'asset_class':'mutual_fund','asset_manager':'Dime','txn_id':hdr['txn_id'],'doc_no':'',
             'account_no':hdr['account_no'],'issue_date':hdr['issue_date'],
             'iso_date':iso_date(hdr['issue_date']),'fx_thb_usd':None,
             'order_no':m.group(1),'settlement':hdr['issue_date'],'type':m.group(2),
@@ -201,7 +201,7 @@ def parse_gold(pdf):
     order = mr.group(1) if mr else ''
 
     return [{
-        'asset_class':'gold','txn_id':txn,'doc_no':txn,'account_no':'',
+        'asset_class':'gold','asset_manager':'Hua Seng Heng','txn_id':txn,'doc_no':txn,'account_no':'',
         'issue_date':issue,'iso_date':iso,'fx_thb_usd':None,
         'order_no':order,'settlement':issue,'type':typ,
         'security':(f'Gold {float(purity):g}%' if purity else 'Gold'),'exchange':'Hua Seng Heng',
@@ -357,7 +357,7 @@ def main():
                     continue
                 seen.add(key)
                 all_trades.append({
-                    'asset_class':'gold','txn_id':txn,'doc_no':rec.get("doc_no",""),'account_no':'',
+                    'asset_class':'gold','asset_manager':'Dime','txn_id':txn,'doc_no':rec.get("doc_no",""),'account_no':'',
                     'issue_date': (f"{iso[8:10]}/{iso[5:7]}/{iso[0:4]}" if len(iso) >= 10 else iso),
                     'iso_date':iso,'fx_thb_usd':None,
                     'order_no':order,'settlement':iso,'type':rec.get("type","BUY"),
