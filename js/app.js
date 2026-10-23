@@ -190,6 +190,7 @@ window.DL = (function () {
   }
 
   function show(key) {
+    try{window.scrollTo(0,0);}catch(_){}
     // leaving Classify: types may have changed → let dashboard/tax re-render with latest types
     const prev = document.querySelector('.dl-sb a.active');
     if (prev && prev.getAttribute('data-nav') === 'classify' && key !== 'classify') {
