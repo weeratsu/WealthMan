@@ -28,16 +28,16 @@ if /i "%~1"=="rebuild" (
 echo Reading confirmation-note PDFs...
 echo (PDF code: pass as an arg e.g. run_wealthman.bat 12111981, or DIME_PDF_PW env var, or config.json; else prompted)
 echo.
-where python >nul 2>nul
-if %errorlevel%==0 (
-    python parse_investments.py %*
+if exist "C:\Users\USER\AppData\Local\Python\pythoncore-3.14-64\python.exe" (
+    "C:\Users\USER\AppData\Local\Python\pythoncore-3.14-64\python.exe" parse_investments.py %*
 ) else (
-    py parse_investments.py %*
+  where python >nul 2>nul && ( python parse_investments.py %* ) || ( py parse_investments.py %* )
 )
 set RC=%errorlevel%
 echo.
 if %RC%==0 ( echo Done. ) else ( echo ** Error occurred ^(code %RC%^) - see log above ** )
 echo.
 echo Closing automatically...
-timeout /t 3 >nul
+ping -n 4 127.0.0.1 >nul
 endlocal
+exit /b 0
