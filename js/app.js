@@ -374,6 +374,74 @@ window.DL = (function () {
   }
   const FUND_TYPES = fundTypes();  // สำรองเดิม (โค้ดเก่าใช้ DL.FUND_TYPES) — ที่รีเฟรชควรเรียก DL.fundTypes()
 
+  // ---------- toast popup (แทน alert) ----------
+  function toast(msg, kind) {
+    let box = document.getElementById('dlToast');
+    if (!box) { box = document.createElement('div'); box.id = 'dlToast'; document.body.appendChild(box); }
+    const el = document.createElement('div');
+    el.className = 'dl-toast ' + (kind || (/ไม่|error|ผิด|ก่อน/i.test(msg) ? 'err' : 'ok'));
+    el.innerHTML = '<span class="dl-toast-ic">' + (el.className.indexOf('err') > 0 ? '⚠️' : '✅') + '</span><span>' + String(msg).replace(/</g, '&lt;') + '</span>';
+    box.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2600);
+  }
+
+  // ---------- custom dropdown: focus = full list, typing = filter ----------
+  function ddAttach(inp, getItems, onPick) {
+    if (!inp || inp._dd) { if (inp) inp._ddItems = getItems; return; }
+    inp._dd = true; inp._ddItems = getItems; inp.autocomplete = 'off';
+    const box = document.createElement('div'); box.className = 'dd-box'; document.body.appendChild(box);
+    let hi = -1, list = [];
+    const place = () => { const r = inp.getBoundingClientRect(); box.style.left = r.left + 'px'; box.style.top = (r.bottom + 2) + 'px'; box.style.minWidth = r.width + 'px'; };
+    const show = all => {
+      const q = all ? '' : inp.value.trim().toLowerCase();
+      list = inp._ddItems().filter(x => !q || x.toLowerCase().includes(q));
+      box.innerHTML = list.length ? list.map((x, i) => `<div class="dd-it${i === hi ? ' on' : ''}" data-i="${i}">${String(x).replace(/</g, '&lt;')}</div>`).join('') : '<div class="dd-no">ไม่พบ</div>';
+      place(); box.style.display = 'block';
+    };
+    const hide = () => { box.style.display = 'none'; hi = -1; };
+    const pick = i => { if (list[i] == null) return; inp.value = list[i]; hide(); onPick && onPick(list[i]); inp.dispatchEvent(new Event('change')); };
+    inp.addEventListener('focus', () => { hi = -1; show(true); inp.select(); });
+    inp.addEventListener('input', () => { hi = 0; show(false); });
+    inp.addEventListener('keydown', ev => {
+      if (box.style.display !== 'block') return;
+      if (ev.key === 'ArrowDown') { hi = Math.min(hi + 1, list.length - 1); show(!inp.value || hi < 0 ? false : false); ev.preventDefault(); }
+      else if (ev.key === 'ArrowUp') { hi = Math.max(hi - 1, 0); show(false); ev.preventDefault(); }
+      else if (ev.key === 'Enter') { if (hi >= 0) { pick(hi); ev.preventDefault(); } }
+      else if (ev.key === 'Escape') hide();
+    });
+    box.addEventListener('mousedown', ev => { const it = ev.target.closest('.dd-it'); if (it) { ev.preventDefault(); pick(+it.dataset.i); } });
+    inp.addEventListener('blur', () => setTimeout(hide, 120));
+    window.addEventListener('scroll', () => { if (box.style.display === 'block') place(); }, true);
+  }
+  // free-text field with suggestions
+  function suggest(input, values) {
+    const vals = [...new Set((values || []).filter(Boolean))].sort();
+    ddAttach(input, () => vals);
+    if (input) input._ddItems = () => vals;
+  }
+  // select → searchable field, value must be a real option
+  function combo(sel) {
+    if (!sel) return;
+    let inp = sel._combo;
+    const txt = () => (sel.selectedIndex >= 0 && sel.value !== '') ? sel.options[sel.selectedIndex].text : '';
+    if (!inp) {
+      inp = document.createElement('input'); inp.className = 'combo-in'; inp.id = (sel.id || 'sel') + 'Combo';
+      sel.style.display = 'none'; sel.parentNode.insertBefore(inp, sel); sel._combo = inp;
+      const commit = () => {
+        const q = inp.value.trim().toLowerCase();
+        const o = [...sel.options].find(x => x.text.trim().toLowerCase() === q);
+        if (o && sel.value !== o.value) { sel.value = o.value; sel.dispatchEvent(new Event('change')); }
+        inp.value = txt();
+      };
+      inp.addEventListener('change', commit); inp.addEventListener('blur', () => setTimeout(commit, 130));
+      sel.addEventListener('change', () => { inp.value = txt(); });
+    }
+    ddAttach(inp, () => [...sel.options].map(o => o.text).filter(t => t && t !== '—' && !/^\+ /.test(t)));
+    inp._ddItems = () => [...sel.options].map(o => o.text).filter(t => t && t !== '—');
+    inp.value = txt();
+  }
+
   function init() {
     // wire sidebar
     document.querySelectorAll('.dl-sb a[data-nav]').forEach(a =>
@@ -404,7 +472,7 @@ window.DL = (function () {
     }
   }
 
-  return { C, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
+  return { C, toast, suggest, combo, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
            SEC_TYPES, DEFAULT_TYPES, loadTypes, saveTypes, typeOf, userTypeOf, setType, allTypes, typeIsSellable, sellableByType,
            isPrivate, setPrivate, togglePrivacy,
            loadFx, saveFx, fxRate, usdToThb, thbSuffix,

@@ -33,7 +33,7 @@ DL.register('setup', function () {
         await navigator.clipboard.writeText(el.getAttribute('data-copy'));
         const cp = el.querySelector('.cp'); const old = cp.textContent;
         cp.textContent = 'คัดลอกแล้ว ✓'; setTimeout(() => cp.textContent = old, 1500);
-      } catch (e) { alert('คัดลอกไม่สำเร็จ'); }
+      } catch (e) { DL.toast('คัดลอกไม่สำเร็จ'); }
     });
   });
 
@@ -66,7 +66,7 @@ DL.register('setup', function () {
 
   document.getElementById('btnGenCfg').addEventListener('click', async () => {
     const cfg = buildConfig();
-    if (!cfg.root) { alert('กรุณากรอก path โฟลเดอร์ก่อน'); return; }
+    if (!cfg.root) { DL.toast('กรุณากรอก path โฟลเดอร์ก่อน'); return; }
     const text = JSON.stringify(cfg, null, 2);
     if (window.showSaveFilePicker) {
       try {
@@ -85,9 +85,9 @@ DL.register('setup', function () {
     okMsg.style.display = 'block';
   });
   document.getElementById('btnCopyCfg').addEventListener('click', async () => {
-    const cfg = buildConfig(); if (!cfg.root) { alert('กรุณากรอก path โฟลเดอร์ก่อน'); return; }
-    try { await navigator.clipboard.writeText(JSON.stringify(cfg, null, 2)); alert('คัดลอกเนื้อหา config.json แล้ว'); }
-    catch (e) { alert('คัดลอกไม่สำเร็จ'); }
+    const cfg = buildConfig(); if (!cfg.root) { DL.toast('กรุณากรอก path โฟลเดอร์ก่อน'); return; }
+    try { await navigator.clipboard.writeText(JSON.stringify(cfg, null, 2)); DL.toast('คัดลอกเนื้อหา config.json แล้ว'); }
+    catch (e) { DL.toast('คัดลอกไม่สำเร็จ'); }
   });
 
   // ---- step 4: verify data loaded ----
@@ -148,8 +148,8 @@ DL.register('setup', function () {
     }
     document.getElementById('btnPunitSet').addEventListener('click', () => {
       const s = secEl.value; const v = parseFloat(valEl.value);
-      if (!s) { alert('เลือกหลักทรัพย์ก่อน'); return; }
-      if (!(v > 0)) { alert('ใส่ตัวหารให้ถูกต้อง (> 0)'); return; }
+      if (!s) { DL.toast('เลือกหลักทรัพย์ก่อน'); return; }
+      if (!(v > 0)) { DL.toast('ใส่ตัวหารให้ถูกต้อง (> 0)'); return; }
       const u = loadU(); u[s] = v; saveU(u); valEl.value = ''; render();
     });
     fill(); render();
@@ -198,8 +198,8 @@ DL.register('setup', function () {
     if (addBtn && !addBtn.dataset.bound) { addBtn.dataset.bound = '1'; addBtn.addEventListener('click', () => {
       const kEl = document.getElementById('clNewKey'), lEl = document.getElementById('clNewLabel');
       let k = (kEl.value || '').trim().toLowerCase().replace(/\s+/g, '_'); const lb = (lEl.value || '').trim();
-      if (!k) { alert('ใส่ key ก่อน'); return; }
-      const m = DL.loadClasses(); if (m[k]) { alert('key นี้มีแล้ว'); return; }
+      if (!k) { DL.toast('ใส่ key ก่อน'); return; }
+      const m = DL.loadClasses(); if (m[k]) { DL.toast('key นี้มีแล้ว'); return; }
       m[k] = { label: lb || k, builtin: false }; DL.saveClasses(m); kEl.value = ''; lEl.value = ''; render(); flash(); DL.refreshAll && DL.refreshAll();
     }); }
     const rstBtn = document.getElementById('btnClReset');
@@ -255,7 +255,7 @@ DL.register('setup', function () {
     const addBtn = document.getElementById('btnFrAdd');
     if (addBtn && !addBtn.dataset.bound) { addBtn.dataset.bound = '1'; addBtn.addEventListener('click', () => {
       const kEl = document.getElementById('frNewKey'), hEl = document.getElementById('frNewHold'), aEl = document.getElementById('frNewAge'), bEl = document.getElementById('frNewBasis');
-      const k = (kEl.value || '').trim().toUpperCase(); if (!k) { alert('ใส่ชื่อประเภทกองทุน'); return; }
+      const k = (kEl.value || '').trim().toUpperCase(); if (!k) { DL.toast('ใส่ชื่อประเภทกองทุน'); return; }
       const R = DL.loadFundRules();
       R[k] = { label: (kEl.value || '').trim(), holdYears: hEl.value.trim() === '' ? null : parseInt(hEl.value, 10), minAge: aEl.value.trim() === '' ? null : parseInt(aEl.value, 10), basis: (bEl && bEl.value) || 'anniversary' };
       DL.saveFundRules(R); kEl.value = ''; hEl.value = ''; aEl.value = ''; render(); flash();
@@ -334,7 +334,7 @@ DL.register('setup', function () {
     const addBtn = document.getElementById('btnAmAdd');
     if (addBtn && !addBtn.dataset.bound) { addBtn.dataset.bound = '1'; addBtn.addEventListener('click', () => {
       const nEl = document.getElementById('amNew'), rEl = document.getElementById('amNewRemark');
-      const n = (nEl && nEl.value || '').trim(); if (!n) { alert('ใส่ชื่อ AM ก่อน'); return; }
+      const n = (nEl && nEl.value || '').trim(); if (!n) { DL.toast('ใส่ชื่อ AM ก่อน'); return; }
       const id = DL.amId(n, true, 'manual');
       if (rEl && rEl.value.trim()) { const m = DL.loadAM(); if (m[id]) { m[id].remark = rEl.value.trim(); DL.saveAM(m); } }
       if (nEl) nEl.value = ''; if (rEl) rEl.value = ''; render();

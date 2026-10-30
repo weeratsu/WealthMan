@@ -145,8 +145,8 @@ DL.register('classify', function (payload) {
         const obj = JSON.parse(rd.result);
         if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
         DL.saveTypes(obj); render();
-        alert('นำเข้าประเภทสำเร็จ: ' + Object.keys(obj).length + ' รายการ');
-      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+        DL.toast('นำเข้าประเภทสำเร็จ: ' + Object.keys(obj).length + ' รายการ');
+      } catch (e) { DL.toast('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsText(file);

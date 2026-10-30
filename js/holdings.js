@@ -305,8 +305,8 @@ DL.register('holdings', function (payload) {
         if (!n) throw new Error('ไม่พบราคาที่ถูกต้อง (ต้องมีคอลัมน์ security + price)');
         localStorage.setItem(PRICE_KEY, JSON.stringify(m));
         ROWS = build(); render();
-        alert('นำเข้าราคาสำเร็จ: ' + n + ' รายการ');
-      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+        DL.toast('นำเข้าราคาสำเร็จ: ' + n + ' รายการ');
+      } catch (e) { DL.toast('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsBinaryString(file);

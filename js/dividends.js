@@ -49,6 +49,14 @@ DL.register('dividends', function (payload) {
   // แปลงเป็นบาท (ตามวันจ่าย) — USD ใช้ FX, THB คงเดิม
   function toThb(v, r) { if (v == null) return null; return r.ccy === 'THB' ? v : DL.usdToThb(v, r.pay_date); }
 
+  const DST = window.__divState || (window.__divState = { last: null, scroll: false, freeze: false, order: null });
+  // fit table box to the visible screen (same as Transactions) — bottom scrollbar always visible
+  function fitDivWrap() {
+    const t = document.getElementById('divTable'); const w = t && t.parentElement; if (!w || !w.offsetParent) return;
+    w.classList.add('div-wrap');
+    w.style.height = Math.max(260, window.innerHeight - Math.max(w.getBoundingClientRect().top, 0) - 24) + 'px';
+  }
+  window.addEventListener('resize', fitDivWrap);
   let ROWS = allRows();
   let sortCol = 'pay_date', sortDir = -1;
 
@@ -123,6 +131,12 @@ DL.register('dividends', function (payload) {
       va = (va || '').toString().toLowerCase(); vb = (vb || '').toString().toLowerCase();
       return va < vb ? -dir : va > vb ? dir : 0;
     });
+    if (DST.freeze && DST.order) {
+      const pos = {}; DST.order.forEach((k, i) => { pos[k] = i; });
+      const P = r => (keyOf(r) in pos ? pos[keyOf(r)] : -1);
+      list.sort((a, b) => P(a) - P(b));
+    }
+    DST.order = list.map(keyOf);
     return list;
   }
 
@@ -151,7 +165,7 @@ DL.register('dividends', function (payload) {
     body.innerHTML = list.map(r => {
       const netThb = r.ccy === 'USD' ? toThb(r.net, r) : null;
       const sfx = (netThb != null) ? ` <span style="color:var(--muted);font-size:11px">${DL.isPrivate() ? '(≈฿•••)' : '(≈฿' + fmt(netThb, 0) + ')'}</span>` : '';
-      return `<tr>
+      return `<tr${keyOf(r) === DST.last ? ' class="row-hl"' : ''}>
       <td class="yr">${dmy(r.pay_date)}</td>
       <td style="text-align:left">${r.security}</td>
       <td><span class="chip" style="font-size:11px">${r.ccy}</span></td>
@@ -167,6 +181,8 @@ DL.register('dividends', function (payload) {
     // wire action buttons
     body.querySelectorAll('button[data-del]').forEach(btn => btn.addEventListener('click', () => onDelete(btn.dataset.del)));
     body.querySelectorAll('button[data-edit]').forEach(btn => btn.addEventListener('click', () => onEdit(btn.dataset.edit)));
+    fitDivWrap();
+    const hl = body.querySelector('tr.row-hl'); if (hl && DST.scroll) { hl.scrollIntoView({ block: 'center' }); DST.scroll = false; }
   }
 
   const headerMap = ['pay_date', 'security', 'ccy', 'per_share', 'gross', 'wht', 'net', 'record_date', 'effective_date'];
@@ -177,6 +193,7 @@ DL.register('dividends', function (payload) {
       th.style.cursor = 'pointer'; th.title = 'คลิกเพื่อเรียง';
       th.addEventListener('click', () => {
         const col = headerMap[i]; if (!col) return;
+        DST.freeze = false;
         if (sortCol === col) sortDir = -sortDir; else { sortCol = col; sortDir = col === 'security' ? 1 : -1; }
         render();
       });
@@ -255,8 +272,8 @@ DL.register('dividends', function (payload) {
         existing.concat(cleaned).forEach(d => { map[d.security + '|' + d.pay_date] = d; });
         saveImported(Object.values(map));
         ROWS = allRows(); buildFilters(); render();
-        alert('นำเข้าปันผลสำเร็จ: ' + cleaned.length + ' รายการ (รวมในระบบ ' + ROWS.filter(r => r.security !== '(TAF Fee)').length + ' รายการ)');
-      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+        DL.toast('นำเข้าปันผลสำเร็จ: ' + cleaned.length + ' รายการ (รวมในระบบ ' + ROWS.filter(r => r.security !== '(TAF Fee)').length + ' รายการ)');
+      } catch (e) { DL.toast('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsBinaryString(file);
@@ -274,21 +291,82 @@ DL.register('dividends', function (payload) {
   // ---- Edit a record (opens inline prompt form via a small modal) ----
   function onEdit(k) {
     const r = ROWS.find(x => keyOf(x) === k); if (!r) return;
-    const nd = editModal(r);
-    if (!nd) return;
+    openDivForm(r, nd => {
     // remove old key from imported + deleted, add new as imported override
     const imp = importedRows().filter(d => keyOf(norm(d)) !== k);
     imp.push(nd);
     saveImported(imp);
     // if it was previously soft-deleted, undelete
     const del = loadDeleted().filter(x => x !== k && x !== keyOf(nd)); saveDeleted(del);
+    if (DST.order) DST.order = DST.order.map(x => x === k ? keyOf(norm(nd)) : x);
+    DST.last = keyOf(norm(nd)); DST.scroll = true; DST.freeze = true;
     ROWS = allRows(); buildFilters(); render();
+    DL.toast('บันทึกการแก้ไขแล้ว');
+    });
   }
+
+  // ---- Add / Edit form (modal) — same feel as Transactions ----
+  function openDivForm(r, onSave) {
+    let ov = document.getElementById('divFormOv');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'divFormOv'; ov.className = 'dvf-ov'; document.body.appendChild(ov); }
+    const v = x => (x == null ? '' : String(x).replace(/"/g, '&quot;'));
+    const secs = [...new Set(ROWS.map(x => x.security).filter(Boolean))].sort();
+    const isNew = !r.security;
+    ov.innerHTML = `<div class="dvf-box">
+      <h2>${isNew ? 'เพิ่มปันผล' : 'แก้ไขปันผล'}</h2>
+      <div class="dvf-grid">
+        <label>Security<input id="dvSec" value="${v(r.security)}"></label>
+        <label>Pay Date<input type="date" id="dvPay" value="${v(r.pay_date)}"></label>
+        <label>Ccy<select id="dvCcy"><option value=""${!r.ccy ? ' selected' : ''}></option><option${r.ccy === 'THB' ? ' selected' : ''}>THB</option><option${r.ccy === 'USD' ? ' selected' : ''}>USD</option></select></label>
+        <label>Gross<input type="number" step="any" id="dvGross" value="${v(r.gross)}"></label>
+        <label>WHT<input type="number" step="any" id="dvWht" value="${v(r.wht)}"></label>
+        <label>Fee<input type="number" step="any" id="dvFee" value="${v(r.fee)}"></label>
+        <label>Per Unit<input type="number" step="any" id="dvPs" value="${v(r.per_share)}"></label>
+        <label>Record date<input type="date" id="dvRec" value="${v(r.record_date)}"></label>
+        <label>Effective<input type="date" id="dvEff" value="${v(r.effective_date)}"></label>
+        <label style="grid-column:1/-1">Note<input id="dvNote" value="${v(r.note)}"></label>
+      </div>
+      <div class="dvf-btns"><button class="btn" id="dvSave">บันทึก</button><button class="btn secondary" id="dvCancel">ยกเลิก</button></div>
+    </div>`;
+    ov.style.display = 'flex';
+    DL.suggest(document.getElementById('dvSec'), secs.concat(DL.allTrades().map(x => x.security)));
+    DL.combo(document.getElementById('dvCcy'));
+    const g = id => document.getElementById(id).value.trim();
+    const num = id => { const x = g(id); return x === '' ? null : +x; };
+    const close = () => { ov.style.display = 'none'; };
+    document.getElementById('dvCancel').onclick = close;
+    ov.onclick = e => { if (e.target === ov) close(); };
+    document.getElementById('dvSave').onclick = () => {
+      if (!g('dvSec')) { DL.toast('ใส่ชื่อหลักทรัพย์ก่อน', 'err'); return; }
+      if (!g('dvPay')) { DL.toast('เลือกวันจ่ายก่อน', 'err'); return; }
+      if (!g('dvCcy')) { DL.toast('เลือกสกุลเงินก่อน', 'err'); return; }
+      const nd = { security: g('dvSec'), pay_date: g('dvPay'), ccy: g('dvCcy'), gross: num('dvGross') || 0,
+        wht: num('dvWht'), fee: num('dvFee'), per_share: num('dvPs'), record_date: g('dvRec'), effective_date: g('dvEff'), note: g('dvNote') };
+      close(); onSave(nd);
+    };
+  }
+  function onAdd() {
+    openDivForm({ security: '', pay_date: '', ccy: '' }, nd => {
+      const k = keyOf(norm(nd));
+      if (ROWS.some(x => keyOf(x) === k)) { DL.toast('มีปันผลของหลักทรัพย์นี้ในวันนี้แล้ว', 'err'); return; }
+      const imp = importedRows(); imp.push(nd); saveImported(imp);
+      saveDeleted(loadDeleted().filter(x => x !== k));
+      if (DST.order) DST.order.unshift(k);
+      DST.last = k; DST.scroll = true; DST.freeze = true;
+      ROWS = allRows(); buildFilters(); render();
+      DL.toast('เพิ่มปันผลแล้ว');
+    });
+  }
+  (function addBtn() {
+    const exp = document.getElementById('btnDivExport'); if (!exp) return;
+    if (!document.getElementById('btnDivAdd')) { const b = document.createElement('button'); b.className = 'btn'; b.id = 'btnDivAdd'; b.textContent = '+ Add dividend'; exp.parentNode.insertBefore(b, exp); }
+    document.getElementById('btnDivAdd').onclick = onAdd;
+  })();
   // minimal edit modal (reuses browser prompt for each field — simple + reliable)
   function editModal(r) {
     const sec = prompt('หลักทรัพย์', r.security); if (sec == null) return null;
     const pay = prompt('วันจ่าย (yyyy-mm-dd)', r.pay_date); if (pay == null) return null;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(pay.trim())) { alert('วันจ่ายต้องเป็น yyyy-mm-dd'); return null; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(pay.trim())) { DL.toast('วันจ่ายต้องเป็น yyyy-mm-dd'); return null; }
     const ccy = (prompt('สกุล (USD/THB)', r.ccy) || 'USD').toUpperCase() === 'THB' ? 'THB' : 'USD';
     const gross = prompt('ปันผล (ตามสกุล)', r.gross != null ? r.gross : ''); if (gross == null) return null;
     const wht = prompt('ภาษีหัก (ว่างได้)', r.wht != null ? r.wht : '');

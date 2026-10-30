@@ -104,20 +104,37 @@ DL.register('trades', function (payload) {
       va = (va == null ? '' : String(va)); vb = (vb == null ? '' : String(vb));
       return va.localeCompare(vb) * sortDir;
     });
+    const rk = t => t._mid || ('A|' + t.txn_id + '|' + t.order_no + '|' + t.iso_date + '|' + t.security);
+    if (ST.freeze && ST.order) {
+      const pos = {}; ST.order.forEach((id, k) => { pos[id] = k; });
+      const P = t => (rk(t) in pos ? pos[rk(t)] : -1);
+      sorted.sort((a, b) => P(a) - P(b));
+    }
+    ST.order = sorted.map(rk);
     const alignCls = c => (c.kind === 'num' || c.kind === 'money') ? ' class="r"' : '';
     const head = '<thead><tr>' + COLS.map(c => {
       const arrow = c.id === sortKey ? (sortDir === 1 ? ' ▲' : ' ▼') : '';
       return `<th data-k="${c.id}" title="${esc(c.tip)}"${alignCls(c)}>${esc(c.h)}${arrow}</th>`;
-    }).join('') + '</tr></thead>';
+    }).join('') + '<th>Actions</th></tr></thead>';
     const body = '<tbody>' + sorted.map(t =>
-      '<tr>' + COLS.map(c => `<td${alignCls(c)}>${esc(cellText(c, t))}</td>`).join('') + '</tr>'
+      '<tr' + (t._mid && t._mid === ST.last ? ' class="row-hl"' : '') + '>' + COLS.map(c => `<td${alignCls(c)}>${esc(cellText(c, t))}</td>`).join('') +
+      '<td style="white-space:nowrap">' + (t._manual ? `<button class="btn secondary" data-tedit="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">✏️</button> <button class="btn secondary" data-tdel="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">🗑️</button>` : '<span style="color:var(--muted);font-size:11px">auto</span>') + '</td></tr>'
     ).join('') + '</tbody>';
     document.getElementById('tableWrap').innerHTML = `<table class="trd-tbl">${head}${body}</table>`;
+    fitTableWrap();
+    const hl = document.querySelector('#tableWrap tr.row-hl');
+    if (hl && ST.scroll) { hl.scrollIntoView({ block: 'center' }); ST.scroll = false; }
+    document.querySelectorAll('#tableWrap button[data-tedit]').forEach(b => b.addEventListener('click', () => editTrx(b.dataset.tedit)));
+    document.querySelectorAll('#tableWrap button[data-tdel]').forEach(b => b.addEventListener('click', () => {
+      if (!confirm('ลบรายการนี้?')) return;
+      DL.saveManual(DL.loadManual().filter(x => x._mid !== b.dataset.tdel)); applyFilter(); DL.refreshAll && DL.refreshAll();
+    }));
     // header click → sort
     document.querySelectorAll('#tableWrap thead th').forEach(th => {
       th.style.cursor = 'pointer';
       th.addEventListener('click', () => {
         const k = th.dataset.k;
+        ST.freeze = false;
         if (k === sortKey) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
         render(CURRENT);
       });
@@ -142,6 +159,13 @@ DL.register('trades', function (payload) {
     return tt === filterVal;   // SUB/RED/SWI/SWO เลือกตรงตัว
   }
   function isBuyish(tType) { return !!BUYISH[(tType || '').toUpperCase()]; }
+  // fit table box to the space left on screen so the bottom scrollbar is always visible
+  function fitTableWrap() {
+    const w = document.getElementById('tableWrap'); if (!w || !w.offsetParent) return;
+    const top = w.getBoundingClientRect().top;
+    w.style.height = Math.max(260, window.innerHeight - Math.max(top, 0) - 24) + 'px';
+  }
+  window.addEventListener('resize', fitTableWrap);
   function applyFilter() {
     const q = document.getElementById('fSearch').value.trim().toLowerCase();
     const cls = document.getElementById('fClass').value;
@@ -197,9 +221,9 @@ DL.register('trades', function (payload) {
         const data = Array.isArray(obj) ? { trades: obj } : obj;
         if (!data.trades || !Array.isArray(data.trades)) throw new Error('ไม่พบ trades');
         DL.setPayload(data);
-        alert('นำเข้าข้อมูลสำเร็จ: ' + data.trades.length + ' รายการ');
+        DL.toast('นำเข้าข้อมูลสำเร็จ: ' + data.trades.length + ' รายการ');
         DL.refreshAll();
-      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+      } catch (e) { DL.toast('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsText(file);
@@ -229,6 +253,9 @@ DL.register('trades', function (payload) {
   // ===== Add manual transaction form =====
   const $ = id => document.getElementById(id);
   function fillFormDropdowns() {
+    const all = DL.allTrades();
+    DL.suggest($('mfSec'), all.map(x => x.security));
+    DL.suggest($('mfExch'), all.map(x => x.exchange).filter(x => x && x !== '-'));
     const am = $('mfAM'); if (am) am.innerHTML = '<option value="">—</option>' + DL.allAMs().map(a => `<option value="${a.id}">${a.name.replace(/</g,'&lt;')}</option>`).join('') + '<option value="__new">+ เพิ่มใหม่…</option>';
     
     const cl = $('mfClass'); if (cl) { const prev = cl.value; cl.innerHTML = DL.allClasses().map(c => `<option value="${c.key}">${c.label.replace(/</g,'&lt;')}</option>`).join(''); if (prev) cl.value = prev; }
@@ -254,15 +281,43 @@ DL.register('trades', function (payload) {
   $('mfAM') && $('mfAM').addEventListener('change', function () {
     if (this.value === '__new') { const n = (prompt('ชื่อ Asset Manager ใหม่:') || '').trim(); let id = ''; if (n) id = DL.amId(n, true, 'manual'); fillFormDropdowns(); this.value = id || ''; }
   });
-  function openForm() { fillFormDropdowns(); $('addTrxCard').style.display = ''; $('addTrxCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-  function closeForm() { $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
-  $('btnAddTrx') && $('btnAddTrx').addEventListener('click', openForm);
+  let EDIT_ID = null;
+  const ST = window.__trxState || (window.__trxState = { last: null, scroll: false, freeze: false, order: null });
+  function editTrx(id) {
+    const t = DL.loadManual().find(x => x._mid === id); if (!t) return;
+    openForm(); EDIT_ID = id;
+    const set = (k, v) => { if ($(k)) $(k).value = (v == null ? '' : v); };
+    set('mfClass', t.asset_class); set('mfAM', t.am_id); set('mfType', t.type); set('mfSec', t.security);
+    set('mfExch', t.exchange); set('mfUnits', t.units); set('mfPrice', t.price); set('mfCcy', t.ccy);
+    set('mfTotalThb', t.total_thb); set('mfTotalUsd', t.total_usd); set('mfFeeThb', t.fee_thb);
+    set('mfTxnDate', t.iso_date); set('mfEffDate', t.effective_date); set('mfSellable', t.sellable_date);
+    set('mfOrder', t.order_no); set('mfNote', t.note);
+    if ($('addTrxTitle')) $('addTrxTitle').textContent = 'แก้ไขรายการ';
+    syncCombos();
+  }
+  function syncCombos() {
+    ['mfClass','mfAM','mfType','mfCcy'].forEach(id => {
+      const sel = $(id); if (!sel) return;
+      if (![...sel.options].some(o => o.value === '')) sel.insertBefore(new Option('', ''), sel.firstChild);
+      if (!EDIT_ID) sel.value = '';
+      DL.combo(sel);
+    });
+  }
+  function openForm() {
+    fillFormDropdowns(); syncCombos();
+    let ov = $('trxFormOv'); if (!ov) { ov = document.createElement('div'); ov.id = 'trxFormOv'; ov.className = 'dvf-ov'; document.body.appendChild(ov); ov.onclick = closeForm; }
+    ov.style.display = 'flex';
+    const card = $('addTrxCard'); card.classList.add('as-modal'); card.style.display = '';
+  }
+  function closeForm() { if ($('trxFormOv')) $('trxFormOv').style.display = 'none'; EDIT_ID = null; if ($('addTrxTitle')) $('addTrxTitle').textContent = 'เพิ่มรายการ (Manual)'; $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
+  $('btnAddTrx') && $('btnAddTrx').addEventListener('click', () => { closeForm(); openForm(); });
   $('mfCancel') && $('mfCancel').addEventListener('click', closeForm);
   $('mfSave') && $('mfSave').addEventListener('click', () => {
     const sec = $('mfSec').value.trim();
     const txnDate = $('mfTxnDate').value;
-    if (!sec) { alert('ใส่ชื่อหลักทรัพย์ก่อน'); return; }
-    if (!txnDate) { alert('เลือกวันที่ทำรายการก่อน'); return; }
+    if (!sec) { DL.toast('ใส่ชื่อหลักทรัพย์ก่อน'); return; }
+    if (!$('mfClass').value || !$('mfType').value || !$('mfCcy').value) { DL.toast('เลือก ชนิดสินทรัพย์ / ประเภท / สกุลเงิน ก่อน', 'err'); return; }
+    if (!txnDate) { DL.toast('เลือกวันที่ทำรายการก่อน'); return; }
     const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
     const trx = {
       _mid: DL.genMid(), asset_class: $('mfClass').value, am_id: $('mfAM').value || '',
@@ -273,8 +328,15 @@ DL.register('trades', function (payload) {
       sellable_date: $('mfSellable').value || '', order_no: $('mfOrder').value.trim() || DL.genMid(),
       txn_id: $('mfOrder').value.trim() || ('MAN-' + sec), note: $('mfNote').value.trim(),
     };
+    if (EDIT_ID) {
+      trx._mid = EDIT_ID; ST.last = EDIT_ID; ST.scroll = true; ST.freeze = true;
+      DL.saveManual(DL.loadManual().map(x => x._mid === EDIT_ID ? Object.assign({}, x, trx) : x));
+      closeForm(); applyFilter(); DL.refreshAll && DL.refreshAll(); DL.toast('บันทึกการแก้ไขแล้ว');
+      return;
+    }
+    ST.last = trx._mid; ST.scroll = true; ST.freeze = true;
     DL.addManual(trx); closeForm(); applyFilter(); DL.refreshAll && DL.refreshAll();
-    alert('เพิ่มรายการแล้ว');
+    DL.toast('เพิ่มรายการแล้ว');
   });
 
   // ===== Import Excel (multi-row) =====
@@ -309,8 +371,8 @@ DL.register('trades', function (payload) {
           n++;
         });
         DL.saveManual(cur); applyFilter(); DL.refreshAll && DL.refreshAll();
-        alert('นำเข้า ' + n + ' รายการสำเร็จ');
-      } catch (e) { alert('นำเข้าไม่สำเร็จ: ' + e.message); }
+        DL.toast('นำเข้า ' + n + ' รายการสำเร็จ');
+      } catch (e) { DL.toast('นำเข้าไม่สำเร็จ: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsArrayBuffer(file);

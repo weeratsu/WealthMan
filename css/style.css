@@ -86,7 +86,7 @@ h2{font-size:14px;font-weight:600;margin:0 0 12px;}
 .chip{font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border-light);border-radius:100px;padding:4px 10px;}
 
 /* ---------- Grid Pro compact ---------- */
-#tableWrap{height:calc(100vh - 210px);min-height:420px;font-size:13px;}
+#tableWrap{height:calc(100vh - 210px);min-height:260px;font-size:13px;}
 /* ตารางรายการ (plain HTML table + sticky header) — DOM เดียว header/body ตรงกันเสมอ */
 #tableWrap{overflow:auto;border:1px solid var(--border-light);border-radius:var(--radius);background:var(--surface);}
 table.trd-tbl{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12px;font-family:var(--font);}
@@ -234,3 +234,58 @@ body.privacy-on #privToggle { background: var(--primary-bg, #ede9fe); border-col
 .moremenu[open] > summary{ background:var(--primary); color:#fff; border-color:var(--primary); }
 .moremenu-panel{ position:absolute; top:calc(100% + 6px); right:0; left:auto; z-index:40; display:flex; flex-direction:column; gap:6px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:0 8px 24px rgba(0,0,0,.14); min-width:max-content; width:max-content; }
 .moremenu-panel .btn{ width:100%; justify-content:flex-start; white-space:nowrap; }
+
+/* Transactions: thicker scrollbars so they are easy to grab */
+#tableWrap::-webkit-scrollbar{height:14px;width:12px;}
+#tableWrap::-webkit-scrollbar-thumb{background:#c4b5fd;border-radius:8px;border:3px solid var(--surface);}
+#tableWrap::-webkit-scrollbar-thumb:hover{background:var(--primary);}
+
+/* zebra stripes for all data tables */
+table.trd-tbl tbody tr:nth-child(even) td, table.rpt tbody tr:nth-child(even) td{background:rgba(147,51,234,.045);}
+table.trd-tbl tbody tr:hover td, table.rpt tbody tr:hover td{background:rgba(147,51,234,.10);}
+
+/* toast popup */
+#dlToast{position:fixed;right:20px;bottom:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.dl-toast{display:flex;align-items:center;gap:10px;min-width:220px;max-width:380px;padding:12px 16px;border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.18);border-left:4px solid var(--success,#16a34a);opacity:0;transform:translateY(10px);transition:all .25s ease;}
+.dl-toast.err{border-left-color:var(--error,#dc2626);}
+.dl-toast.show{opacity:1;transform:none;}
+/* last added/edited row */
+table.trd-tbl tbody tr.row-hl td{background:rgba(147,51,234,.16) !important;}
+table.trd-tbl tbody tr.row-hl td:first-child{box-shadow:inset 4px 0 0 var(--primary);}
+
+/* stronger last-edited highlight */
+@keyframes rowFlash{0%{background:#fde68a}100%{background:#fef3c7}}
+table.trd-tbl tbody tr.row-hl td{background:#fef3c7 !important;animation:rowFlash 1.6s ease-out;font-weight:600;}
+table.trd-tbl tbody tr.row-hl td:first-child{box-shadow:inset 5px 0 0 #f59e0b;}
+
+#divTable tbody tr.row-hl td, table.rpt tbody tr.row-hl td{background:#fef3c7 !important;animation:rowFlash 1.6s ease-out;font-weight:600;}
+table.rpt tbody tr.row-hl td:first-child{box-shadow:inset 5px 0 0 #f59e0b;}
+
+/* Dividends: scroll box like Transactions */
+.div-wrap{overflow:auto !important;border:1px solid var(--border-light);border-radius:var(--radius);min-height:260px;}
+.div-wrap thead th{position:sticky;top:0;z-index:2;background:var(--surface);}
+.div-wrap::-webkit-scrollbar{height:14px;width:12px;}
+.div-wrap::-webkit-scrollbar-thumb{background:#c4b5fd;border-radius:8px;border:3px solid var(--surface);}
+.div-wrap::-webkit-scrollbar-thumb:hover{background:var(--primary);}
+
+/* Dividends add/edit modal */
+.dvf-ov{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9000;}
+.dvf-box{background:var(--surface);border-radius:12px;padding:20px 22px;width:min(640px,94vw);box-shadow:0 12px 40px rgba(0,0,0,.25);}
+.dvf-box h2{margin:0 0 14px;font-size:17px;}
+.dvf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 12px;}
+.dvf-grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);}
+.dvf-grid input,.dvf-grid select{height:34px;box-sizing:border-box;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;}
+.dvf-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+@media(max-width:560px){.dvf-grid{grid-template-columns:1fr 1fr;}}
+
+/* searchable select */
+.combo-in{width:100%;box-sizing:border-box;}
+
+/* custom dropdown */
+.dd-box{position:fixed;z-index:10000;display:none;max-height:260px;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);font-family:var(--font);font-size:13px;padding:4px 0;}
+.dd-it{padding:6px 12px;cursor:pointer;white-space:nowrap;}
+.dd-it:hover,.dd-it.on{background:rgba(147,51,234,.12);}
+.dd-no{padding:6px 12px;color:var(--muted);}
+
+/* Add transaction as popup */
+#addTrxCard.as-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;width:min(920px,94vw);max-height:90vh;overflow:auto;margin:0;box-shadow:0 12px 40px rgba(0,0,0,.25);}

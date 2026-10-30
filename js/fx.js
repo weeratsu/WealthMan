@@ -84,8 +84,8 @@ DL.register('fx', function () {
   document.getElementById('btnFxAdd').addEventListener('click', () => {
     const d = document.getElementById('fxDate').value;
     const v = parseFloat(document.getElementById('fxVal').value);
-    if (!d) { alert('Please select a date first'); return; }
-    if (!(v > 0)) { alert('Enter a valid rate'); return; }
+    if (!d) { DL.toast('Please select a date first'); return; }
+    if (!(v > 0)) { DL.toast('Enter a valid rate'); return; }
     const u = loadUser(); u[d] = v; saveUser(u);
     document.getElementById('fxVal').value = '';
     render(); afterChange();
@@ -120,8 +120,8 @@ DL.register('fx', function () {
           u[d] = v; n++;
         });
         saveUser(u); render(); afterChange();
-        alert('Imported ' + n + ' rate(s) successfully');
-      } catch (e) { alert('Import failed: ' + e.message); }
+        DL.toast('Imported ' + n + ' rate(s) successfully');
+      } catch (e) { DL.toast('Import failed: ' + e.message); }
       ev.target.value = '';
     };
     rd.readAsArrayBuffer(file);
