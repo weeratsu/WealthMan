@@ -52,6 +52,21 @@ DL.register('trades', function (payload) {
 
   // ---- นิยามคอลัมน์ (id, หัว, ชนิด, ฟังก์ชันดึงค่า, คำอธิบาย tooltip) ----
   const fxOf = t => { const v = t.fx_thb_usd; if (v != null && v !== '') return +v; const a = t.total_usd, b = t.total_thb; return (a && b) ? b / a : null; };
+  // latest price (same source as Holdings: seed + localStorage dimelog_prices)
+  function latestPrice(sym) {
+    let m = Object.assign({}, (window.DIME_PRICES && window.DIME_PRICES.prices) || {});
+    try { Object.assign(m, JSON.parse(localStorage.getItem('dimelog_prices') || '{}') || {}); } catch (e) {}
+    const v = m[sym]; return (v == null || v === '') ? null : +v;
+  }
+  // per-row unrealized P/L for buy rows: (latest − buy price) × units ÷ price-unit divisor, in trade ccy
+  function rowPL(t) {
+    if (!isBuyish(t.type)) return null;
+    const p = latestPrice(t.security), u = +t.units, bp = +t.price;
+    if (p == null || !u || !bp) return null;
+    const div = DL.priceDivisor ? (DL.priceDivisor(t.security) || 1) : 1;
+    return (p - bp) * u / div;
+  }
+  function rowPLpct(t) { const p = latestPrice(t.security), bp = +t.price; return (isBuyish(t.type) && p != null && bp) ? (p / bp - 1) * 100 : null; }
   const COLS = [
     { id:'date',  h:'วันที่',            get:t=>t.iso_date||'',          kind:'date', tip:'วันที่ทำรายการ (ตามใบยืนยัน)' },
     { id:'eff',   h:'วันมีผล',           get:t=>t.effective_date||'',    kind:'date', tip:'วันมีผล (effective/settlement) — เว้นว่างถ้าไม่มี' },
@@ -71,6 +86,9 @@ DL.register('trades', function (payload) {
     { id:'tusd',  h:'Total (USD)',       get:t=>t.total_usd,             kind:'money', dp:2, thb:true, tip:'มูลค่ารวมสุทธิ สกุล USD · วงเล็บ ≈฿ = แปลงเป็นบาทด้วยเรทวันใกล้สุด (FX Rates)' },
     { id:'fee',   h:'ค่าธรรมเนียม (THB)', get:t=>t.fee_thb,              kind:'money', dp:2, tip:'ค่าธรรมเนียมเป็นเงินบาท' },
     { id:'fusd',  h:'Fee (USD)',         get:t=>t.fee_usd,               kind:'money', dp:2, tip:'ค่าธรรมเนียม สกุล USD' },
+    { id:'lastp', h:'Last Price',        get:t=>isBuyish(t.type)?latestPrice(t.security):null, kind:'num', dp:4, tip:'ราคาล่าสุดที่อัปเดตไว้ (หน้า Holdings) — สกุลเดียวกับรายการ' },
+    { id:'pl',    h:'P/L',               get:rowPL,                      kind:'money', dp:2, tip:'กำไร/ขาดทุนยังไม่รับรู้ของรายการซื้อนี้ = (ราคาล่าสุด − ราคาซื้อ) × หน่วย · สกุลตามรายการ' },
+    { id:'plp',   h:'P/L %',             get:rowPLpct,                   kind:'num', dp:2, tip:'% เทียบราคาซื้อ' },
     { id:'txn',   h:'Txn ID',            get:t=>t.txn_id||'',            kind:'text', tip:'เลขอ้างอิงรายการ (Transaction ID)' },
   ];
 
@@ -104,7 +122,7 @@ DL.register('trades', function (payload) {
       va = (va == null ? '' : String(va)); vb = (vb == null ? '' : String(vb));
       return va.localeCompare(vb) * sortDir;
     });
-    const rk = t => t._mid || ('A|' + t.txn_id + '|' + t.order_no + '|' + t.iso_date + '|' + t.security);
+    const rk = t => t._mid || t._akey;
     if (ST.freeze && ST.order) {
       const pos = {}; ST.order.forEach((id, k) => { pos[id] = k; });
       const P = t => (rk(t) in pos ? pos[rk(t)] : -1);
@@ -117,14 +135,14 @@ DL.register('trades', function (payload) {
       return `<th data-k="${c.id}" title="${esc(c.tip)}"${alignCls(c)}>${esc(c.h)}${arrow}</th>`;
     }).join('') + '<th>Actions</th></tr></thead>';
     const body = '<tbody>' + sorted.map(t =>
-      '<tr' + (t._mid && t._mid === ST.last ? ' class="row-hl"' : '') + '>' + COLS.map(c => `<td${alignCls(c)}>${esc(cellText(c, t))}</td>`).join('') +
-      '<td style="white-space:nowrap">' + (t._manual ? `<button class="btn secondary" data-tedit="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">✏️</button> <button class="btn secondary" data-tdel="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">🗑️</button>` : '<span style="color:var(--muted);font-size:11px">auto</span>') + '</td></tr>'
+      '<tr' + ((t._mid || t._akey) === ST.last ? ' class="row-hl"' : '') + '>' + COLS.map(c => { const v = (c.id === 'pl' || c.id === 'plp') ? c.get(t) : null; const st = v == null ? '' : ` style="color:${v >= 0 ? 'var(--success)' : 'var(--error,#d33)'};font-weight:600"`; return `<td${alignCls(c)}${st}>${esc(cellText(c, t))}</td>`; }).join('') +
+      '<td style="white-space:nowrap">' + (t._manual ? `<button class="btn secondary" data-tedit="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">✏️</button> <button class="btn secondary" data-tdel="${esc(t._mid)}" style="padding:1px 7px;font-size:12px">🗑️</button>` : `<button class="btn secondary" data-tedit="${esc(t._akey)}" data-auto="1" title="แก้รายการ auto (เก็บเป็นค่าทับ ไม่หายตอน rebuild)" style="padding:1px 7px;font-size:12px">✏️</button>${t._edited ? ' <span style="color:#f59e0b;font-size:11px" title="แก้ไขแล้ว">●</span>' : ''}`) + '</td></tr>'
     ).join('') + '</tbody>';
     document.getElementById('tableWrap').innerHTML = `<table class="trd-tbl">${head}${body}</table>`;
     fitTableWrap();
     const hl = document.querySelector('#tableWrap tr.row-hl');
     if (hl && ST.scroll) { hl.scrollIntoView({ block: 'center' }); ST.scroll = false; }
-    document.querySelectorAll('#tableWrap button[data-tedit]').forEach(b => b.addEventListener('click', () => editTrx(b.dataset.tedit)));
+    document.querySelectorAll('#tableWrap button[data-tedit]').forEach(b => b.addEventListener('click', () => editTrx(b.dataset.tedit, !!b.dataset.auto)));
     document.querySelectorAll('#tableWrap button[data-tdel]').forEach(b => b.addEventListener('click', () => {
       if (!confirm('ลบรายการนี้?')) return;
       DL.saveManual(DL.loadManual().filter(x => x._mid !== b.dataset.tdel)); applyFilter(); DL.refreshAll && DL.refreshAll();
@@ -283,9 +301,10 @@ DL.register('trades', function (payload) {
   });
   let EDIT_ID = null;
   const ST = window.__trxState || (window.__trxState = { last: null, scroll: false, freeze: false, order: null });
-  function editTrx(id) {
-    const t = DL.loadManual().find(x => x._mid === id); if (!t) return;
-    openForm(); EDIT_ID = id;
+  let EDIT_AUTO = false;
+  function editTrx(id, isAuto) {
+    const t = isAuto ? DL.allTrades().find(x => !x._manual && x._akey === id) : DL.loadManual().find(x => x._mid === id); if (!t) return;
+    openForm(); EDIT_ID = id; EDIT_AUTO = !!isAuto;
     const set = (k, v) => { if ($(k)) $(k).value = (v == null ? '' : v); };
     set('mfClass', t.asset_class); set('mfAM', t.am_id); set('mfType', t.type); set('mfSec', t.security);
     set('mfExch', t.exchange); set('mfUnits', t.units); set('mfPrice', t.price); set('mfCcy', t.ccy);
@@ -309,7 +328,7 @@ DL.register('trades', function (payload) {
     ov.style.display = 'flex';
     const card = $('addTrxCard'); card.classList.add('as-modal'); card.style.display = '';
   }
-  function closeForm() { if ($('trxFormOv')) $('trxFormOv').style.display = 'none'; EDIT_ID = null; if ($('addTrxTitle')) $('addTrxTitle').textContent = 'เพิ่มรายการ (Manual)'; $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
+  function closeForm() { EDIT_AUTO = false; if ($('trxFormOv')) $('trxFormOv').style.display = 'none'; EDIT_ID = null; if ($('addTrxTitle')) $('addTrxTitle').textContent = 'เพิ่มรายการ (Manual)'; $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
   $('btnAddTrx') && $('btnAddTrx').addEventListener('click', () => { closeForm(); openForm(); });
   $('mfCancel') && $('mfCancel').addEventListener('click', closeForm);
   $('mfSave') && $('mfSave').addEventListener('click', () => {
@@ -328,6 +347,13 @@ DL.register('trades', function (payload) {
       sellable_date: $('mfSellable').value || '', order_no: $('mfOrder').value.trim() || DL.genMid(),
       txn_id: $('mfOrder').value.trim() || ('MAN-' + sec), note: $('mfNote').value.trim(),
     };
+    if (EDIT_ID && EDIT_AUTO) {
+      const ov = DL.loadAutoOv(); const keep = Object.assign({}, trx); delete keep._mid; delete keep.txn_id; delete keep.order_no;
+      ov[EDIT_ID] = keep; DL.saveAutoOv(ov);
+      ST.last = EDIT_ID; ST.scroll = true; ST.freeze = true; EDIT_AUTO = false;
+      closeForm(); applyFilter(); DL.refreshAll && DL.refreshAll(); DL.toast('บันทึกการแก้ไขแล้ว (รายการ auto)');
+      return;
+    }
     if (EDIT_ID) {
       trx._mid = EDIT_ID; ST.last = EDIT_ID; ST.scroll = true; ST.freeze = true;
       DL.saveManual(DL.loadManual().map(x => x._mid === EDIT_ID ? Object.assign({}, x, trx) : x));

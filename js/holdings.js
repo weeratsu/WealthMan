@@ -17,7 +17,22 @@ DL.register('holdings', function (payload) {
     return seed;
   }
   function userPrices() { try { return JSON.parse(localStorage.getItem(PRICE_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  const NAV_KEY = 'dimelog_price_dates';
+  function navDates() { try { return JSON.parse(localStorage.getItem(NAV_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function saveNavDates(m) { try { localStorage.setItem(NAV_KEY, JSON.stringify(m)); } catch (e) {} }
+  function toIsoD(v) {
+    if (v == null || v === '') return '';
+    if (typeof v === 'number') { const d = XLSX.SSF.parse_date_code(v); return d ? `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}` : ''; }
+    const s = String(v).trim(), m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    const MON = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
+    const w = s.match(/^(\d{1,2})[\s\-\/]+([A-Za-z]{3})[A-Za-z]*[\s\-\/,]+(\d{4})$/);
+    if (w && MON[w[2].toLowerCase()]) return `${w[3]}-${String(MON[w[2].toLowerCase()]).padStart(2,'0')}-${w[1].padStart(2,'0')}`;
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    const d = new Date(s); return isNaN(d) ? '' : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
   function setPrice(sym, val) {
+    { const nd = navDates(); if (val === '' || val == null || isNaN(+val)) delete nd[sym]; else nd[sym] = new Date().toISOString().slice(0, 10); saveNavDates(nd); }
     const m = userPrices();
     if (val === '' || val == null || isNaN(+val)) delete m[sym]; else m[sym] = +val;
     try { localStorage.setItem(PRICE_KEY, JSON.stringify(m)); } catch (e) {}
@@ -197,13 +212,14 @@ DL.register('holdings', function (payload) {
         <td>${unitStr}</td>
         <td>${r.ccy || '-'}</td>
         <td>${avg}</td>
-        <td>${priceInput}</td>
+        <td>${priceInput}${r.held && navDates()[r.sym] ? `<div style="font-size:10px;color:var(--muted);margin-top:2px" title="NAV date">NAV ${dmy(navDates()[r.sym])}</div>` : ''}</td>
         ${plCell(r)}
         <td>${money(r.inv_thb, 2)}</td>
         <td>${r.realized_thb != null ? `<b style="color:${r.realized_thb >= 0 ? 'var(--success)' : 'var(--error,#d33)'}">${r.realized_thb >= 0 ? '+' : ''}${money(r.realized_thb, 0)}</b>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td>${r.n}</td>
       </tr>`;
     }).join('');
+    fitHldWrap();
     // คลิกชื่อ -> detail
     body.querySelectorAll('.hld-sym').forEach(td => td.addEventListener('click', () => openDetail(td.getAttribute('data-sym'))));
     // แก้ราคา -> บันทึก + re-render (เฉพาะแถวนั้น KPI อัปเดต)
@@ -279,9 +295,9 @@ DL.register('holdings', function (payload) {
   document.getElementById('btnHldTemplate').onclick = function () {
     // template: ทุก symbol ที่ถืออยู่ + ราคาปัจจุบัน · หัวคอลัมน์เป็น security/price/ccy (ตรงกับที่ import อ่าน)
     const rows = ROWS.filter(r => r.held).sort((a, b) => a.sym.localeCompare(b.sym))
-      .map(r => ({ security: r.sym, price: r.price != null ? r.price : '', ccy: r.ccy }));
+      .map(r => ({ security: r.sym, price: r.price != null ? r.price : '', ccy: r.ccy, nav_date: navDates()[r.sym] || '' }));
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows, { header: ['security', 'price', 'ccy'] });
+    const ws = XLSX.utils.json_to_sheet(rows, { header: ['security', 'price', 'ccy', 'nav_date'] });
     XLSX.utils.book_append_sheet(wb, ws, 'Prices');
     XLSX.writeFile(wb, 'WealthMan_Prices_Template.xlsx');
   };
@@ -293,7 +309,7 @@ DL.register('holdings', function (payload) {
       try {
         const wb = XLSX.read(rd.result, { type: 'binary' });
         const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-        const m = userPrices(); let n = 0;
+        const m = userPrices(); const nd = navDates(); const today = new Date().toISOString().slice(0, 10); let n = 0;
         rows.forEach(r => {
           // รับหัวคอลัมน์ได้ทั้งอังกฤษ (security/price) และไทย (จาก Template: ชื่อหลักทรัพย์/ราคาปัจจุบัน...)
           const sym = (r.security != null ? r.security : (r['ชื่อหลักทรัพย์'] != null ? r['ชื่อหลักทรัพย์'] : '')).toString().trim();
@@ -301,7 +317,9 @@ DL.register('holdings', function (payload) {
           if (!sym) return;
           if (price === '' || price == null || isNaN(+price)) return;
           m[sym] = +price; n++;
+          nd[sym] = toIsoD(r.nav_date != null && r.nav_date !== '' ? r.nav_date : r['NAV date']) || today;
         });
+        saveNavDates(nd);
         if (!n) throw new Error('ไม่พบราคาที่ถูกต้อง (ต้องมีคอลัมน์ security + price)');
         localStorage.setItem(PRICE_KEY, JSON.stringify(m));
         ROWS = build(); render();
@@ -312,6 +330,12 @@ DL.register('holdings', function (payload) {
     rd.readAsBinaryString(file);
   };
 
+  function fitHldWrap() {
+    const t = document.getElementById('hldTable'); const w = t && t.parentElement; if (!w || !w.offsetParent) return;
+    w.classList.add('div-wrap');
+    w.style.height = Math.max(260, window.innerHeight - Math.max(w.getBoundingClientRect().top, 0) - 24) + 'px';
+  }
+  window.addEventListener('resize', fitHldWrap);
   ROWS = build();
   render();
 });

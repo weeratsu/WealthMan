@@ -41,7 +41,24 @@ DL.register('fx', function () {
     const el = document.getElementById('fxChart');
     if (!el || typeof Highcharts === 'undefined') return;
     const C = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888';
-    const data = Object.keys(all).sort().map(d => [Date.parse(d), +all[d]]);
+    const OPT_KEY = 'dimelog_fx_chart_opt';
+    let O = { rate: true, trend: true, ma: true, avg: true, from: '', to: '' };
+    try { Object.assign(O, JSON.parse(localStorage.getItem(OPT_KEY) || '{}')); } catch (e) {}
+    let bar = document.getElementById('fxChartOpt');
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'fxChartOpt'; bar.className = 'filters'; bar.style.margin = '0 0 8px';
+      el.parentNode.insertBefore(bar, el);
+      const ck = (k, lb, col) => `<label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" data-opt="${k}"><span style="display:inline-block;width:14px;height:3px;background:${col}"></span>${lb}</label>`;
+      bar.innerHTML = ck('rate', 'USD/THB', '#9333ea') + ck('trend', 'Trend', '#f59e0b') + ck('ma', '7-pt avg', '#16a34a') + ck('avg', 'Average', '#2563eb') +
+        `<span class="date-field">From <input type="date" data-opt="from"></span><span class="date-field">To <input type="date" data-opt="to"></span>` +
+        `<button class="btn secondary" data-rng="3">3M</button><button class="btn secondary" data-rng="6">6M</button><button class="btn secondary" data-rng="12">1Y</button><button class="btn secondary" data-rng="0">All</button>`;
+      bar.addEventListener('change', ev => { const k = ev.target.dataset.opt; if (!k) return; O[k] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value; localStorage.setItem(OPT_KEY, JSON.stringify(O)); renderChart(all); });
+      bar.addEventListener('click', ev => { const b = ev.target.closest('[data-rng]'); if (!b) return; const m = +b.dataset.rng;
+        if (m) { const d = new Date(); d.setMonth(d.getMonth() - m); O.from = d.toISOString().slice(0, 10); } else O.from = ''; O.to = '';
+        localStorage.setItem(OPT_KEY, JSON.stringify(O)); renderChart(all); });
+    }
+    bar.querySelectorAll('[data-opt]').forEach(i => { const k = i.dataset.opt; if (i.type === 'checkbox') i.checked = !!O[k]; else i.value = O[k] || ''; });
+    const data = Object.keys(all).sort().filter(d => (!O.from || d >= O.from) && (!O.to || d <= O.to)).map(d => [Date.parse(d), +all[d]]);
     // force English month/date labels (default locale may render Thai)
     Highcharts.setOptions({ lang: {
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -62,15 +79,20 @@ DL.register('fx', function () {
       }
     }
     const accent = C('--primary') || C('--accent') || '#9333ea';
+    const avg = data.length ? data.reduce((s, d) => s + d[1], 0) / data.length : null;
+    const W = 7, ma = data.map((d, i) => { const s = data.slice(Math.max(0, i - W + 1), i + 1); return [d[0], s.reduce((a, b) => a + b[1], 0) / s.length]; });
     Highcharts.chart('fxChart', {
       chart: { type: 'line', backgroundColor: 'transparent', style: { fontFamily: C('--font') } },
-      title: { text: null }, credits: { enabled: false }, legend: { enabled: false },
+      title: { text: null }, credits: { enabled: false }, legend: { enabled: false, itemStyle: { color: C('--text2'), fontWeight: '500', fontSize: '11px' } },
       xAxis: { type: 'datetime', dateTimeLabelFormats: { day: '%e %b', week: '%e %b', month: "%b '%y", year: '%Y' }, labels: { style: { color: C('--text2'), fontSize: '11px' } }, lineColor: C('--border-light') },
-      yAxis: { title: { text: 'THB/USD', style: { color: C('--text2') } }, labels: { style: { color: C('--text2') } }, gridLineColor: C('--border-light'), startOnTick: false, endOnTick: false, softThreshold: false },
+      yAxis: { title: { text: 'THB/USD', style: { color: C('--text2') } }, labels: { style: { color: C('--text2') } }, gridLineColor: C('--border-light'), startOnTick: false, endOnTick: false, softThreshold: false,
+        plotLines: (avg == null || !O.avg) ? [] : [{ value: avg, color: '#2563eb', width: 1.5, dashStyle: 'ShortDash', zIndex: 4, label: { text: 'Avg ' + avg.toFixed(2), align: 'right', x: -4, y: -4, style: { color: '#2563eb', fontSize: '11px', fontWeight: '600' } } }] },
       tooltip: { valueDecimals: 4, valueSuffix: ' THB/USD', xDateFormat: '%d/%m/%Y' },
       series: [
-        { name: 'Trend', data: trend, type: 'line', color: accent, opacity: 0.28, dashStyle: 'Dash', lineWidth: 2, enableMouseTracking: false, marker: { enabled: false }, zIndex: 1 },
-        { name: 'USD/THB', data: data, type: 'areaspline', color: accent, lineWidth: 2.5, zIndex: 2, threshold: null,
+        { name: 'Trend (linear)', visible: O.trend, data: trend, type: 'line', color: '#f59e0b', dashStyle: 'Dash', lineWidth: 2, enableMouseTracking: false, marker: { enabled: false }, zIndex: 3 },
+        { name: W + '-pt moving avg', visible: O.ma, data: ma, type: 'spline', color: '#16a34a', lineWidth: 1.8, marker: { enabled: false }, zIndex: 3, tooltip: { valueDecimals: 4 } },
+        { name: 'Average', visible: O.avg, data: [], color: '#2563eb', dashStyle: 'ShortDash', events: { legendItemClick: () => false } },
+        { name: 'USD/THB', visible: O.rate, data: data, type: 'areaspline', color: accent, lineWidth: 2.5, zIndex: 2, threshold: null,
           marker: { radius: 2, fillColor: accent },
           fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, Highcharts.color(accent).setOpacity(0.25).get('rgba')], [1, Highcharts.color(accent).setOpacity(0).get('rgba')]] } },
       ],

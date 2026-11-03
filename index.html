@@ -24,15 +24,20 @@
   <!-- ===== Sidebar ===== -->
   <nav class="dl-sb">
     <div class="dl-sb-brand"><img src="assets/favicon-32.png" alt="">WealthMan</div>
+    <div class="sb-grp">Overview</div>
     <a data-nav="dashboard" class="active"><span class="ic">📊</span><span>Dashboard</span></a>
-    <a data-nav="trades"><span class="ic">📋</span><span>Transactions</span></a>
+    <div class="sb-grp">Portfolio</div>
     <a data-nav="holdings"><span class="ic">📦</span><span>Holdings</span></a>
+    <div class="sb-grp">Records</div>
+    <a data-nav="trades"><span class="ic">📋</span><span>Transactions</span></a>
     <a data-nav="dividends"><span class="ic">💰</span><span>Dividends</span></a>
-    <a data-nav="tax"><span class="ic">📄</span><span>Tax Report</span></a>
-    <a data-nav="taxcheck"><span class="ic">🧭</span><span>Offshore Tax Check</span></a>
-    <a data-nav="analysis"><span class="ic">📈</span><span>Analysis</span></a>
-    <a data-nav="classify"><span class="ic">🏷️</span><span>Classify</span></a>
     <a data-nav="fx"><span class="ic">💱</span><span>FX Rates</span></a>
+    <div class="sb-grp">Reports</div>
+    <a data-nav="tax"><span class="ic">📄</span><span>Summary</span></a>
+    <div class="sb-grp">Tax</div>
+    <a data-nav="taxcheck"><span class="ic">🧭</span><span>Offshore Tax Check</span></a>
+    <div class="sb-grp">Setup</div>
+    <a data-nav="classify"><span class="ic">🏷️</span><span>Classify</span></a>
     <a data-nav="setup"><span class="ic">⚙️</span><span>Settings</span></a>
     <a data-nav="help"><span class="ic">📖</span><span>Help</span></a>
     <button id="privToggle" class="btn secondary" style="margin:10px 10px 0;width:calc(100% - 20px);">👁️ ซ่อนตัวเลข</button>
@@ -60,6 +65,37 @@
         <div class="card"><h2>เงินปันผลรับรายเดือน (USD)</h2><div id="chartDiv" style="height:300px;"></div></div>
         <div class="card"><h2>กำไร/ขาดทุนต่อหลักทรัพย์ (เฉพาะที่ใส่ราคา)</h2><div id="chartPL" style="height:300px;"></div></div>
       </div>
+      <div id="dashAnalysis"><h2 style="margin:22px 0 4px;font-size:18px">Performance</h2>
+      <div class="sub" id="anSub"></div>
+      <div class="kpis" id="anKpis"></div>
+      <div class="card"><h2>กำไร/ขาดทุน % ต่อหลักทรัพย์ (Top / Worst performer)</h2>
+        <div class="hint" style="margin-bottom:8px;">ต้องใส่ราคาปัจจุบันในหน้า Holdings ก่อน</div>
+        <div id="anPerf" style="height:360px;"></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Dividend Yield on Cost (USD)</h2><div class="hint" style="margin-bottom:8px;">ปันผลรับสะสม ÷ เงินลงทุน — ตัวไหนปันผลคุ้มทุนสุด</div><div id="anYoc" style="height:320px;"></div></div>
+        <div class="card"><h2>แนวโน้มปันผลรายเดือน (USD)</h2><div class="hint" style="margin-bottom:8px;">ดูว่าปันผลโตขึ้นไหมตามเวลา</div><div id="anDivTrend" style="height:320px;"></div></div>
+      </div>
+      <div class="card"><h2>Total Return — ผลตอบแทนรวม (ราคา + ปันผล)</h2>
+        <div class="hint" style="margin-bottom:8px;">รวมกำไร/ขาดทุนจากราคา + ปันผลที่ได้รับ · เรียงจากดีสุด→แย่สุด</div>
+        <div style="overflow-x:auto;">
+          <table class="rpt" id="anTotTable">
+            <thead><tr>
+              <th style="text-align:left">หลักทรัพย์</th>
+              <th style="text-align:left">ประเภท</th>
+              <th>สกุล</th>
+              <th>เงินลงทุน</th>
+              <th>กำไร/ขาดทุน (ราคา) %</th>
+              <th>ปันผลรับ</th>
+              <th>Yield on cost</th>
+              <th>Total return %</th>
+            </tr></thead>
+            <tbody id="anTotBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="warn">⚠️ ตัวเลขอิงราคาปัจจุบันที่กรอกเอง + ปันผลที่บันทึก ใช้ประเมินคร่าว ๆ · กองทุนไทย (THB) ยังไม่มีราคา/ปันผลในระบบจึงไม่แสดงผลตอบแทน · ไม่รวมผลของอัตราแลกเปลี่ยน</div>
+    </div>
       <div class="foot" id="dashFoot"></div>
     </section>
 
@@ -255,7 +291,7 @@
     <!-- ===== Panel: Tax ===== -->
     <section class="panel" id="panel-tax">
       <div class="top">
-        <h1>Tax Report</h1>
+        <h1>Summary</h1>
         <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" id="btnTaxExport">📊 Export Excel</button></div>
       </div>
       <div class="sub" id="taxSub"></div>
@@ -285,38 +321,7 @@
     </section>
 
     <!-- ===== Panel: Analysis ===== -->
-    <section class="panel" id="panel-analysis">
-      <div class="top"><h1>Analysis</h1></div>
-      <div class="sub" id="anSub"></div>
-      <div class="kpis" id="anKpis"></div>
-      <div class="card"><h2>กำไร/ขาดทุน % ต่อหลักทรัพย์ (Top / Worst performer)</h2>
-        <div class="hint" style="margin-bottom:8px;">ต้องใส่ราคาปัจจุบันในหน้า Holdings ก่อน</div>
-        <div id="anPerf" style="height:360px;"></div>
-      </div>
-      <div class="grid2">
-        <div class="card"><h2>Dividend Yield on Cost (USD)</h2><div class="hint" style="margin-bottom:8px;">ปันผลรับสะสม ÷ เงินลงทุน — ตัวไหนปันผลคุ้มทุนสุด</div><div id="anYoc" style="height:320px;"></div></div>
-        <div class="card"><h2>แนวโน้มปันผลรายเดือน (USD)</h2><div class="hint" style="margin-bottom:8px;">ดูว่าปันผลโตขึ้นไหมตามเวลา</div><div id="anDivTrend" style="height:320px;"></div></div>
-      </div>
-      <div class="card"><h2>Total Return — ผลตอบแทนรวม (ราคา + ปันผล)</h2>
-        <div class="hint" style="margin-bottom:8px;">รวมกำไร/ขาดทุนจากราคา + ปันผลที่ได้รับ · เรียงจากดีสุด→แย่สุด</div>
-        <div style="overflow-x:auto;">
-          <table class="rpt" id="anTotTable">
-            <thead><tr>
-              <th style="text-align:left">หลักทรัพย์</th>
-              <th style="text-align:left">ประเภท</th>
-              <th>สกุล</th>
-              <th>เงินลงทุน</th>
-              <th>กำไร/ขาดทุน (ราคา) %</th>
-              <th>ปันผลรับ</th>
-              <th>Yield on cost</th>
-              <th>Total return %</th>
-            </tr></thead>
-            <tbody id="anTotBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="warn">⚠️ ตัวเลขอิงราคาปัจจุบันที่กรอกเอง + ปันผลที่บันทึก ใช้ประเมินคร่าว ๆ · กองทุนไทย (THB) ยังไม่มีราคา/ปันผลในระบบจึงไม่แสดงผลตอบแทน · ไม่รวมผลของอัตราแลกเปลี่ยน</div>
-    </section>
+    
 
 
     <!-- ===== Panel: Setup ===== -->

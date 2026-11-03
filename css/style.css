@@ -289,3 +289,11 @@ table.rpt tbody tr.row-hl td:first-child{box-shadow:inset 5px 0 0 #f59e0b;}
 
 /* Add transaction as popup */
 #addTrxCard.as-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;width:min(920px,94vw);max-height:90vh;overflow:auto;margin:0;box-shadow:0 12px 40px rgba(0,0,0,.25);}
+
+/* icon-only row action buttons */
+button[data-tedit],button[data-tdel],button[data-edit],button[data-del],button[data-fr-del],button[data-cl-del]{background:none !important;border:none !important;box-shadow:none !important;padding:2px 4px !important;font-size:15px !important;cursor:pointer;opacity:.75;}
+button[data-tedit]:hover,button[data-tdel]:hover,button[data-edit]:hover,button[data-del]:hover{opacity:1;transform:scale(1.15);}
+
+/* sidebar group headers */
+.sb-grp{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 18px 4px;}
+.sb-grp:first-of-type{padding-top:4px;}

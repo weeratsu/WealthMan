@@ -34,8 +34,8 @@ window.DL = (function () {
   // money(): ถ้าโหมดซ่อน คืน ••••• ไม่งั้น fmt ปกติ. ใช้กับ"จำนวนเงิน"เท่านั้น (ไม่ใช่ % / หน่วย / ราคาต่อหน่วย)
   const money = (n, d = 2) => priv ? '•••••' : fmt(n, d);
   const dmy = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
-  const isBuy = t => t.type === 'BUY' || t.type === 'SUB';
-  const isSell = t => t.type === 'SEL' || t.type === 'RED';
+  const isBuy = t => ['BUY', 'SUB', 'SWI'].includes(String(t.type || '').toUpperCase());
+  const isSell = t => ['SEL', 'SELL', 'RED', 'SWO'].includes(String(t.type || '').toUpperCase());
   // ---------- Asset Class master (localStorage, แก้ได้ใน Settings) ----------
   // key = รหัสภายใน (offshore/mutual_fund/gold/...) · value = { label, builtin }
   const DEFAULT_CLASSES = {
@@ -190,27 +190,28 @@ window.DL = (function () {
   }
 
   function show(key) {
+    if (key === 'analysis') key = 'dashboard';
     try{window.scrollTo(0,0);}catch(_){}
     // leaving Classify: types may have changed → let dashboard/tax re-render with latest types
     const prev = document.querySelector('.dl-sb a.active');
     if (prev && prev.getAttribute('data-nav') === 'classify' && key !== 'classify') {
-      rendered['dashboard'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
+      rendered['dashboard'] = false; rendered['analysis'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
     }
     // leaving Holdings: ราคาปัจจุบันอาจเปลี่ยน → ให้ Dashboard re-render กำไร/ขาดทุนใหม่
     if (prev && prev.getAttribute('data-nav') === 'holdings' && key !== 'holdings') {
-      rendered['dashboard'] = false; rendered['analysis'] = false;
+      rendered['dashboard'] = false; rendered['analysis'] = false; rendered['analysis'] = false;
     }
     // leaving FX Rates: เรทอาจเปลี่ยน → หน้าที่แปลง USD→THB ต้อง re-render
     if (prev && prev.getAttribute('data-nav') === 'fx' && key !== 'fx') {
-      rendered['dashboard'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
+      rendered['dashboard'] = false; rendered['analysis'] = false; rendered['tax'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
     }
     // leaving Settings: ตัวหารหน่วยราคา (price-unit) อาจเปลี่ยน → re-render หน้าที่คำนวณมูลค่า
     if (prev && prev.getAttribute('data-nav') === 'setup' && key !== 'setup') {
-      rendered['dashboard'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
+      rendered['dashboard'] = false; rendered['analysis'] = false; rendered['holdings'] = false; rendered['analysis'] = false;
     }
     // leaving Dividends: อาจ import ปันผลเพิ่ม → ให้ Dashboard/Tax re-render
     if (prev && prev.getAttribute('data-nav') === 'dividends' && key !== 'dividends') {
-      rendered['dashboard'] = false; rendered['tax'] = false; rendered['analysis'] = false;
+      rendered['dashboard'] = false; rendered['analysis'] = false; rendered['tax'] = false; rendered['analysis'] = false;
     }
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     const el = document.getElementById('panel-' + key);
@@ -221,6 +222,11 @@ window.DL = (function () {
     if (!rendered[key] && panels[key]) {
       try { panels[key](payload); } catch (e) { console.error('panel ' + key + ' error', e); }
       rendered[key] = true;
+    }
+    // Analysis now lives inside Dashboard → render it together
+    if (key === 'dashboard' && !rendered['analysis'] && panels['analysis']) {
+      try { panels['analysis'](payload); } catch (e) { console.error('panel analysis error', e); }
+      rendered['analysis'] = true;
     }
     if (location.hash !== '#' + key) history.replaceState(null, '', '#' + key);
   }
@@ -264,8 +270,14 @@ window.DL = (function () {
   function deleteManual(id) { saveManual(loadManual().filter(t => t._mid !== id)); }
   function genMid() { return 'M' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   // รวม auto (parser) + manual → ใช้แทน payload.trades ทั่วแอป
+  // overrides for auto (parser) rows — kept in localStorage, survive parser rebuild
+  const AUTO_OV_KEY = 'dimelog_auto_override';
+  function autoKey(t) { return (t.txn_id || '') + '|' + (t.order_no || '') + '|' + (t.iso_date || ''); }
+  function loadAutoOv() { try { return JSON.parse(localStorage.getItem(AUTO_OV_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function saveAutoOv(m) { try { localStorage.setItem(AUTO_OV_KEY, JSON.stringify(m || {})); } catch (e) {} }
   function allTrades() {
-    const auto = (payload.trades || []).map(t => Object.assign({ _manual: false }, t));
+    const ov = loadAutoOv();
+    const auto = (payload.trades || []).map(t => { const k = autoKey(t); return Object.assign({ _manual: false, _akey: k }, t, ov[k] || {}, ov[k] ? { _edited: true } : {}); });
     const manual = loadManual().map(t => Object.assign({ _manual: true }, t));
     return auto.concat(manual);
   }
@@ -442,6 +454,35 @@ window.DL = (function () {
     inp.value = txt();
   }
 
+  // ---------- generic click-to-sort for every table.rpt without its own sorter ----------
+  (function genericSort() {
+    const OWN = ['hldTable', 'divTable', 'clsTable', 'amTable'];
+    const cellVal = td => {
+      if (!td) return '';
+      const f = td.querySelector('input,select'); let s = f ? (f.value || '') : td.textContent;
+      s = s.trim(); const iso = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if (iso) return iso[3] + iso[2] + iso[1];
+      const n = s.replace(/[,฿$%+\s]/g, '').replace(/^[−–]/, '-').match(/^-?\d+(\.\d+)?/);
+      return (n && n[0].length >= s.replace(/[,฿$%+\s]/g, '').length - 6) ? +n[0] : s.toLowerCase();
+    };
+    document.addEventListener('click', ev => {
+      const th = ev.target.closest('table.rpt thead th'); if (!th || ev.target.closest('button,input,select')) return;
+      const tbl = th.closest('table'); const tr = th.parentElement;
+      if (OWN.includes(tbl.id) || tr.dataset.sortable || th.classList.contains('amsort')) return;
+      const tb = tbl.tBodies[0]; if (!tb) return;
+      const rows = [...tb.rows]; if (rows.length < 2 || rows.some(r => r.querySelector('td[colspan]') && rows.length > 1 && r.cells.length < tr.cells.length)) return;
+      const idx = [...tr.cells].indexOf(th);
+      const dir = th.dataset.sdir === 'asc' ? -1 : 1; th.dataset.sdir = dir === 1 ? 'asc' : 'desc';
+      [...tr.cells].forEach(c => { c.textContent = c.textContent.replace(/ [▲▼]$/, ''); if (c !== th) delete c.dataset.sdir; });
+      th.textContent += dir === 1 ? ' ▲' : ' ▼';
+      const tot = rows.filter(r => r.classList.contains('total-row')), body = rows.filter(r => !r.classList.contains('total-row'));
+      body.sort((x, y) => { const a = cellVal(x.cells[idx]), b = cellVal(y.cells[idx]);
+        if (typeof a === 'number' && typeof b === 'number') return (a - b) * dir;
+        return String(a).localeCompare(String(b), 'th') * dir; });
+      body.concat(tot).forEach(r => tb.appendChild(r));
+    });
+    const st = document.createElement('style'); st.textContent = 'table.rpt thead th{cursor:pointer;user-select:none}'; document.head.appendChild(st);
+  })();
+
   function init() {
     // wire sidebar
     document.querySelectorAll('.dl-sb a[data-nav]').forEach(a =>
@@ -472,7 +513,7 @@ window.DL = (function () {
     }
   }
 
-  return { C, toast, suggest, combo, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
+  return { C, loadAutoOv, saveAutoOv, toast, suggest, combo, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
            SEC_TYPES, DEFAULT_TYPES, loadTypes, saveTypes, typeOf, userTypeOf, setType, allTypes, typeIsSellable, sellableByType,
            isPrivate, setPrivate, togglePrivacy,
            loadFx, saveFx, fxRate, usdToThb, thbSuffix,
