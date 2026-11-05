@@ -4,7 +4,7 @@
 DL.register('trades', function (payload) {
   const dmy = DL.dmy, clsLabel = DL.clsLabel;
   let CURRENT = [];
-  let sortKey = 'date', sortDir = 1;   // 1=asc, -1=desc
+  let sortKey = 'date', sortDir = -1;   // 1=asc, -1=desc (default: newest first)
   const TRADES = () => DL.allTrades();   // auto (parser) + manual (localStorage)
 
   const sub = document.getElementById('trdSub');
