@@ -228,6 +228,8 @@ window.DL = (function () {
       try { panels['analysis'](payload); } catch (e) { console.error('panel analysis error', e); }
       rendered['analysis'] = true;
     }
+    // every filter dropdown on every page → typeable/searchable
+    try { document.querySelectorAll('#panel-' + key + ' .filters select').forEach(s => combo(s)); } catch (e) { console.error('combo', e); }
     if (location.hash !== '#' + key) history.replaceState(null, '', '#' + key);
   }
 
@@ -407,7 +409,7 @@ window.DL = (function () {
     const place = () => { const r = inp.getBoundingClientRect(); box.style.left = r.left + 'px'; box.style.top = (r.bottom + 2) + 'px'; box.style.minWidth = r.width + 'px'; };
     const show = all => {
       const q = all ? '' : inp.value.trim().toLowerCase();
-      list = inp._ddItems().filter(x => !q || x.toLowerCase().includes(q));
+      list = inp._ddItems().filter(x => !q || smatch(q, x));
       box.innerHTML = list.length ? list.map((x, i) => `<div class="dd-it${i === hi ? ' on' : ''}" data-i="${i}">${String(x).replace(/</g, '&lt;')}</div>`).join('') : '<div class="dd-no">ไม่พบ</div>';
       place(); box.style.display = 'block';
     };
@@ -444,6 +446,12 @@ window.DL = (function () {
         const q = inp.value.trim().toLowerCase();
         const o = [...sel.options].find(x => x.text.trim().toLowerCase() === q);
         if (o && sel.value !== o.value) { sel.value = o.value; sel.dispatchEvent(new Event('change')); }
+        // filter box + pattern (comma / *) → send it to the page's Search box
+        const bar = sel.closest('.filters'), srch = bar && bar.querySelector('input[type=text]:not(.combo-in)');
+        if (!o && q && srch && (q.indexOf(',') >= 0 || q.indexOf('*') >= 0)) {
+          if (sel.value !== '') { sel.value = ''; sel.dispatchEvent(new Event('change')); }
+          srch.value = inp.value.trim(); srch.dispatchEvent(new Event('input')); inp.value = ''; return;
+        }
         inp.value = txt();
       };
       inp.addEventListener('change', commit); inp.addEventListener('blur', () => setTimeout(commit, 130));
@@ -451,6 +459,8 @@ window.DL = (function () {
     }
     ddAttach(inp, () => [...sel.options].map(o => o.text).filter(t => t && t !== '—' && !/^\+ /.test(t)));
     inp._ddItems = () => [...sel.options].map(o => o.text).filter(t => t && t !== '—');
+    if (sel.options[0] && sel.options[0].value === '' && sel.options[0].text) inp.placeholder = sel.options[0].text;
+    if (!sel._comboObs) { sel._comboObs = new MutationObserver(() => { inp.value = txt(); }); sel._comboObs.observe(sel, { childList: true }); }
     inp.value = txt();
   }
 
@@ -483,6 +493,17 @@ window.DL = (function () {
     const st = document.createElement('style'); st.textContent = 'table.rpt thead th{cursor:pointer;user-select:none}'; document.head.appendChild(st);
   })();
 
+  // ---------- search: comma = OR, * = wildcard, plain = contains ----------
+  function smatch(q, ...fields) {
+    q = String(q || '').trim(); if (!q) return true;
+    const hay = fields.map(f => String(f == null ? '' : f).toLowerCase());
+    return q.toLowerCase().split(',').map(s => s.trim()).filter(Boolean).some(p => {
+      if (p.indexOf('*') < 0) return hay.some(h => h.includes(p));
+      const re = new RegExp('^' + p.split('*').map(x => x.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+      return hay.some(h => re.test(h));
+    });
+  }
+
   function init() {
     // wire sidebar
     document.querySelectorAll('.dl-sb a[data-nav]').forEach(a =>
@@ -513,7 +534,7 @@ window.DL = (function () {
     }
   }
 
-  return { C, loadAutoOv, saveAutoOv, toast, suggest, combo, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
+  return { C, smatch, loadAutoOv, saveAutoOv, toast, suggest, combo, fmt, money, dmy, isBuy, isSell, clsLabel, buildClassOptions, loadClasses, saveClasses, resetClasses, allClasses, DEFAULT_CLASSES, register, show, refreshAll, setPayload, init,
            SEC_TYPES, DEFAULT_TYPES, loadTypes, saveTypes, typeOf, userTypeOf, setType, allTypes, typeIsSellable, sellableByType,
            isPrivate, setPrivate, togglePrivacy,
            loadFx, saveFx, fxRate, usdToThb, thbSuffix,

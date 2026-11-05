@@ -163,7 +163,7 @@ DL.register('holdings', function (payload) {
     const q = (searchEl.value || '').trim().toLowerCase();
     const fc = clsEl.value, ft = typeEl.value, fs = secEl ? secEl.value : '';
     let list = ROWS.filter(r => {
-      if (q && !r.sym.toLowerCase().includes(q)) return false;
+      if (q && !DL.smatch(q, r.sym)) return false;
       if (fc && r.cls !== fc) return false;
       if (ft && r.type !== ft) return false;
       if (fs && r.sym !== fs) return false;

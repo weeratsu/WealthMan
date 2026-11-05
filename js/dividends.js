@@ -115,7 +115,7 @@ DL.register('dividends', function (payload) {
     const fcl = clsEl ? clsEl.value : '', ft = typeEl ? typeEl.value : '';
     let list = ROWS.filter(r => {
       if (r.security === '(TAF Fee)') return false;
-      if (q && !r.security.toLowerCase().includes(q)) return false;
+      if (q && !DL.smatch(q, r.security)) return false;
       if (fcl && secClass(r.security) !== fcl) return false;
       if (ft && (DL.typeOf(r.security) || '') !== ft) return false;
       if (fs && r.security !== fs) return false;
@@ -158,9 +158,49 @@ DL.register('dividends', function (payload) {
     kpiEl.innerHTML = parts.join('');
   }
 
+  // ---- monthly dividend chart: per-year columns + monthly average line ----
+  const DCK = 'dimelog_div_chart_years';
+  function renderDivChart() {
+    if (typeof Highcharts === 'undefined' || !kpiEl) return;
+    let card = document.getElementById('divChartCard');
+    if (!card) {
+      card = document.createElement('div'); card.className = 'card'; card.id = 'divChartCard';
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h2 style="margin:0">ปันผลรายเดือน (THB สุทธิ)</h2><div id="divChartYears" class="filters" style="margin:0"></div></div><div id="divChart" style="height:280px"></div>';
+      kpiEl.parentNode.insertBefore(card, kpiEl.nextSibling);
+    }
+    const fcl = clsEl ? clsEl.value : '', ft = typeEl ? typeEl.value : '', fs = secEl.value;
+    const src = ROWS.filter(r => r.security !== '(TAF Fee)' && (!fcl || secClass(r.security) === fcl) && (!ft || (DL.typeOf(r.security) || '') === ft) && (!fs || r.security === fs));
+    const M = {};  // year -> [12]
+    src.forEach(r => { const y = (r.pay_date || '').slice(0, 4), m = +(r.pay_date || '').slice(5, 7) - 1; if (!y || m < 0) return;
+      (M[y] = M[y] || Array(12).fill(0))[m] += (r.ccy === 'THB' ? r.net : (toThb(r.net, r) || 0)); });
+    const years = Object.keys(M).sort();
+    let sel; try { sel = JSON.parse(localStorage.getItem(DCK) || 'null'); } catch (e) {}
+    if (!Array.isArray(sel)) sel = years.slice(-2);
+    sel = sel.filter(y => years.includes(y));
+    const box = document.getElementById('divChartYears');
+    box.innerHTML = years.map(y => `<label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" data-y="${y}"${sel.includes(y) ? ' checked' : ''}>${y}</label>`).join('') +
+      ['All:all','None:none','3Y:3','5Y:5'].map(s => { const [l, v] = s.split(':'); return `<button class="btn secondary" data-yq="${v}" style="padding:2px 8px;font-size:11px">${l}</button>`; }).join('');
+    box.onclick = e => { const q = e.target.dataset.yq; if (!q) return;
+      const s = q === 'all' ? years : q === 'none' ? [] : years.slice(-(+q));
+      localStorage.setItem(DCK, JSON.stringify(s)); renderDivChart(); };
+    box.onchange = () => { const s = [...box.querySelectorAll('input:checked')].map(i => i.dataset.y); localStorage.setItem(DCK, JSON.stringify(s)); renderDivChart(); };
+    const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const avg = mon.map((_, i) => sel.length ? +(sel.reduce((s, y) => s + M[y][i], 0) / sel.length).toFixed(2) : 0);
+    const priv = DL.isPrivate();
+    Highcharts.chart('divChart', {
+      chart: { backgroundColor: 'transparent' }, title: { text: null }, credits: { enabled: false },
+      xAxis: { categories: mon }, yAxis: { title: { text: null }, labels: { enabled: !priv } },
+      tooltip: { shared: true, valueDecimals: 2, valueSuffix: ' ฿', enabled: !priv },
+      plotOptions: { column: { borderRadius: 3, groupPadding: 0.12 } },
+      series: sel.map(y => ({ type: 'column', name: y, data: M[y].map(v => +v.toFixed(2)) }))
+        .concat(sel.length ? [{ type: 'spline', name: sel.length > 1 ? 'เฉลี่ยรายเดือน' : 'เดือนนี้', data: avg, color: '#f59e0b', dashStyle: sel.length > 1 ? 'ShortDash' : 'Solid', marker: { radius: 3 }, visible: sel.length > 1 }] : []),
+    });
+  }
+
   function render() {
     const list = current();
     kpis(list);
+    renderDivChart();
     countEl.textContent = `${list.length} รายการ`;
     body.innerHTML = list.map(r => {
       const netThb = r.ccy === 'USD' ? toThb(r.net, r) : null;

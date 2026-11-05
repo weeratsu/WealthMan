@@ -297,3 +297,29 @@ button[data-tedit]:hover,button[data-tdel]:hover,button[data-edit]:hover,button[
 /* sidebar group headers */
 .sb-grp{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 18px 4px;}
 .sb-grp:first-of-type{padding-top:4px;}
+
+/* ===== compact data pages (Holdings / Dividends / Transactions) ===== */
+#panel-holdings .kpis,#panel-dividends .kpis,#panel-trades .kpis{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:10px;}
+#panel-holdings .kpi,#panel-dividends .kpi,#panel-trades .kpi{padding:8px 12px;min-height:0;}
+#panel-holdings .kpi .label,#panel-dividends .kpi .label{font-size:11px;margin-bottom:2px;}
+#panel-holdings .kpi .value,#panel-dividends .kpi .value{font-size:17px;line-height:1.25;}
+#panel-holdings .kpi .kpi-note,#panel-dividends .kpi .kpi-note,#panel-holdings .kpi .hint,#panel-dividends .kpi div[style*="font-size:11px"]{display:none;}
+#panel-holdings .top,#panel-dividends .top,#panel-trades .top{margin-bottom:6px;}
+#panel-holdings .sub,#panel-dividends .sub{font-size:11px;margin:0 0 8px;}
+#panel-holdings .card,#panel-dividends .card{padding:10px 12px;}
+#panel-holdings .filters,#panel-dividends .filters{gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+#panel-holdings .filters input[type=text],#panel-dividends .filters input[type=text]{flex:1 1 200px;min-width:160px;}
+#panel-holdings .filters select,#panel-dividends .filters select,#panel-holdings .filters input,#panel-dividends .filters input{height:30px;font-size:12px;}
+#hldTable td,#hldTable th,#divTable td,#divTable th{white-space:nowrap;padding:5px 10px;line-height:1.3;}
+#hldTable td,#divTable td{font-size:12px;}
+#hldTable input.hld-price{height:24px;padding:1px 6px;}
+#panel-dividends .note{display:none;}
+
+/* compact Dashboard KPIs */
+#panel-dashboard .kpis{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:10px;}
+#panel-dashboard .kpi{padding:8px 12px;min-height:0;}
+#panel-dashboard .kpi .label{font-size:11px;margin-bottom:2px;}
+#panel-dashboard .kpi .value{font-size:17px;line-height:1.25;}
+#panel-dashboard .kpi .kpi-note{font-size:10px;margin-top:2px;}
+
+.filters .combo-in{width:auto;min-width:150px;height:36px;box-sizing:border-box;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:var(--font);font-size:13px;}

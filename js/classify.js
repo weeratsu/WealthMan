@@ -66,7 +66,7 @@ DL.register('classify', function (payload) {
     const f = filterEl.value;
     const fc = clsEl ? clsEl.value : '', ft = typeEl ? typeEl.value : '';
     let list = rowsData().filter(r => {
-      if (q && !r.sec.toLowerCase().includes(q)) return false;
+      if (q && !DL.smatch(q, r.sec)) return false;
       if (fc && r.clsKey !== fc) return false;
       if (ft && r.type !== ft) return false;
       if (f === 'unset' && r.type) return false;       // No type at all

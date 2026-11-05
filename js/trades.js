@@ -204,7 +204,7 @@ DL.register('trades', function (payload) {
       const iso = t.iso_date || '';
       if (from && iso && iso < from) return false;
       if (to && iso && iso > to) return false;
-      if (q) { const hay = `${t.security} ${t.order_no} ${t.txn_id} ${t.exchange}`.toLowerCase(); if (!hay.includes(q)) return false; }
+      if (q && !DL.smatch(q, t.security, t.order_no, t.txn_id, t.exchange)) return false;
       return true;
     });
     render(list);
@@ -365,6 +365,24 @@ DL.register('trades', function (payload) {
     DL.toast('เพิ่มรายการแล้ว');
   });
 
+
+  // ---- auto-calc: units × price = total (fill the empty one of the three) ----
+  (function autoCalc() {
+    const U = $('mfUnits'), P = $('mfPrice'), T = () => ($('mfCcy') && $('mfCcy').value === 'USD') ? $('mfTotalUsd') : $('mfTotalThb');
+    if (!U || !P) return;
+    let last = [];
+    const num = el => { const v = parseFloat(String(el.value).replace(/,/g, '')); return isNaN(v) ? null : v; };
+    const run = src => {
+      const tot = T(); if (!tot) return;
+      last = [src].concat(last.filter(x => x !== src)).slice(0, 2);
+      const u = num(U), p = num(P), v = num(tot);
+      const target = [U, P, tot].find(x => !last.includes(x));
+      if (target === tot && u != null && p != null) tot.value = +(u * p).toFixed(2);
+      else if (target === P && u && v != null) P.value = +(v / u).toFixed(4);
+      else if (target === U && p && v != null) U.value = +(v / p).toFixed(4);
+    };
+    [U, P, $('mfTotalThb'), $('mfTotalUsd')].forEach(el => el && el.addEventListener('input', () => run(el === U || el === P ? el : T())));
+  })();
   // ===== Import Excel (multi-row) =====
   function trxTemplate() {
     const rows = [{ asset_manager: 'Dime', asset_class: 'mutual_fund', type: 'SUB', security: 'ASP-RMF', exchange: '', fund_type: 'RMF', units: 100, price: 10, ccy: 'THB', total_thb: 1000, total_usd: '', fee_thb: 0, txn_date: '2026-01-15', effective_date: '', sellable_date: '', order_no: '', note: '' }];
@@ -414,5 +432,6 @@ DL.register('trades', function (payload) {
     document.addEventListener('click', e => { if (dd.open && !dd.contains(e.target)) dd.removeAttribute('open'); });
   })();
 
+  ['fClass','fFundType','fSec','fTxnType','fCcy','fYear'].forEach(id => DL.combo(document.getElementById(id)));
   applyFilter();
 });
