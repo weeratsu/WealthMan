@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-03T09:36:03",
+  "generated_at": "2026-11-10T18:25:17",
   "source_folder": "",
-  "file_count": 62,
-  "trade_count": 134,
+  "file_count": 63,
+  "trade_count": 135,
   "trades": [
     {
       "asset_class": "gold",
@@ -3219,6 +3219,30 @@
       "fee_thb": 1.68,
       "total_thb": 993.97,
       "source_file": "[Confirmation] 2026-11-02 - Dime_offshore_confirmationNote_DIMEOS20261102091788.pdf"
+    },
+    {
+      "asset_class": "offshore",
+      "asset_manager": "Dime",
+      "txn_id": "DIMEOS20261110105013",
+      "doc_no": "2026111000105013",
+      "issue_date": "10/11/2026",
+      "iso_date": "2026-11-10",
+      "fx_thb_usd": 33.3992,
+      "order_no": "351188",
+      "settlement": "10/11/2026",
+      "type": "BUY",
+      "security": "RKLB",
+      "exchange": "XNAS",
+      "units": 0.0891673,
+      "price": 54.28,
+      "ccy": "USD",
+      "gross_usd": 4.84,
+      "fee_usd": 0.0,
+      "total_usd": 4.84,
+      "gross_thb": 161.65,
+      "fee_thb": 0.0,
+      "total_thb": 161.65,
+      "source_file": "[Confirmation] 2026-11-10 - Dime_offshore_confirmationNote_DIMEOS20261110105013.pdf"
     }
   ]
 }
