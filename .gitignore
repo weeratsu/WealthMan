@@ -3,6 +3,8 @@
 data/inv_data_full.js
 # path โฟลเดอร์ส่วนตัวของเครื่อง
 scripts/config.json
+# Google Sheet endpoint + token (Nov 11 2026)
+js/config-sheet.js
 # log การรัน (มี path เครื่อง)
 scripts/run_log.txt
 # ไฟล์ export Excel (พอร์ตเต็ม)
