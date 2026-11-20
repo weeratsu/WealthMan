@@ -9,7 +9,7 @@ DL.register('trades', function (payload) {
 
   const sub = document.getElementById('trdSub');
   const dates = TRADES().map(t => t.iso_date).filter(Boolean).sort();
-  sub.textContent = `${DL.payload.trade_count || TRADES().length} รายการ · ช่วง ${dmy(dates[0])} – ${dmy(dates[dates.length - 1])}`;
+  sub.textContent = `${TRADES().length} รายการ · ช่วง ${dmy(dates[0])} – ${dmy(dates[dates.length - 1])}`;
 
   // security filter options (เรียง A→Z)
   const fSec = document.getElementById('fSec');

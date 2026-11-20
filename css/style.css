@@ -186,6 +186,16 @@ ol,ul{margin:8px 0;padding-left:20px;} li{margin:5px 0;}
   #tableWrap{height:70vh;}
 }
 
+/* ---------- Collapsible sidebar (☰) ---------- */
+#sbToggle{position:fixed;top:10px;left:calc(var(--sb-w) - 38px);z-index:1001;width:28px;height:28px;border-radius:8px;
+  border:1px solid var(--border-light);background:var(--surface);cursor:pointer;font-size:14px;line-height:1;transition:left .2s;}
+.dl-sb{transition:transform .2s;}
+.main{transition:margin-left .2s;}
+body.sb-off .dl-sb{transform:translateX(-100%);}
+body.sb-off .main{margin-left:0;padding-left:64px;}
+body.sb-off #sbToggle{left:16px;top:16px;width:34px;height:34px;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+@media(max-width:720px){#sbToggle{display:none;} body.sb-off .dl-sb{transform:none;}}
+
 
 /* ---------- Privacy mode: ซ่อนตัวเลขเงิน (แคปอวดเพื่อน) ---------- */
 /* ซ่อน label แกน Y (จำนวนเงิน) ของกราฟทั้งหมด — ยังเห็นรูปทรง/แกน X/ชื่อ/pie % */

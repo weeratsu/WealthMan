@@ -22,6 +22,8 @@
 </head>
 <body>
   <!-- ===== Sidebar ===== -->
+  <button id="sbToggle" title="ซ่อน/แสดงเมนู" onclick="var c=document.body.classList.toggle('sb-off');localStorage.setItem('wm_sb_off',c?'1':'');">☰</button>
+  <script>if(localStorage.getItem('wm_sb_off'))document.body.classList.add('sb-off');</script>
   <nav class="dl-sb">
     <div class="dl-sb-brand"><img src="assets/favicon-32.png" alt="">WealthMan</div>
     <div class="sb-grp">Overview</div>

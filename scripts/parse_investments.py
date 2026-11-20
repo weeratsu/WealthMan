@@ -405,6 +405,11 @@ def main():
     # 3) inv_log.json — public JSON (ตัดข้อมูลส่วนตัว)
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(payload_public, f, ensure_ascii=False, indent=2)
+    # 4) Nov 20 2026: upsert ลง Google Sheet (แท็บ Trades) ตรง — ไม่ต้องรอเปิดแอป
+    try:
+        sheet_upsert_trades(all_trades)
+    except Exception as _se:
+        print("  !! Sheet upsert ไม่สำเร็จ (ไฟล์ในเครื่องยังเขียนครบ):", repr(_se)[:200])
 
     # ---- ย้ายไฟล์ที่ parse สำเร็จ เข้าโฟลเดอร์ yyyy/<ชนิด> ----
     # ย้ายเฉพาะไฟล์ที่: parse ได้รายการ, รู้ปี+ชนิด, และยังอยู่ที่ ROOT ชั้นบนสุด (ไม่ใช่ในโฟลเดอร์ปีอยู่แล้ว)
@@ -473,6 +478,40 @@ def main():
         print(f"  ไฟล์มีปัญหา: {len(errors)}")
         for fn, e in errors:
             print("   !!", fn, "|", e)
+
+
+def _sheet_cfg():
+    """อ่าน endpoint/token จาก js/config-sheet.js (gitignored). ไม่มีไฟล์ = ข้าม"""
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "js", "config-sheet.js")
+    if not os.path.exists(fp):
+        return None
+    s = open(fp, encoding="utf-8").read()
+    ep = re.search(r"endpoint\s*:\s*'([^']+)'", s); tk = re.search(r"token\s*:\s*'([^']+)'", s)
+    return (ep.group(1), tk.group(1)) if ep and tk else None
+
+
+def sheet_upsert_trades(trades, chunk=150):
+    """UPSERT (ไม่ replace) — แถว manual ใน Sheet ไม่โดนแตะ. key เดียวกับ sheet-sync.js: txn_id|order_no"""
+    import urllib.request
+    cfg = _sheet_cfg()
+    if not cfg:
+        print("  (ข้าม Sheet: ไม่พบ js/config-sheet.js)"); return
+    ep, tk = cfg
+    rows = []
+    for t in trades:
+        base = t.get('txn_id') or t.get('mid') or t.get('id') or '|'.join(str(t.get(k, '')) for k in ('iso_date', 'security', 'type'))
+        sub = t.get('order_no') or f"{t.get('security') or ''}:{'' if t.get('units') is None else t.get('units')}"
+        o = dict(t); o['trade_key'] = f"{base}|{sub}"; o['txn_id'] = t.get('txn_id') or base; o['source'] = 'pdf'
+        rows.append(o)
+    ins = upd = 0
+    for i in range(0, len(rows), chunk):
+        body = json.dumps({"token": tk, "action": "upsert", "tab": "Trades", "rows": rows[i:i + chunk]}, ensure_ascii=False).encode("utf-8")
+        req = urllib.request.Request(ep, data=body, headers={"Content-Type": "text/plain;charset=utf-8"})
+        j = json.loads(urllib.request.urlopen(req, timeout=120).read().decode("utf-8"))
+        if not j.get("ok"):
+            raise RuntimeError(j.get("error") or "API error")
+        ins += j.get("inserted", 0); upd += j.get("updated", 0)
+    print(f"  Google Sheet (Trades): เพิ่ม {ins} · อัปเดต {upd}")
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@
  * Manual: wmSheet.push() · wmSheet.pull() · wmSheet.status()
  */
 (function () {
-  var OLD = 'dimelog_', NEW = 'wm_', STAMP = 'wm__stamp:', SKIP = { 'wm_privacy': 1, 'wm_div_chart_years': 1, 'wm_fx_chart_opt': 1 };
+  var OLD = 'dimelog_', NEW = 'wm_', STAMP = 'wm__stamp:', SKIP = { 'wm_privacy': 1, 'wm_div_chart_years': 1, 'wm_fx_chart_opt': 1, 'wm_sb_off': 1 };
   var P = Storage.prototype, g = P.getItem, s = P.setItem, r = P.removeItem;
   var map = function (k) { return (typeof k === 'string' && k.indexOf(OLD) === 0) ? NEW + k.slice(OLD.length) : k; };
   var cfg = window.WM_SHEET || null, timer = null, busy = false, last = { push: null, pull: null, err: null };
@@ -28,7 +28,7 @@
   P.setItem = function (k, v) { k = map(k); var x = s.call(this, k, v); if (this === localStorage) changed(k); return x; };
 
   function changed(k) {
-    if (!k || k.indexOf(NEW) !== 0 || k.indexOf(STAMP) === 0 || SKIP[k]) return;
+    if (!k || k.indexOf(NEW) !== 0 || k.indexOf(STAMP) === 0 || k.indexOf('wm__prev:') === 0 || SKIP[k]) return;
     s.call(localStorage, STAMP + k, new Date().toISOString());
     if (!cfg) return; clearTimeout(timer); timer = setTimeout(push, 3000);
   }
@@ -59,7 +59,7 @@
     var settings = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
-      if (k && k.indexOf(NEW) === 0 && k.indexOf(STAMP) !== 0 && !SKIP[k])
+      if (k && k.indexOf(NEW) === 0 && k.indexOf(STAMP) !== 0 && k.indexOf('wm__prev:') !== 0 && !SKIP[k])
         settings.push({ key: k, json: g.call(localStorage, k), updated_at: g.call(localStorage, STAMP + k) || '' });
     }
     var trades = [], seen = {};
@@ -89,8 +89,13 @@
       return { security: k, price: pr[k], price_date: pd[k] || '', price_unit: pu[k] || '', type: (typeof ty[k] === 'object' ? JSON.stringify(ty[k]) : (ty[k] || '')) };
     });
 
-    var fxm = Object.assign({}, (window.INV_FX && window.INV_FX.rates) || {}, J(NEW + 'fx', {}));
-    var fx = Object.keys(fxm).map(function (d) { var v = fxm[d]; return { fx_id: d + '|USD', date: d, ccy: 'USD', rate: (v && typeof v === 'object') ? (v.rate || v.v || '') : v, source: 'app' }; });
+    // v7: FX layers = trx slip rates < seed (data/fx.js) < user-entered (same order as the app's loadFx)
+    var fxm = {}, fxs = {};
+    trades.forEach(function (t) { var d = t.iso_date, r = parseFloat(t.fx_thb_usd); if (d && r > 0) { fxm[d] = r; fxs[d] = 'trx'; } });
+    var seed = (window.INV_FX && window.INV_FX.rates) || {}; Object.keys(seed).forEach(function (d) { fxm[d] = seed[d]; fxs[d] = 'seed'; });
+    var ufx = J(NEW + 'fx', {}); Object.keys(ufx || {}).forEach(function (d) { fxm[d] = ufx[d]; fxs[d] = 'user'; });
+    var fx = Object.keys(fxm).sort().map(function (d) { var v = fxm[d];
+      return { fx_id: d + '|USD', date: d, ccy: 'USD', rate: (v && typeof v === 'object') ? (v.rate || v.v || '') : v, source: fxs[d] }; });
     return { Settings: settings, Trades: trades, Dividends: divs, Securities: secs, FX: fx };
   }
   function push() {
@@ -122,7 +127,10 @@
       var raw = (j.data && j.data.Settings) || [], n = 0, grp = {};
       pulledOK = true;
       // v2: re-join split parts key#0, key#1 ...
+      // v6: ignore legacy un-split rows (e.g. 'wm_manual_trx' = '[]') when split rows 'key#N' exist — they collided with #0
+      var hasParts = {}; raw.forEach(function (o) { var m = /^(.*)#(\d+)$/.exec(String(o.key || '')); if (m) hasParts[m[1]] = 1; });
       raw.forEach(function (o) { var m = /^(.*)#(\d+)$/.exec(String(o.key || '')), k = m ? m[1] : String(o.key || ''), i = m ? +m[2] : 0;
+        if (!m && hasParts[k]) return;
         (grp[k] = grp[k] || { key: k, parts: [], updated_at: o.updated_at }).parts[i] = String(o.json == null ? '' : o.json); });
       var rows = Object.keys(grp).map(function (k) { return { key: k, json: grp[k].parts.join(''), updated_at: grp[k].updated_at }; });
       sheetKeys = rows.length;
