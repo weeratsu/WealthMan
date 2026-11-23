@@ -98,11 +98,11 @@ function upsert_(tab, rows) {
     if (idx[k] != null) {
       var rg = sh.getRange(idx[k] + 2, 1, 1, h.length);
       if (hist && jcol >= 0) { var oldv = rg.getValues()[0][jcol]; if (String(oldv) !== String(vals[jcol])) hist.push([now, tab, k, oldv, o.updated_at]); }
-      rg.setValues([vals]); upd++;
+      rg.setNumberFormats(fmt_([vals])).setValues([vals]); upd++;
     }
     else { ins.push(vals); idx[k] = keys.length + ins.length - 1; }
   });
-  if (ins.length) sh.getRange(sh.getLastRow() + 1, 1, ins.length, h.length).setValues(ins);
+  if (ins.length) sh.getRange(sh.getLastRow() + 1, 1, ins.length, h.length).setNumberFormats(fmt_(ins)).setValues(ins);
   if (hist && hist.length) { var hs = sheet_('History'); hs.getRange(hs.getLastRow() + 1, 1, hist.length, 5).setValues(hist); }
   return { ok: true, inserted: ins.length, updated: upd };
 }
@@ -113,10 +113,13 @@ function replace_(tab, rows) {
   if (!rows.length) throw new Error('refusing to replace ' + tab + ' with 0 rows');
   if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
   var vals = rows.map(function (o) { o.updated_at = o.updated_at || now; return h.map(function (c) { return val_(o[c]); }); });
-  if (vals.length) sh.getRange(2, 1, vals.length, h.length).setValues(vals);
+  if (vals.length) sh.getRange(2, 1, vals.length, h.length).setNumberFormats(fmt_(vals)).setValues(vals);
   return { ok: true, rows: vals.length };
 }
 
+// v4 (Nov 23 2026): string cells = plain text '@' so Sheets doesn't turn '02/11/2026' into a Date or a long doc_no into 2.02609E+15;
+// numbers keep the normal format.
+function fmt_(rows) { return rows.map(function (r) { return r.map(function (v) { return typeof v === 'string' ? '@' : '0.########'; }); }); }
 function val_(v) { return v == null ? '' : (typeof v === 'object' ? JSON.stringify(v) : v); }
 function iso_(d) { return Utilities.formatDate(d, 'Asia/Bangkok', 'yyyy-MM-dd'); }
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }

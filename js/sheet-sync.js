@@ -108,14 +108,26 @@
       busy = false; chip('⚠ blocked: this browser has less data than Sheet', 1);
       console.warn('wm push blocked: local keys', d.Settings.length, '< sheet keys', sheetKeys); return Promise.resolve(); }
     d.Settings = splitSettings(d.Settings);
+    // v9 (Nov 23 2026): manual trx deleted in the app -> mark deleted='Y' in Sheet (upsert never removes rows).
+    // Sends the Sheet's own copy of the row, so nothing else is blanked. Guard: skip if this browser lost most manual trx.
+    var have = {}, nMan = 0; d.Trades.forEach(function (t) { have[t.trade_key] = 1; if (t.source === 'manual') nMan++; });
+    var gone = Object.keys(sheetManual).filter(function (k) { return !have[k]; });
+    if (gone.length && nMan >= Math.ceil(Object.keys(sheetManual).length * 0.5)) {
+      gone.forEach(function (k) { var o = Object.assign({}, sheetManual[k]); o.deleted = 'Y'; o.updated_at = new Date().toISOString(); d.Trades.push(o); });
+      console.log('wm push: mark deleted', gone.length);
+    } else if (gone.length) console.warn('wm push: NOT marking', gone.length, 'deleted (local manual', nMan, ')');
     var tabs = ['Settings', 'Trades', 'Dividends', 'Securities', 'FX'];
     // v3 SAFETY: Settings (source of truth) is UPSERT ONLY — never wiped, never deleted; Sheet keeps old values in History tab.
     // Readable tabs (Trades/Dividends/Securities/FX) are rebuilt from Settings + files; never sent empty.
+    // v8 (Nov 23 2026): Trades = UPSERT only (parser writes pdf rows straight to the Sheet; replace would wipe them)
     var jobs = []; tabs.forEach(function (t) { var R = d[t] || []; if (!R.length) return;
-      for (var i = 0; i < R.length; i += CHUNK) jobs.push({ action: (t !== 'Settings' && i === 0) ? 'replace' : 'upsert', tab: t, rows: R.slice(i, i + CHUNK) }); });
+      for (var i = 0; i < R.length; i += CHUNK) jobs.push({ action: (t !== 'Settings' && t !== 'Trades' && i === 0) ? 'replace' : 'upsert', tab: t, rows: R.slice(i, i + CHUNK) }); });
     // Settings first, so the source of truth is safe even if a later chunk fails
     return jobs.reduce(function (p, b, n) { return p.then(function () { chip('⏳ saving ' + (n + 1) + '/' + jobs.length); return api(b); }); }, Promise.resolve())
-      .then(function () { last.push = new Date().toISOString(); last.err = null; chip('✓ Sheet synced'); })
+      .then(function () { last.push = new Date().toISOString(); last.err = null; chip('✓ Sheet synced');
+        // v10: remember what is now in the Sheet, so a trx added AND deleted in the same page load still gets deleted='Y'
+        sheetManual = {}; d.Trades.forEach(function (t) { if (t.source === 'manual' && t.deleted !== 'Y' && t.trade_key) sheetManual[t.trade_key] = t; });
+      })
       .catch(function (e) { last.err = String(e); chip('⚠ Sheet sync failed', 1); console.warn('wm push', e); })
       .then(function () { busy = false; });
   }
@@ -126,6 +138,8 @@
     return api({ action: 'get' }).then(function (j) {
       var raw = (j.data && j.data.Settings) || [], n = 0, grp = {};
       pulledOK = true;
+      sheetManual = {}; ((j.data && j.data.Trades) || []).forEach(function (r) {
+        if (r && r.source === 'manual' && r.deleted !== 'Y' && r.trade_key) sheetManual[r.trade_key] = r; });
       // v2: re-join split parts key#0, key#1 ...
       // v6: ignore legacy un-split rows (e.g. 'wm_manual_trx' = '[]') when split rows 'key#N' exist — they collided with #0
       var hasParts = {}; raw.forEach(function (o) { var m = /^(.*)#(\d+)$/.exec(String(o.key || '')); if (m) hasParts[m[1]] = 1; });
@@ -150,7 +164,7 @@
       return n > 0;
     });
   }
-  var pulledOK = false, sheetKeys = 0;
+  var pulledOK = false, sheetKeys = 0, sheetManual = {};
   function restorePrev() { var n = 0; for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i);
       if (k && k.indexOf('wm__prev:') === 0) { s.call(localStorage, k.slice(9), g.call(localStorage, k)); n++; } } return n + ' key(s) restored — reload the page'; }
   window.wmSheet = { push: push, pull: pull, restorePrev: restorePrev,

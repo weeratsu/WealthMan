@@ -293,12 +293,12 @@ DL.register('trades', function (payload) {
     if (base) { $('mfSellable').value = sellable || ''; if (hint) hint.textContent = sellable ? ('คำนวณจาก type: ' + ty + ' (แก้ได้)') : (/RMF/i.test(ty) && !birth ? 'ใส่วันเกิดใน Settings เพื่อคำนวณ RMF' : ''); }
     else if (hint) hint.textContent = '';
   }
-  $('mfTxnDate') && $('mfTxnDate').addEventListener('change', recomputeSellable);
-  $('mfEffDate') && $('mfEffDate').addEventListener('change', recomputeSellable);
-  $('mfSec') && $('mfSec').addEventListener('input', recomputeSellable);
-  $('mfAM') && $('mfAM').addEventListener('change', function () {
+  if ($('mfTxnDate')) $('mfTxnDate').onchange = recomputeSellable;
+  if ($('mfEffDate')) $('mfEffDate').onchange = recomputeSellable;
+  if ($('mfSec')) $('mfSec').oninput = recomputeSellable;
+  if ($('mfAM')) $('mfAM').onchange = function () {
     if (this.value === '__new') { const n = (prompt('ชื่อ Asset Manager ใหม่:') || '').trim(); let id = ''; if (n) id = DL.amId(n, true, 'manual'); fillFormDropdowns(); this.value = id || ''; }
-  });
+  };
   let EDIT_ID = null;
   const ST = window.__trxState || (window.__trxState = { last: null, scroll: false, freeze: false, order: null });
   let EDIT_AUTO = false;
@@ -329,9 +329,11 @@ DL.register('trades', function (payload) {
     const card = $('addTrxCard'); card.classList.add('as-modal'); card.style.display = '';
   }
   function closeForm() { EDIT_AUTO = false; if ($('trxFormOv')) $('trxFormOv').style.display = 'none'; EDIT_ID = null; if ($('addTrxTitle')) $('addTrxTitle').textContent = 'เพิ่มรายการ (Manual)'; $('addTrxCard').style.display = 'none'; ['mfSec','mfExch','mfUnits','mfPrice','mfTotalThb','mfTotalUsd','mfFeeThb','mfTxnDate','mfEffDate','mfSellable','mfOrder','mfNote'].forEach(id => { if ($(id)) $(id).value = ''; }); }
-  $('btnAddTrx') && $('btnAddTrx').addEventListener('click', () => { closeForm(); openForm(); });
-  $('mfCancel') && $('mfCancel').addEventListener('click', closeForm);
-  $('mfSave') && $('mfSave').addEventListener('click', () => {
+  // Nov 23 2026: onclick (not addEventListener) — this panel fn re-runs on every refreshAll(), so listeners stacked up
+  // and each old copy (with EDIT_ID = null) added a NEW record on every edit-save.
+  if ($('btnAddTrx')) $('btnAddTrx').onclick = () => { closeForm(); openForm(); };
+  if ($('mfCancel')) $('mfCancel').onclick = closeForm;
+  if ($('mfSave')) $('mfSave').onclick = () => {
     const sec = $('mfSec').value.trim();
     const txnDate = $('mfTxnDate').value;
     if (!sec) { DL.toast('ใส่ชื่อหลักทรัพย์ก่อน'); return; }
@@ -363,7 +365,7 @@ DL.register('trades', function (payload) {
     ST.last = trx._mid; ST.scroll = true; ST.freeze = true;
     DL.addManual(trx); closeForm(); applyFilter(); DL.refreshAll && DL.refreshAll();
     DL.toast('เพิ่มรายการแล้ว');
-  });
+  };
 
 
   // ---- auto-calc: units × price = total (fill the empty one of the three) ----
@@ -421,9 +423,9 @@ DL.register('trades', function (payload) {
     };
     rd.readAsArrayBuffer(file);
   }
-  $('btnTrxTemplate') && $('btnTrxTemplate').addEventListener('click', trxTemplate);
-  $('btnImportXlsx') && $('btnImportXlsx').addEventListener('click', () => $('fileImportXlsx').click());
-  $('fileImportXlsx') && $('fileImportXlsx').addEventListener('change', importXlsx);
+  if ($('btnTrxTemplate')) $('btnTrxTemplate').onclick = trxTemplate;
+  if ($('btnImportXlsx')) $('btnImportXlsx').onclick = () => $('fileImportXlsx').click();
+  if ($('fileImportXlsx')) $('fileImportXlsx').onchange = importXlsx;
 
   // more-menu: close after clicking an item, and when clicking outside
   (function () {
